@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package org.Wedding.entities;
 
 import java.time.LocalDateTime;
@@ -11,52 +16,103 @@ public class Commande {
     private double total;
     private StatutCommande statut;
     private List<Reservation> reservations;
-    private List<Produit> produits = new ArrayList<>();
+    private List<Produit> produits = new ArrayList();
 
-
-
-    public enum StatutCommande {
-        RESERVE, CONFIRME, ANNULE
-    }
-
-    // Constructeurs
-    public Commande(int id, String utilisateur, LocalDateTime date, double total, String statut, List<Produit> produits) {
+    public Commande(int id, String utilisateur, LocalDateTime date, String statut, List<Produit> produits) {
         this.id = id;
         this.utilisateur = utilisateur;
         this.date = date;
-        this.total = total;
-        this.statut = StatutCommande.valueOf(statut.toUpperCase()); // ✅ Convertir en majuscule
-        this.produits = produits;
+        this.total = calculerTotal(); // 🔥 Calcul automatique du total
+
+
+        // Convertir la chaîne de statut en Enum
+        try {
+            this.statut = StatutCommande.valueOf(statut.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            this.statut = StatutCommande.EN_ATTENTE; // Valeur par défaut si erreur
+        }
+
+        // Initialiser les listes pour éviter les erreurs NullPointerException
+        this.reservations = new ArrayList<>();
+        this.produits = new ArrayList<>(produits); // Copie pour éviter les modifications externes
     }
 
-    // Getters et Setters
-    public int getId() { return id; }
-    public void setId (int id) { this.id = id; }
+    private double calculerTotal() {
+            double somme = 0;
+            for (Produit p : produits) {
+                somme += p.getPrix();  // Ajoute le prix de chaque produit
+            }
+            return somme;
+        }
 
-    public String getUtilisateur() { return utilisateur; }
-    public void setUtilisateur(String utilisateur) { this.utilisateur = utilisateur; }
 
-    public LocalDateTime getDate() { return date; }
-    public void setDate(LocalDateTime date) { this.date = date; }
+    public int getId() {
+        return this.id;
+    }
 
-    public double getTotal() { return total; }
-    public void setTotal(double total) { this.total = total; }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public StatutCommande getStatut() { return statut; }
-    public void setStatut(StatutCommande statut) { this.statut = statut; }
+    public String getUtilisateur() {
+        return this.utilisateur;
+    }
 
-    public List<Reservation> getReservations() { return reservations; }
-    public void setReservations(List<Reservation> reservations) { this.reservations = reservations; }
+    public void setUtilisateur(String utilisateur) {
+        this.utilisateur = utilisateur;
+    }
+
+    public LocalDateTime getDate() {
+        return this.date;
+    }
+
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
+
+    public double getTotal() {
+        return this.total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public StatutCommande getStatut() {
+        return this.statut;
+    }
+
+    public void setStatut(StatutCommande statut) {
+        this.statut = statut;
+    }
+
+    public List<Reservation> getReservations() {
+        return this.reservations;
+    }
+
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
+    }
 
     public void ajouterReservation(Reservation reservation) {
         this.reservations.add(reservation);
-        this.total += reservation.getProduit().getPrix() * reservation.getQuantite();
+        this.total += reservation.getProduit().getPrix() * (double)reservation.getQuantite();
     }
+
     public List<Produit> getProduits() {
-        return produits;
+        return this.produits;
     }
-    @Override
+
     public String toString() {
-        return "Commande{id=" + id + ", utilisateur='" + utilisateur + "', total=" + total + ", statut=" + statut + "}";
+        return "Commande{id=" + this.id + ", utilisateur='" + this.utilisateur + "', total=" + this.total + ", statut=" + this.statut + "}";
+    }
+
+    public static enum StatutCommande {
+        EN_ATTENTE,
+        CONFIRME,
+        ANNULE;
+
+        private StatutCommande() {
+        }
     }
 }

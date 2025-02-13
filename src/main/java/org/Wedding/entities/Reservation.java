@@ -1,3 +1,8 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package org.Wedding.entities;
 
 public class Reservation {
@@ -7,13 +12,8 @@ public class Reservation {
     private int quantite;
     private StatutReservation statut;
 
-    public enum StatutReservation {
-        RESERVE, CONFIRME
-    }
-
-    // Constructeurs
     public Reservation() {
-        this.statut = StatutReservation.RESERVE;
+        this.statut = Reservation.StatutReservation.RESERVE;
     }
 
     public Reservation(Long id, Commande commande, Produit produit, int quantite) {
@@ -24,24 +24,56 @@ public class Reservation {
         this.quantite = quantite;
     }
 
-    // Getters et Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return this.id;
+    }
 
-    public Commande getCommande() { return commande; }
-    public void setCommande(Commande commande) { this.commande = commande; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Produit getProduit() { return produit; }
-    public void setProduit(Produit produit) { this.produit = produit; }
+    public Commande getCommande() {
+        return this.commande;
+    }
 
-    public int getQuantite() { return quantite; }
-    public void setQuantite(int quantite) { this.quantite = quantite; }
+    public void setCommande(Commande commande) {
+        this.commande = commande;
+    }
 
-    public StatutReservation getStatut() { return statut; }
-    public void setStatut(StatutReservation statut) { this.statut = statut; }
+    public Produit getProduit() {
+        return this.produit;
+    }
 
-    @Override
+    public void setProduit(Produit produit) {
+        this.produit = produit;
+    }
+
+    public int getQuantite() {
+        return this.quantite;
+    }
+
+    public void setQuantite(int quantite) {
+        this.quantite = quantite;
+    }
+
+    public StatutReservation getStatut() {
+        return this.statut;
+    }
+
+    public void setStatut(StatutReservation statut) {
+        this.statut = statut;
+    }
+
     public String toString() {
-        return "Reservation{id=" + id + ", produit=" + produit.getNom() + ", quantite=" + quantite + ", statut=" + statut + "}";
+        Long var10000 = this.id;
+        return "Reservation{id=" + var10000 + ", produit=" + this.produit.getNom() + ", quantite=" + this.quantite + ", statut=" + this.statut + "}";
+    }
+
+    public static enum StatutReservation {
+        RESERVE,
+        CONFIRME;
+
+        private StatutReservation() {
+        }
     }
 }
