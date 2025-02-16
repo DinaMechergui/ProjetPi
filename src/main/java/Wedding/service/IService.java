@@ -3,7 +3,7 @@
 // (powered by FernFlower decompiler)
 //
 
-package org.Wedding.service;
+package Wedding.service;
 
 import java.sql.SQLException;
 import java.util.List;

@@ -3,7 +3,7 @@
 // (powered by FernFlower decompiler)
 //
 
-package org.Wedding.entities;
+package Wedding.entities;
 
 public class Reservation {
     private Long id;

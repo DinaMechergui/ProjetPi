@@ -3,10 +3,10 @@
 // (powered by FernFlower decompiler)
 //
 
-package org.Wedding.service;
+package Wedding.service;
 
 import java.sql.SQLException;
-import org.Wedding.entities.Commande;
+import Wedding.entities.Commande;
 
 public interface IServiceCommande {
     int ajouterReservation(Commande var1) throws SQLException;

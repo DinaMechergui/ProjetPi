@@ -1,9 +1,4 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
-
-package org.Wedding.entities;
+package Wedding.entities;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,36 +11,44 @@ public class Commande {
     private double total;
     private StatutCommande statut;
     private List<Reservation> reservations;
-    private List<Produit> produits = new ArrayList();
 
-    public Commande(int id, String utilisateur, LocalDateTime date, String statut, List<Produit> produits) {
+    // Constructeur par défaut
+    public Commande() {
+        this.id = 0;
+        this.utilisateur = "";
+        this.date = LocalDateTime.now();
+        this.total = 0.0;
+        this.statut = StatutCommande.RESERVE;
+        this.reservations = new ArrayList<>();
+    }
+
+    // Constructeur avec paramètres
+    public Commande(int id, String utilisateur, LocalDateTime date, String statut, List<Reservation> reservations) {
         this.id = id;
         this.utilisateur = utilisateur;
         this.date = date;
-        this.total = calculerTotal(); // 🔥 Calcul automatique du total
+        this.reservations = (reservations != null) ? new ArrayList<>(reservations) : new ArrayList<>();
 
-
-        // Convertir la chaîne de statut en Enum
+        // Convertir la chaîne en Enum avec gestion des erreurs
         try {
             this.statut = StatutCommande.valueOf(statut.toUpperCase());
         } catch (IllegalArgumentException e) {
-            this.statut = StatutCommande.EN_ATTENTE; // Valeur par défaut si erreur
+            this.statut = StatutCommande.RESERVE; // Valeur par défaut
         }
 
-        // Initialiser les listes pour éviter les erreurs NullPointerException
-        this.reservations = new ArrayList<>();
-        this.produits = new ArrayList<>(produits); // Copie pour éviter les modifications externes
+        this.total = calculerTotal(); // Calculer le total initial
     }
 
-    private double calculerTotal() {
-            double somme = 0;
-            for (Produit p : produits) {
-                somme += p.getPrix();  // Ajoute le prix de chaque produit
-            }
-            return somme;
+    // Méthode pour calculer le total
+    public double calculerTotal() {
+        double total = 0;
+        for (Reservation reservation : reservations) {
+            total += reservation.getProduit().getPrix() * reservation.getQuantite();
         }
+        return total;
+    }
 
-
+    // Getters et Setters
     public int getId() {
         return this.id;
     }
@@ -91,28 +94,27 @@ public class Commande {
     }
 
     public void setReservations(List<Reservation> reservations) {
-        this.reservations = reservations;
+        this.reservations = (reservations != null) ? new ArrayList<>(reservations) : new ArrayList<>();
+        this.total = calculerTotal(); // Recalculer le total après mise à jour des réservations
     }
 
+    // Ajouter une réservation
     public void ajouterReservation(Reservation reservation) {
-        this.reservations.add(reservation);
-        this.total += reservation.getProduit().getPrix() * (double)reservation.getQuantite();
+        if (reservation != null) {
+            this.reservations.add(reservation);
+            this.total = calculerTotal(); // Recalculer le total après ajout
+        }
     }
 
-    public List<Produit> getProduits() {
-        return this.produits;
-    }
-
+    @Override
     public String toString() {
         return "Commande{id=" + this.id + ", utilisateur='" + this.utilisateur + "', total=" + this.total + ", statut=" + this.statut + "}";
     }
 
-    public static enum StatutCommande {
-        EN_ATTENTE,
+    // Enum pour le statut de la commande
+    public enum StatutCommande {
         CONFIRME,
-        ANNULE;
-
-        private StatutCommande() {
-        }
+        ANNULE,
+        RESERVE;
     }
 }
