@@ -162,3 +162,31 @@
 .contact-button:hover {
     -fx-background-color: #5a7364; /* Couleur plus foncée au survol */
 }
+.dashboard-button {
+    -fx-background-color: linear-gradient(to right, #2c3e50, #4ca1af); /* Dégradé pro */
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 25;
+    -fx-background-radius: 30; /* Bouton arrondi */
+    -fx-border-radius: 30;
+    -fx-border-color: #ffffff33;
+    -fx-border-width: 1.5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 2); /* Ombre classe */
+}
+
+/* Effet au survol */
+.dashboard-button:hover {
+    -fx-background-color: linear-gradient(to right, #4ca1af, #2c3e50); /* Inversion du dégradé */
+    -fx-border-color: #f1c40f; /* Bordure dorée au survol */
+    -fx-text-fill: #f1c40f; /* Texte doré */
+    -fx-effect: dropshadow(three-pass-box, rgba(241, 196, 15, 0.6), 15, 0, 0, 3); /* Lumière dorée */
+}
+
+/* Effet au clic */
+.dashboard-button:pressed {
+    -fx-background-color: linear-gradient(to right, #1f2c38, #3b899d);
+    -fx-scale-x: 0.98; /* Effet de clic réaliste */
+    -fx-scale-y: 0.98;
+}
