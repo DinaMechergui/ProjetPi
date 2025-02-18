@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane fitToWidth="true" fitToHeight="true" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Wedding.controllers.HomeController"
+            stylesheets="@styles.css">
+    <AnchorPane prefHeight="1200.0" prefWidth="1200.0"> <!-- Augmentez la hauteur pour permettre le défilement -->
+        <children>
+            <!-- Navbar -->
+            <HBox styleClass="navbar" layoutX="0" layoutY="0" prefWidth="1200" prefHeight="80">
+                <!-- Logo -->
+                <ImageView fx:id="logo" fitHeight="60" fitWidth="60" pickOnBounds="true" preserveRatio="true">
+                    <Image url="@/images/logo.jpg"/>
+                </ImageView>
+
+                <!-- Liens de la navbar -->
+                <HBox spacing="20" alignment="CENTER_LEFT" styleClass="nav-links">
+                    <Button text="Store" styleClass="nav-button" onAction="#goToStore" />
+                    <Button text="Event" styleClass="nav-button" onAction="#goToEvent" />
+                    <Button text="Drive and Stay" styleClass="nav-button" onAction="#goToDriveAndStay" />
+                    <Button text="Invité" styleClass="nav-button" onAction="#goToInvite" />
+                </HBox>
+
+                <!-- Boutons de login/logout -->
+                <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="auth-buttons">
+                    <Button fx:id="loginButton" text="Login" styleClass="auth-button" onAction="#handleLogin" />
+                    <Button fx:id="logoutButton" text="Logout" styleClass="auth-button" onAction="#handleLogout" visible="false" />
+                </HBox>
+            </HBox>
+
+            <!-- Barre de recherche -->
+            <HBox layoutX="50" layoutY="100" spacing="10">
+                <TextField fx:id="searchBar" prefWidth="300" promptText="Type here to search" styleClass="search-bar" />
+                <Button text="Search" styleClass="search-button" />
+            </HBox>
+
+            <!-- Icône du panier -->
+            <ImageView fx:id="cartIcon" layoutX="1100" layoutY="20" fitHeight="50" fitWidth="50" onMouseClicked="#goToCart">
+                <Image url="@/images/cart-icon.png"/>
+            </ImageView>
+
+            <!-- Section "À propos de nous" -->
+            <VBox layoutX="50" layoutY="150" spacing="20" styleClass="about-us">
+                <Label text="À propos de nous" styleClass="section-title" />
+                <HBox spacing="20">
+                    <ImageView fitWidth="300" fitHeight="200" preserveRatio="true">
+                        <Image url="@/images/about-us.jpg"/>
+                    </ImageView>
+                    <Label text="Nous sommes une plateforme de planification de mariages dédiée à rendre votre journée spéciale inoubliable. Notre équipe expérimentée travaille sans relâche pour vous offrir des services de qualité supérieure."
+                           styleClass="about-us-description" wrapText="true" />
+                </HBox>
+            </VBox>
+
+            <!-- Section "Nos services" -->
+            <VBox layoutX="50" layoutY="400" spacing="20" styleClass="services">
+                <Label text="Nos services" styleClass="section-title" />
+                <HBox spacing="20">
+                    <VBox spacing="10" styleClass="service-card">
+                        <ImageView fitWidth="150" fitHeight="150" preserveRatio="true">
+                            <Image url="@/images/service1.jpg"/>
+                        </ImageView>
+                        <Label text="Hlow traditionelle" styleClass="service-title" />
+                        <Label text="Nous planifions chaque détail de votre mariage pour une journée parfaite."
+                               styleClass="service-description" wrapText="true" />
+                    </VBox>
+                    <VBox spacing="10" styleClass="service-card">
+                        <ImageView fitWidth="150" fitHeight="150" preserveRatio="true">
+                            <Image url="@/images/service2.jpg"/>
+                        </ImageView>
+                        <Label text="Maquillage" styleClass="service-title" />
+                        <Label text="Les meilleurs makeup Artist en tunisie."
+                               styleClass="service-description" wrapText="true" />
+                    </VBox>
+                    <VBox spacing="10" styleClass="service-card">
+                        <ImageView fitWidth="150" fitHeight="150" preserveRatio="true">
+                            <Image url="@/images/service3.jpg"/>
+                        </ImageView>
+                        <Label text="Hotel" styleClass="service-title" />
+                        <Label text="Des magnifiques hotels pour passer une nuitee magique."
+                               styleClass="service-description" wrapText="true" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Section "Notre équipe" déplacée ici -->
+            <!-- Section "Notre équipe" (déplacée plus bas) -->
+            <VBox layoutX="50" layoutY="750" spacing="20" styleClass="team">
+                <Label text="Notre équipe" styleClass="section-title" />
+                <HBox spacing="20">
+                    <VBox spacing="10" styleClass="team-member">
+                        <ImageView fitWidth="150" fitHeight="150" preserveRatio="true">
+                            <Image url="@/images/dina.jpg"/>
+                        </ImageView>
+                        <Label text="Mechergui Dina" styleClass="team-member-name" />
+                        <Label text="Organisateur de mariages" styleClass="team-member-role" />
+                    </VBox>
+                    <VBox spacing="10" styleClass="team-member">
+                        <ImageView fitWidth="150" fitHeight="150" preserveRatio="true">
+                            <Image url="@/images/nesrine.jpg"/>
+                        </ImageView>
+                        <Label text="Rouissi Nesrine" styleClass="team-member-name" />
+                        <Label text="Designer d'événements" styleClass="team-member-role" />
+                    </VBox>
+                    <VBox spacing="10" styleClass="team-member">
+                        <ImageView fitWidth="150" fitHeight="150" preserveRatio="true">
+                            <Image url="@/images/sourour.jpg"/>
+                        </ImageView>
+                        <Label text="Sourour gharbi" styleClass="team-member-name" />
+                        <Label text="Responsable de la logistique" styleClass="team-member-role" />
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <!-- Section "Contact" (déplacée plus bas) -->
+            <VBox layoutX="50" layoutY="1100" spacing="20" styleClass="contact">
+                <Label text="Contactez-nous" styleClass="section-title" />
+                <HBox spacing="20">
+                    <VBox spacing="10">
+                        <Label text="Adresse : 123 Rue du Mariage, Paris" styleClass="contact-info" />
+                        <Label text="Téléphone : +33 1 23 45 67 89" styleClass="contact-info" />
+                        <Label text="Email : contact@weddingplanner.com" styleClass="contact-info" />
+                    </VBox>
+                    <Button text="Envoyer un message" styleClass="contact-button" />
+                </HBox>
+            </VBox>
+
+        </children>
+    </AnchorPane>
+</ScrollPane>
