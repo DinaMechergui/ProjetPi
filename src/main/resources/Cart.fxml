@@ -28,6 +28,8 @@
                 style="-fx-background-color: #6d8c7a; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10 20; -fx-border-radius: 5;"/>
         <Button layoutX="200.0" layoutY="600.0" text="Cancel" onAction="#handleCancelOrder"
                 style="-fx-background-color: #e14d3c; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10 20; -fx-border-radius: 5;"/>
+        <Button layoutX="380.0" layoutY="600.0" text="Afficher la Facture" onAction="#showInvoice"
+                style="-fx-background-color: #6d8c7a; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10 20; -fx-border-radius: 5;"/>
 
         <!-- Cart Icon to go back to products -->
         <ImageView layoutX="650.0" layoutY="20.0" fitHeight="50" fitWidth="50" onMouseClicked="#goToProductsPage">
