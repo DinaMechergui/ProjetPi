@@ -33,6 +33,11 @@ public class ServiceCommande implements IServiceCommande {
     }
 
     public int ajouterOuMettreAJourReservation(String utilisateur, Produit produit) throws SQLException {
+        // Vérifier si le produit est en stock
+        if (produit.getStock() <= 0) {
+            throw new SQLException("Le produit " + produit.getNom() + " est en rupture de stock.");
+        }
+
         // Vérifier si une commande "RESERVE" existe pour cet utilisateur
         String sqlCheckCommande = "SELECT id, total FROM commande WHERE utilisateur = ? AND statut = 'RESERVE'";
         int idCommande = -1;
@@ -47,16 +52,14 @@ public class ServiceCommande implements IServiceCommande {
             }
         }
 
-        // Si aucune commande "RESERVE" n'existe, créer une nouvelle commande directement en "RESERVE"
         if (idCommande == -1) {
             String sqlInsertCommande = "INSERT INTO commande (utilisateur, date, total, statut) VALUES (?, ?, ?, 'RESERVE')";
             try (PreparedStatement stmt = connection.prepareStatement(sqlInsertCommande, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, utilisateur);
                 stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-                stmt.setDouble(3, produit.getPrix()); // Le total initial est le prix du premier produit
+                stmt.setDouble(3, produit.getPrix());
                 stmt.executeUpdate();
 
-                // Récupérer l'ID de la nouvelle commande
                 ResultSet rs = stmt.getGeneratedKeys();
                 if (rs.next()) {
                     idCommande = rs.getInt(1);
@@ -64,7 +67,6 @@ public class ServiceCommande implements IServiceCommande {
             }
         }
 
-        // Vérifier si le produit est déjà dans la commande
         String sqlCheckProduit = "SELECT quantite FROM reservation WHERE commande_id = ? AND produit_id = ?";
         boolean produitExiste = false;
         int nouvelleQuantite = 1;
@@ -75,12 +77,11 @@ public class ServiceCommande implements IServiceCommande {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 produitExiste = true;
-                nouvelleQuantite = rs.getInt("quantite") + 1; // Incrémenter la quantité
+                nouvelleQuantite = rs.getInt("quantite") + 1;
             }
         }
 
         if (produitExiste) {
-            // Mise à jour de la quantité du produit
             String sqlUpdateQuantite = "UPDATE reservation SET quantite = ? WHERE commande_id = ? AND produit_id = ?";
             try (PreparedStatement updateStmt = connection.prepareStatement(sqlUpdateQuantite)) {
                 updateStmt.setInt(1, nouvelleQuantite);
@@ -89,7 +90,6 @@ public class ServiceCommande implements IServiceCommande {
                 updateStmt.executeUpdate();
             }
         } else {
-            // Ajouter le produit pour la première fois avec statut "RESERVE"
             String sqlInsertProduit = "INSERT INTO reservation (commande_id, produit_id, quantite, statut) VALUES (?, ?, ?, 'RESERVE')";
             try (PreparedStatement insertStmt = connection.prepareStatement(sqlInsertProduit)) {
                 insertStmt.setInt(1, idCommande);
@@ -99,7 +99,6 @@ public class ServiceCommande implements IServiceCommande {
             }
         }
 
-        // Retourner l'ID de la commande
         return idCommande;
     }
         @Override
