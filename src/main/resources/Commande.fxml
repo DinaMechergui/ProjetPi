@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="Wedding.controllers.CommandeController" spacing="10" padding="10">
+    <ListView fx:id="productListView" />
+    <Button fx:id="reserveButton" text="Réserver" onAction="#reserveProduct" />
+    <Button fx:id="confirmButton" text="Confirmer la Commande" onAction="#confirmOrder" />
+    <Button fx:id="cancelButton" text="Annuler la Réservation" onAction="#cancelReservation" />
+    <TextArea fx:id="reservationSummary" editable="false" />
+</VBox>
