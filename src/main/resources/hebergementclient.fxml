@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.HebergementControllerClient"
+            prefHeight="600.0" prefWidth="800.0">
+    <stylesheets>
+        <URL value="@style.css"/>
+    </stylesheets>
+
+    <children>
+        <!-- Grille des hébergements -->
+        <ScrollPane layoutX="20" layoutY="20" prefWidth="760" prefHeight="560">
+            <GridPane fx:id="gridPaneHebergements" hgap="20" vgap="20">
+                <!-- Les cartes d'hébergement seront ajoutées dynamiquement -->
+            </GridPane>
+        </ScrollPane>
+    </children>
+</AnchorPane>

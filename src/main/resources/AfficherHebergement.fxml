@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.HebergementController"
+            prefHeight="600.0" prefWidth="800.0">
+    <stylesheets>
+        <!-- Lien vers le fichier CSS -->
+        <URL value="@style.css"/>
+    </stylesheets>
+
+    <children>
+        <!-- Bouton Ajouter Hébergement -->
+        <Button text="Ajouter Hébergement" layoutX="640" layoutY="20" onAction="#goToAjouterHebergement" />
+
+        <!-- Grille des hébergements -->
+        <ScrollPane layoutX="20" layoutY="60" prefWidth="760" prefHeight="520">
+            <GridPane fx:id="gridPaneHebergements" hgap="20" vgap="20">
+                <!-- Les cartes d'hébergement seront ajoutées ici dynamiquement -->
+            </GridPane>
+        </ScrollPane>
+    </children>
+</AnchorPane>

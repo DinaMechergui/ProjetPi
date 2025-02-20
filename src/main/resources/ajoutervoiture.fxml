@@ -1,0 +1,28 @@
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import java.net.URL?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.AjouterVoitureController">
+   <stylesheets>
+      <URL value="@style.css"/>
+   </stylesheets>
+   <children>
+      <Label text="Ajouter une Voiture" layoutX="20" layoutY="20" style="-fx-font-size: 20;"/>
+
+
+
+      <!-- Champs pour saisir les informations de la voiture -->
+      <Label text="Marque:" layoutX="20" layoutY="60"/>
+      <TextField fx:id="marqueField" layoutX="100" layoutY="60"/>
+
+      <Label text="Prix:" layoutX="20" layoutY="100"/>
+      <TextField fx:id="prixField" layoutX="100" layoutY="100"/>
+
+      <Label text="Disponibilité (true/false):" layoutX="20" layoutY="140"/>
+      <TextField fx:id="dispoField" layoutX="180" layoutY="140"/>
+
+      <!-- Bouton pour enregistrer la voiture -->
+      <Button text="Ajouter" onAction="#ajouterVoiture" layoutX="100" layoutY="180"/>
+   </children>
+</AnchorPane>
