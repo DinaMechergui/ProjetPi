@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="484.0" prefWidth="710.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.tacheuser.contoller.Users" style="-fx-background-color: #D3D3D3;">
+
+    <!-- Liste des utilisateurs -->
+    <ListView fx:id="usersListView" layoutX="20.0" layoutY="20.0" onMouseClicked="#handleUserSelection" prefHeight="200.0" prefWidth="650.0" style="-fx-background-color: #e9ddd7; -fx-border-radius: 5; -fx-padding: 5;" />
+
+    <!-- Champs de saisie -->
+    <VBox layoutX="20.0" layoutY="230.0" spacing="10" style="-fx-padding: 10; -fx-background-color: #e9ddd7; -fx-border-radius: 10; -fx-background-radius: 10;">
+        <TextField fx:id="nomField" promptText="Nom" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;"/>
+        <TextField fx:id="prenomField" promptText="Prénom" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;"/>
+        <TextField fx:id="mailField" promptText="Email" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;"/>
+        <TextField fx:id="telField" promptText="Téléphone" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;"/>
+        <TextField fx:id="roleField" promptText="Rôle" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;"/>
+    </VBox>
+
+    <!-- Boutons d'actions -->
+    <HBox layoutX="224.0" layoutY="256.0" spacing="10">
+        <Button onAction="#handleAdd" text="Ajouter" style="-fx-background-color: #8fbd9a; -fx-text-fill: white; -fx-border-radius: 5;"/>
+        <Button onAction="#handleUpdate" text="Modifier" style="-fx-background-color: #ac9d66; -fx-text-fill: white; -fx-border-radius: 5;"/>
+        <Button onAction="#handleDelete" text="Supprimer" style="-fx-background-color: #c57077; -fx-text-fill: white; -fx-border-radius: 5;"/>
+    </HBox>
+
+    <!-- Bouton vers les réclamations -->
+    <Button layoutX="300.0" layoutY="354.0" onAction="#goToReclamations" text="Réclamations" style="-fx-background-color: #6888a8; -fx-text-fill: white; -fx-border-radius: 5;"/>
+
+</AnchorPane>

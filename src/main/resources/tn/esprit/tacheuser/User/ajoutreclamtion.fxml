@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.paint.Color?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="tn.esprit.tacheuser.contoller.ajoutreclamtion"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <VBox alignment="CENTER" spacing="20" style="-fx-padding: 20px;">
+        <!-- Title of the page -->
+        <Label text="Ajout de Réclamation" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #92a69b;" />
+
+        <!-- Title of the Reclamation -->
+        <Label text="Titre de la réclamation:" style="-fx-text-fill: #b56852;"/>
+        <TextField fx:id="titleField" promptText="Entrez le titre de la réclamation" style="-fx-background-color: #e9ddd7; -fx-border-color: #c2c2c2; -fx-border-radius: 5; -fx-padding: 5;"/>
+
+        <!-- Description of the Reclamation -->
+        <Label text="Description:" style="-fx-text-fill: #b56852;"/>
+        <TextArea fx:id="descriptionField" promptText="Entrez la description de la réclamation" style="-fx-background-color: #e9ddd7; -fx-border-color: #c2c2c2; -fx-border-radius: 5; -fx-padding: 5;" wrapText="true"/>
+
+        <!-- Submit Button -->
+        <Button text="Soumettre" onAction="#handleSubmitReclamation"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5; -fx-background-radius: 5;" />
+
+        <!-- Back Button to go back to profile -->
+        <Button text="Retour" onAction="#handleBackToProfile"
+                style="-fx-background-color: #b53931; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5; -fx-background-radius: 5;"/>
+    </VBox>
+
+</AnchorPane>

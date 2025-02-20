@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="428.0" prefWidth="603.0" style="-fx-background-color: #D3D3D3;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.tacheuser.contoller.Login">
+    <VBox alignment="CENTER" layoutX="170.0" layoutY="38.0" prefHeight="380.0" prefWidth="306.0" spacing="10" style="-fx-background-color: #e9ddd7; -fx-padding: 20; -fx-border-radius: 10; -fx-background-radius: 10;">
+      <Text fill="#538c3c" strokeType="OUTSIDE" strokeWidth="0.0" text="she said yes" wrappingWidth="266.27620697021484">
+         <font>
+            <Font size="48.0" />
+         </font>
+      </Text>
+        <TextField fx:id="mailField" promptText="Email" style="-fx-background-color: #e4c2b9; -fx-border-color: #c2c2c2; -fx-border-radius: 5; -fx-padding: 5;" />
+        <PasswordField fx:id="passwordField" promptText="Mot de passe" style="-fx-background-color: #e4c2b9; -fx-border-color: #c2c2c2; -fx-border-radius: 5; -fx-padding: 5;" />
+        <Button onAction="#handleLogin" prefHeight="26.0" prefWidth="150.0" style="-fx-background-color: #92a69b; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5; -fx-background-radius: 5;" text="Se connecter" />
+        <Button onAction="#handleRegister" prefHeight="26.0" prefWidth="152.0" style="-fx-background-color: #92a69b; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5; -fx-background-radius: 5;" text="S'inscrire" />
+    </VBox>
+   <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
+</AnchorPane>
