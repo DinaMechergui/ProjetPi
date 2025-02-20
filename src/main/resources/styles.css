@@ -1,83 +1,57 @@
 /* Style général de l'application */
 .root {
     -fx-background-color: #f5f5f5; /* Fond clair */
-}
-
-/* Header */
-.header {
-    -fx-background-color: #6d8c7a; /* Couleur principale */
-    -fx-padding: 10;
-    -fx-spacing: 10;
-    -fx-alignment: center-left;
-}
-
-.header-title {
-    -fx-text-fill: white; /* Texte blanc */
-    -fx-font-size: 20px;
-    -fx-font-weight: bold;
-}
-
-/* Boutons */
-.button {
-    -fx-background-color: #6d8c7a; /* Couleur principale */
-    -fx-text-fill: white; /* Texte blanc */
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-padding: 10 20;
-    -fx-border-radius: 5;
-    -fx-background-radius: 5;
-    -fx-cursor: hand; /* Curseur en forme de main */
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 5, 0, 0, 0); /* Ombre légère */
-}
-
-.button:hover {
-    -fx-background-color: #5a7364; /* Couleur plus foncée au survol */
-}
-
-.button:pressed {
-    -fx-background-color: #4a5f4f; /* Couleur encore plus foncée lors du clic */
-}
-
-/* Cartes de produit */
-.product-card {
-    -fx-background-color: white; /* Fond blanc */
-    -fx-border-radius: 10; /* Coins arrondis */
-    -fx-background-radius: 10; /* Coins arrondis */
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 0); /* Ombre légère */
-    -fx-padding: 15; /* Espace intérieur */
-    -fx-spacing: 10; /* Espace entre les éléments */
-    -fx-alignment: center; /* Centrer le contenu */
-}
-
-.product-name {
-    -fx-font-size: 18px; /* Taille de la police */
-    -fx-font-weight: bold; /* Gras */
-    -fx-text-fill: #6d8c7a; /* Couleur principale */
-}
-
-.product-price {
-    -fx-font-size: 16px; /* Taille de la police */
-    -fx-text-fill: #333333; /* Texte gris foncé */
+    -fx-font-family: 'Segoe UI', sans-serif; /* Police moderne */
 }
 
 /* Navbar */
 .navbar {
     -fx-background-color: #6d8c7a; /* Couleur principale */
-    -fx-padding: 10;
+    -fx-padding: 15 20;
     -fx-spacing: 20;
     -fx-alignment: center-left;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 5); /* Ombre légère */
 }
 
+/* Logo */
+#logo {
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 10, 0, 0, 5); /* Ombre pour le logo */
+}
+
+/* Boutons de navigation */
 .nav-button {
     -fx-background-color: transparent; /* Fond transparent */
     -fx-text-fill: white; /* Texte blanc */
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-cursor: hand; /* Curseur en forme de main */
+    -fx-padding: 10 20;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 0); /* Ombre légère */
 }
 
 .nav-button:hover {
     -fx-text-fill: #f1c40f; /* Couleur jaune au survol */
+    -fx-effect: dropshadow(three-pass-box, rgba(241, 196, 15, 0.6), 10, 0, 0, 2); /* Ombre dorée */
+}
+
+/* Boutons de connexion/déconnexion */
+.auth-button {
+    -fx-background-color: #5a7364; /* Couleur secondaire */
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 0); /* Ombre légère */
+}
+
+.auth-button:hover {
+    -fx-background-color: #4a5f4f; /* Couleur plus foncée au survol */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 8, 0, 0, 2); /* Ombre plus prononcée */
 }
 
 /* Barre de recherche */
@@ -86,19 +60,49 @@
     -fx-border-radius: 5;
     -fx-background-radius: 5;
     -fx-padding: 10;
+    -fx-font-size: 14px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 0); /* Ombre légère */
+}
+
+.search-button {
+    -fx-background-color: #6d8c7a; /* Couleur principale */
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 0); /* Ombre légère */
+}
+
+.search-button:hover {
+    -fx-background-color: #5a7364; /* Couleur plus foncée au survol */
+}
+
+/* Icône du panier */
+#cartIcon {
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 5); /* Ombre pour l'icône */
+}
+
+#cartIcon:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(241, 196, 15, 0.6), 15, 0, 0, 5); /* Ombre dorée au survol */
 }
 
 /* Sections */
 .section-title {
-    -fx-font-size: 24px;
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-text-fill: #6d8c7a; /* Couleur principale */
+    -fx-font-family: 'Georgia', serif; /* Police élégante */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 2); /* Ombre légère */
 }
 
 .section-description {
     -fx-font-size: 16px;
     -fx-text-fill: #333333; /* Texte gris foncé */
     -fx-wrap-text: true;
+    -fx-font-family: 'Segoe UI', sans-serif; /* Police moderne */
 }
 
 /* Cartes de service */
@@ -106,20 +110,23 @@
     -fx-background-color: white;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 0); /* Ombre légère */
-    -fx-padding: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 5); /* Ombre légère */
+    -fx-padding: 20;
+    -fx-spacing: 10;
 }
 
 .service-title {
-    -fx-font-size: 18px;
+    -fx-font-size: 20px;
     -fx-font-weight: bold;
     -fx-text-fill: #6d8c7a; /* Couleur principale */
+    -fx-font-family: 'Georgia', serif; /* Police élégante */
 }
 
 .service-description {
     -fx-font-size: 14px;
-    -fx-text-fill: #333333; /* Texte gris foncé */
+    -fx-text-fill: #555555; /* Texte gris foncé */
     -fx-wrap-text: true;
+    -fx-font-family: 'Segoe UI', sans-serif; /* Police moderne */
 }
 
 /* Cartes de membre d'équipe */
@@ -127,25 +134,38 @@
     -fx-background-color: white;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 0); /* Ombre légère */
-    -fx-padding: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 5); /* Ombre légère */
+    -fx-padding: 20;
+    -fx-spacing: 10;
 }
 
 .team-member-name {
     -fx-font-size: 18px;
     -fx-font-weight: bold;
     -fx-text-fill: #6d8c7a; /* Couleur principale */
+    -fx-font-family: 'Georgia', serif; /* Police élégante */
 }
 
 .team-member-role {
     -fx-font-size: 14px;
-    -fx-text-fill: #333333; /* Texte gris foncé */
+    -fx-text-fill: #555555; /* Texte gris foncé */
+    -fx-font-family: 'Segoe UI', sans-serif; /* Police moderne */
 }
 
-/* Contact */
+/* Section Contact */
+.contact {
+    -fx-background-color: white;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 5); /* Ombre légère */
+    -fx-padding: 20;
+    -fx-spacing: 10;
+}
+
 .contact-info {
     -fx-font-size: 16px;
-    -fx-text-fill: #333333; /* Texte gris foncé */
+    -fx-text-fill: #555555; /* Texte gris foncé */
+    -fx-font-family: 'Segoe UI', sans-serif; /* Police moderne */
 }
 
 .contact-button {
@@ -156,37 +176,10 @@
     -fx-padding: 10 20;
     -fx-border-radius: 5;
     -fx-background-radius: 5;
-    -fx-cursor: hand; /* Curseur en forme de main */
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 0); /* Ombre légère */
 }
 
 .contact-button:hover {
     -fx-background-color: #5a7364; /* Couleur plus foncée au survol */
-}
-.dashboard-button {
-    -fx-background-color: linear-gradient(to right, #2c3e50, #4ca1af); /* Dégradé pro */
-    -fx-text-fill: white; /* Texte blanc */
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-padding: 12 25;
-    -fx-background-radius: 30; /* Bouton arrondi */
-    -fx-border-radius: 30;
-    -fx-border-color: #ffffff33;
-    -fx-border-width: 1.5;
-    -fx-cursor: hand;
-    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 2); /* Ombre classe */
-}
-
-/* Effet au survol */
-.dashboard-button:hover {
-    -fx-background-color: linear-gradient(to right, #4ca1af, #2c3e50); /* Inversion du dégradé */
-    -fx-border-color: #f1c40f; /* Bordure dorée au survol */
-    -fx-text-fill: #f1c40f; /* Texte doré */
-    -fx-effect: dropshadow(three-pass-box, rgba(241, 196, 15, 0.6), 15, 0, 0, 3); /* Lumière dorée */
-}
-
-/* Effet au clic */
-.dashboard-button:pressed {
-    -fx-background-color: linear-gradient(to right, #1f2c38, #3b899d);
-    -fx-scale-x: 0.98; /* Effet de clic réaliste */
-    -fx-scale-y: 0.98;
 }
