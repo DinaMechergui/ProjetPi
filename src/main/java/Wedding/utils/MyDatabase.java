@@ -1,4 +1,4 @@
-package org.Wedding.utils;
+package Wedding.utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,7 +10,7 @@ public class MyDatabase {
 
     final String USERNAME="root";
     final String PASSWORD="";
-    Connection connection;
+    static Connection connection;
 
     static MyDatabase instance;
 
@@ -30,7 +30,7 @@ public class MyDatabase {
         return instance;
     }
 
-    public Connection getConnection() {
+    public static Connection getConnection() {
         return connection;
     }
 }
