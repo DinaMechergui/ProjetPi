@@ -1,8 +1,10 @@
 package Wedding.controllers;
 
 import Wedding.entities.Commande;
+import Wedding.entities.Facture;
 import Wedding.entities.Produit;
 import Wedding.service.ServiceCommande;
+import Wedding.service.ServiceFacture;
 import Wedding.utils.MyDatabase;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -149,19 +151,28 @@ public class CartController {
     }
 
     @FXML
-
     private void handleConfirmOrder() {
         try {
             if (currentCommande != null && currentCommande.getId() != -1) {
+                // Confirmer la commande
                 serviceCommande.confirmerCommande(currentCommande.getId());
-                showAlert("Commande Confirmée", "Votre commande a été confirmée avec succès.", Alert.AlertType.INFORMATION);
-                System.out.println("Commande confirmée !");
+                System.out.println("Commande confirmée avec ID : " + currentCommande.getId());
+
+                // Créer une facture après la confirmation de la commande
+                ServiceFacture serviceFacture = new ServiceFacture();
+                double total = calculateTotal(serviceCommande.getProduitsDansPanier(currentCommande.getId()));
+                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), total);
+
+                serviceFacture.ajouterFacture(facture);
+                System.out.println("Facture créée pour la commande ID : " + currentCommande.getId());
+
+                showAlert("Commande Confirmée", "Votre commande a été confirmée et une facture a été générée.", Alert.AlertType.INFORMATION);
             } else {
                 showAlert("Aucune commande", "Il n'y a aucune commande à confirmer.", Alert.AlertType.WARNING);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert("Erreur", "Une erreur est survenue lors de la confirmation.", Alert.AlertType.ERROR);
+            showAlert("Erreur", "Une erreur est survenue lors de la confirmation ou de la création de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
@@ -209,6 +220,27 @@ public class CartController {
             stage.setScene(scene); // Changer la scène vers la page des produits
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void showInvoice() {
+        if (currentCommande != null) {
+            try {
+                ServiceFacture serviceFacture = new ServiceFacture();
+                Facture facture = serviceFacture.getFactureByCommandeId(currentCommande.getId());
+
+                if (facture != null) {
+                    showAlert("Facture", "Date : " + facture.getDateFacture() +
+                            "\nTotal : " + facture.getTotal() + " TND", Alert.AlertType.INFORMATION);
+                } else {
+                    showAlert("Aucune facture", "Aucune facture trouvée pour cette commande.", Alert.AlertType.WARNING);
+                }
+            } catch (SQLException e) {
+                showAlert("Erreur", "Erreur lors de la récupération de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        } else {
+            showAlert("Aucune commande sélectionnée", "Veuillez sélectionner une commande pour voir la facture.", Alert.AlertType.WARNING);
         }
     }
 

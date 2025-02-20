@@ -8,5 +8,7 @@
     <Button fx:id="reserveButton" text="Réserver" onAction="#reserveProduct" />
     <Button fx:id="confirmButton" text="Confirmer la Commande" onAction="#confirmOrder" />
     <Button fx:id="cancelButton" text="Annuler la Réservation" onAction="#cancelReservation" />
+    <Button text="Afficher la Facture" onAction="#showInvoice"/>
+
     <TextArea fx:id="reservationSummary" editable="false" />
 </VBox>

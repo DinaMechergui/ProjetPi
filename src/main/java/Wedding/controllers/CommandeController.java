@@ -1,9 +1,11 @@
 package Wedding.controllers;
 
 import Wedding.entities.Commande;
+import Wedding.entities.Facture;
 import Wedding.entities.Produit;
 import Wedding.entities.Reservation;
 import Wedding.service.ServiceCommande;
+import Wedding.service.ServiceFacture;
 import Wedding.service.ServiceProduit;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -53,8 +55,8 @@ public class CommandeController {
 
     // Charger les produits depuis la base de données
     private void loadProducts() throws SQLException {
-        productList = FXCollections.observableArrayList(serviceProduit.afficher()); // Récupérer la liste des produits
-        productListView.setItems(productList); // Afficher les produits dans la ListView
+        productList = FXCollections.observableArrayList(serviceProduit.afficher());
+        productListView.setItems(productList);
     }
 
     // Trouver une réservation existante pour un produit donné
@@ -62,7 +64,7 @@ public class CommandeController {
         if (currentCommande != null) {
             for (Reservation reservation : currentCommande.getReservations()) {
                 if (reservation.getProduit().equals(produit)) {
-                    return reservation; // Retourne la réservation existante
+                    return reservation;
                 }
             }
         }
@@ -74,45 +76,33 @@ public class CommandeController {
     private void reserveProduct() {
         Produit selectedProduct = productListView.getSelectionModel().getSelectedItem(); // Produit sélectionné
         if (selectedProduct != null) {
+            // Vérification du stock
+            if (selectedProduct.getStock() <= 0) {
+                showAlert("Stock épuisé", "Ce produit n'est plus en stock et ne peut pas être réservé.", Alert.AlertType.WARNING);
+                return; // Stoppe l'exécution si le stock est épuisé
+            }
+
             try {
-                // Créer une nouvelle commande si elle n'existe pas
                 if (currentCommande == null) {
                     currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>());
                 }
 
-                // Vérifier si le produit est déjà réservé
                 Reservation reservationExistante = trouverReservationExistante(selectedProduct);
 
                 if (reservationExistante != null) {
-                    // Augmenter la quantité si le produit est déjà réservé
                     reservationExistante.setQuantite(reservationExistante.getQuantite() + 1);
                 } else {
-                    // Créer une nouvelle réservation
                     Reservation nouvelleReservation = new Reservation(null, currentCommande, selectedProduct, 1);
                     currentCommande.ajouterReservation(nouvelleReservation);
                 }
 
-                // Mettre à jour la base de données
                 serviceCommande.ajouterOuMettreAJourReservation(currentCommande.getUtilisateur(), selectedProduct);
                 showAlert("Succès", "Votre réservation a été enregistrée avec succès.", Alert.AlertType.INFORMATION);
 
-                // Calculer le total de la commande
-                double total = currentCommande.calculerTotal();
-
-                // Afficher le résumé de la réservation
-                reservationSummary.appendText("Produit réservé : " + selectedProduct.getNom() + " - Quantité : " +
-                        (reservationExistante != null ? reservationExistante.getQuantite() : 1) + " - Prix unitaire : " + selectedProduct.getPrix() + " TND\n");
-                reservationSummary.appendText("Total actuel : " + total + " TND\n");
-
-                // Afficher une alerte de succès
-                showAlert("Réservation réussie", "Le produit " + selectedProduct.getNom() + " a été réservé avec succès !\nTotal actuel : " + total + " TND", Alert.AlertType.INFORMATION);
-
             } catch (SQLException e) {
-                // Afficher une alerte d'erreur en cas d'échec
-                showAlert("Erreur de réservation", "Une erreur s'est produite lors de la réservation du produit : " + e.getMessage(), Alert.AlertType.ERROR);
+                showAlert("Erreur de réservation", "Une erreur s'est produite lors de la réservation : " + e.getMessage(), Alert.AlertType.ERROR);
             }
         } else {
-            // Afficher une alerte si aucun produit n'est sélectionné
             showAlert("Aucun produit sélectionné", "Veuillez sélectionner un produit pour réserver.", Alert.AlertType.WARNING);
         }
     }
@@ -122,24 +112,48 @@ public class CommandeController {
     private void confirmOrder() {
         if (currentCommande != null) {
             try {
-                // Confirmer la commande dans la base de données
+                // Confirmer la commande
                 serviceCommande.confirmerCommande(currentCommande.getId());
 
+                // Créer une facture
+                ServiceFacture serviceFacture = new ServiceFacture();
+                Facture facture = new Facture(0, currentCommande, LocalDateTime.now(), currentCommande.calculerTotal());
+                serviceFacture.ajouterFacture(facture);
+
                 // Afficher une alerte de succès
-                showAlert("Commande confirmée", "Votre commande a été confirmée avec succès !", Alert.AlertType.INFORMATION);
+                showAlert("Commande confirmée", "Votre commande a été confirmée avec succès ! Une facture a été générée.", Alert.AlertType.INFORMATION);
 
                 // Mettre à jour le résumé de la réservation
-                reservationSummary.appendText("Commande confirmée !\n");
+                reservationSummary.appendText("Commande confirmée ! Facture générée.\n");
 
             } catch (SQLException e) {
-                // Afficher une alerte d'erreur en cas d'échec
                 showAlert("Erreur de confirmation", "Une erreur s'est produite lors de la confirmation de la commande : " + e.getMessage(), Alert.AlertType.ERROR);
             }
         } else {
-            // Afficher une alerte si aucune commande n'est à confirmer
-            showAlert("Aucune commande à confirmer", "Aucune commande n'est en cours pour être confirmée.", Alert.AlertType.WARNING);
+            showAlert("Aucune commande à confirmer", "Aucune commande en cours pour être confirmée.", Alert.AlertType.WARNING);
         }
     }
+    @FXML
+    private void showInvoice() {
+        if (currentCommande != null) {
+            try {
+                ServiceFacture serviceFacture = new ServiceFacture();
+                Facture facture = serviceFacture.getFactureByCommandeId(currentCommande.getId());
+
+                if (facture != null) {
+                    showAlert("Facture", "Date : " + facture.getDateFacture() +
+                            "\nTotal : " + facture.getTotal() + " TND", Alert.AlertType.INFORMATION);
+                } else {
+                    showAlert("Aucune facture", "Aucune facture trouvée pour cette commande.", Alert.AlertType.WARNING);
+                }
+            } catch (SQLException e) {
+                showAlert("Erreur", "Erreur lors de la récupération de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        } else {
+            showAlert("Aucune commande sélectionnée", "Veuillez sélectionner une commande pour voir la facture.", Alert.AlertType.WARNING);
+        }
+    }
+
 
     // Annuler la réservation
     @FXML
