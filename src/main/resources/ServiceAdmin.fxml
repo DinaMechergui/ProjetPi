@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.text.*?>
+
+<GridPane fx:controller="controller.AdminServiceController"
+          xmlns:fx="http://javafx.com/fxml"
+          xmlns="http://javafx.com/javafx/8.0.171"
+          hgap="10" vgap="10" stylesheets="@styles.css">
+
+    <!-- Header -->
+    <HBox GridPane.columnSpan="2" alignment="CENTER" spacing="20" styleClass="header">
+        <Label text="Gestion des Services" styleClass="header-title"/>
+    </HBox>
+
+    <!-- GridView for Services -->
+    <GridPane fx:id="gridPane" GridPane.rowIndex="1" GridPane.columnSpan="2" alignment="CENTER" hgap="10" vgap="10">
+        <!-- Services will be added dynamically via the controller -->
+    </GridPane>
+
+    <!-- CRUD Buttons -->
+    <HBox GridPane.rowIndex="2" spacing="10" alignment="CENTER" styleClass="header">
+        <Button fx:id="btnAdd" text="Ajouter" styleClass="button"/>
+        <Button fx:id="btnEdit" text="Modifier" styleClass="button"/>
+        <Button fx:id="btnDelete" text="Supprimer" styleClass="button"/>
+    </HBox>
+</GridPane>

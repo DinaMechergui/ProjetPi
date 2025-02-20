@@ -1,0 +1,185 @@
+/* Root and Base Styles */
+.root {
+    -fx-primary-color: #2c3e50;
+    -fx-secondary-color: #3498db;
+    -fx-accent-color: #e74c3c;
+    -fx-light-gray: #ecf0f1;
+    -fx-dark-gray: #2c3e50;
+    -fx-base: -fx-light-gray;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+    -fx-background-color: -fx-light-gray;
+}
+
+/* Header Styles */
+.header {
+    -fx-background-color: -fx-primary-color;
+    -fx-padding: 20px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);
+}
+
+.header-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 2, 0, 0, 1);
+}
+
+/* Button Styles */
+.button {
+    -fx-background-color: -fx-secondary-color;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: derive(-fx-secondary-color, -10%);
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);
+}
+
+/* Form Elements */
+.product-card {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 3);
+    -fx-font-size: 14px;
+}
+
+.combo-box, .date-picker, .text-field {
+    -fx-pref-width: 250px;
+}
+
+/* Cart and Grid Items */
+.cartGrid {
+    -fx-padding: 20px;
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 3);
+}
+
+.product-name {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primary-color;
+}
+
+/* Image Styling */
+.image-view {
+    -fx-border-color: -fx-light-gray;
+    -fx-border-width: 3px;
+    -fx-border-radius: 5px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 3);
+}
+
+/* Price Label */
+#totalPriceLabel {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-accent-color;
+    -fx-padding: 15px 0;
+}
+
+/* Grid Layout */
+GridPane {
+    -fx-padding: 20px;
+}
+
+/* Dynamic Content Cards */
+.gridPane > * {
+    -fx-background-color: white;
+    -fx-background-radius: 8px;
+    -fx-padding: 15px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 5, 0, 0, 3);
+    -fx-margin: 10px;
+    -fx-transition: all 0.3s;
+}
+
+.gridPane > *:hover {
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 4);
+    -fx-translate-y: -2px;
+}
+
+/* Consistent Spacing */
+HBox, VBox {
+    -fx-spacing: 10px;
+}
+
+/* Form Labels */
+/* Target all labels */
+Label {
+    -fx-font-weight: bold;
+    -fx-text-fill: -fx-primary-color;
+    -fx-font-size: 14px;
+}
+
+/* Override for header titles */
+.header-title {
+    -fx-font-weight: normal; /* Reset to regular weight */
+    -fx-text-fill: white;    /* Use header-specific color */
+    -fx-font-size: 28px;     /* Larger font size */
+
+}
+/* Style global */
+.root {
+    -fx-background-color: #e9ddd0;
+    -fx-font-family: "Arial";
+}
+
+/* Style des labels */
+.label {
+    -fx-text-fill: #4A4A4A;
+    -fx-font-size: 14px;
+}
+
+/* Champs de saisie (combobox, datepicker, textfield) */
+.input-field {
+    -fx-background-color: #D3D3D3;
+    -fx-border-color: #c2c2c2;
+    -fx-border-radius: 5px;
+    -fx-padding: 5px;
+    -fx-font-size: 14px;
+}
+
+/* Boutons */
+.primary-button {
+    -fx-background-color: #92a69b;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 15px;
+    -fx-border-radius: 5px;
+}
+
+.primary-button:hover {
+    -fx-background-color: #7f9487;
+}
+
+/* Conteneur du panier */
+.cart-container {
+    -fx-background-color: #e4c2b9;
+    -fx-padding: 10px;
+    -fx-border-radius: 5px;
+}
+
+/* Prix total */
+.total-price {
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-text-fill: #4A4A4A;
+}
+
+/* Statut */
+.status-label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #4A4A4A;
+}
+
+/* Image */
+#serviceImage {
+    -fx-border-color: #c2c2c2;
+    -fx-border-width: 2px;
+    -fx-border-radius: 5px;
+}
