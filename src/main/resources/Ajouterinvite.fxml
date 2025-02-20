@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controller.Ajouterinvite">
+   <children>
+      <Label layoutX="126.0" layoutY="55.0" text="nom" />
+      <Label layoutX="117.0" layoutY="99.0" text="prenom" />
+      <Label layoutX="124.0" layoutY="148.0" text="email" />
+      <TextField fx:id="prenomtf" layoutX="197.0" layoutY="95.0" />
+      <TextField fx:id="nomtf" layoutX="188.0" layoutY="51.0" />
+      <TextField fx:id="emailtf" layoutX="188.0" layoutY="144.0" />
+      <Button layoutX="300.0" layoutY="319.0" mnemonicParsing="false" onAction="#ajouterInvite" text="Ajouter" />
+
+      <Label layoutX="124.0" layoutY="200.0" text="tel" />
+      <Label layoutX="104.0" layoutY="251.0" text="confirmation" />
+      <TextField fx:id="teltf" layoutX="189.0" layoutY="196.0" />
+      <TextField fx:id="confimationtf" layoutX="189.0" layoutY="247.0" />
+      <ComboBox fx:id="evenementCB" layoutX="189.0" layoutY="285.0" prefWidth="150.0" />
+      <Label layoutX="44.0" layoutY="289.0" text="selectioner evenement" />
+   </children>
+</AnchorPane>
