@@ -1,0 +1,86 @@
+/* Style général de l'application */
+.root {
+    -fx-background-color: #f5f5f5; /* Fond clair */
+}
+
+/* Header */
+.header {
+    -fx-background-color: #6d8c7a; /* Couleur principale */
+    -fx-padding: 10;
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+}
+
+.header-title {
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+}
+
+/* Boutons généraux */
+.button {
+    -fx-background-color: #6d8c7a; /* Couleur principale */
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-background-radius: 5;
+    -fx-cursor: hand; /* Curseur en forme de main */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 0); /* Ombre légère */
+}
+
+.button:hover {
+    -fx-background-color: #5a7364; /* Couleur plus foncée au survol */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 8, 0, 0, 2); /* Ombre plus prononcée */
+}
+
+.button:pressed {
+    -fx-background-color: #4a5f4f; /* Couleur encore plus foncée lors du clic */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 0); /* Ombre légère */
+}
+
+/* Boutons de navigation (Sidebar) */
+.nav-button {
+    -fx-background-color: #6d8c7a; /* Couleur principale */
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 12 25;
+    -fx-background-radius: 5; /* Coins légèrement arrondis */
+    -fx-border-radius: 5;
+    -fx-border-color: transparent; /* Bordure transparente par défaut */
+    -fx-border-width: 1.5;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 0); /* Ombre légère */
+}
+
+/* Effet au survol */
+.nav-button:hover {
+    -fx-background-color: #5a7364; /* Couleur plus foncée au survol */
+    -fx-border-color: #f1c40f; /* Bordure dorée au survol */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.2), 8, 0, 0, 2); /* Ombre plus prononcée */
+}
+
+/* Effet au clic */
+.nav-button:pressed {
+    -fx-background-color: #4a5f4f; /* Couleur encore plus foncée lors du clic */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 5, 0, 0, 0); /* Ombre légère */
+}
+
+/* Photo d'admin */
+.admin-photo {
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.3), 10, 0, 0, 0); /* Ombre pour l'image */
+}
+
+/* Sections */
+.section-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6d8c7a; /* Couleur principale */
+}
+
+.section-description {
+    -fx-font-size: 16px;
+    -fx-text-fill: #333333; /* Texte gris foncé */
+    -fx-wrap-text: true;
+}

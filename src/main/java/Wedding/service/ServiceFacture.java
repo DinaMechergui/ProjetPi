@@ -9,7 +9,8 @@ import java.sql.*;
 public class ServiceFacture {
     private Connection connection;
 
-    public ServiceFacture() {
+    public ServiceFacture()
+    {
         connection = MyDatabase.getInstance().getConnection();
     }
 

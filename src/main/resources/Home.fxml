@@ -6,9 +6,10 @@
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 
+<?import javafx.scene.shape.Circle?>
 <ScrollPane fitToWidth="true" fitToHeight="true" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Wedding.controllers.HomeController"
             stylesheets="@styles.css">
-    <AnchorPane prefHeight="1200.0" prefWidth="1200.0"> <!-- Augmentez la hauteur pour permettre le défilement -->
+    <AnchorPane prefHeight="1200.0" prefWidth="1200.0">
         <children>
             <!-- Navbar -->
             <HBox styleClass="navbar" layoutX="0" layoutY="0" prefWidth="1200" prefHeight="80">
@@ -40,7 +41,12 @@
 
             <!-- Icône du panier -->
             <ImageView fx:id="cartIcon" layoutX="1100" layoutY="20" fitHeight="50" fitWidth="50" onMouseClicked="#goToCart">
-                <Image url="@/images/cart-icon.png"/>
+                <image>
+                    <Image url="@/images/cart-icon.png" />
+                </image>
+                <clip>
+                    <Circle centerX="25" centerY="25" radius="25" /> <!-- Découper en cercle -->
+                </clip>
             </ImageView>
 
             <!-- Section "À propos de nous" -->
@@ -86,8 +92,7 @@
                 </HBox>
             </VBox>
 
-            <!-- Section "Notre équipe" déplacée ici -->
-            <!-- Section "Notre équipe" (déplacée plus bas) -->
+            <!-- Section "Notre équipe" -->
             <VBox layoutX="50" layoutY="750" spacing="20" styleClass="team">
                 <Label text="Notre équipe" styleClass="section-title" />
                 <HBox spacing="20">
@@ -115,7 +120,7 @@
                 </HBox>
             </VBox>
 
-            <!-- Section "Contact" (déplacée plus bas) -->
+            <!-- Section "Contact" -->
             <VBox layoutX="50" layoutY="1100" spacing="20" styleClass="contact">
                 <Label text="Contactez-nous" styleClass="section-title" />
                 <HBox spacing="20">
@@ -127,7 +132,6 @@
                     <Button text="Envoyer un message" styleClass="contact-button" />
                 </HBox>
             </VBox>
-
         </children>
     </AnchorPane>
 </ScrollPane>
