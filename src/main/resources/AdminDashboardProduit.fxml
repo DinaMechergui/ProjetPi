@@ -31,6 +31,7 @@
             <!-- Boutons de gestion -->
             <Button text="Gestion Utilisateurs" styleClass="nav-button" />
             <Button text="Gestion des Produits" styleClass="nav-button" />
+            <Button text="Gestion des Réservation" styleClass="nav-button" onAction="#goToReservation" />
             <Button text="Gestion des Événements" styleClass="nav-button" />
             <Button text="Gestion Hôtels And Voitures" styleClass="nav-button" />
             <Button text="Gestion des Invités" styleClass="nav-button" />
