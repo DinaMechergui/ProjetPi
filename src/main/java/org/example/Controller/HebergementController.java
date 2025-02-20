@@ -3,6 +3,7 @@ package org.example.Controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -44,7 +45,7 @@ public class HebergementController {
         }
     }
 
-    private void loadHebergements() throws SQLException {
+    void loadHebergements() throws SQLException {
         gridPaneHebergements.getChildren().clear(); // Réinitialiser l'affichage
         List<Hebergement> hebergements = serviceHebergement.afficher();
         int row = 0;
@@ -72,7 +73,6 @@ public class HebergementController {
         hebergementDispo.setStyle(hebergement.isDisponible() ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
 
 
-
         Button modifierButton = new Button("Modifier");
         modifierButton.setOnAction(event -> modifierHebergement(hebergement));
 
@@ -88,41 +88,88 @@ public class HebergementController {
     }
 
     private void modifierHebergement(Hebergement hebergement) {
-        TextInputDialog dialog = new TextInputDialog(hebergement.getNom());
+        // Création de la boîte de dialogue
+        Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Modifier Hébergement");
-        dialog.setHeaderText("Modifier les informations de l'hébergement");
-        dialog.setContentText("Nouveau nom :");
+        dialog.setHeaderText("Modifiez les informations de l'hébergement");
 
-        Optional<String> result = dialog.showAndWait();
-        result.ifPresent(nouveauNom -> {
-            TextInputDialog prixDialog = new TextInputDialog(String.valueOf(hebergement.getPrixParNuit()));
-            prixDialog.setTitle("Modifier Prix");
-            prixDialog.setContentText("Nouveau prix :");
+        // Création des champs de saisie
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
 
-            Optional<String> prixResult = prixDialog.showAndWait();
-            prixResult.ifPresent(nouveauPrix -> {
-                TextInputDialog dispoDialog = new TextInputDialog(hebergement.isDisponible() ? "true" : "false");
-                dispoDialog.setTitle("Modifier Disponibilité");
-                dispoDialog.setContentText("Disponible ? (true/false) :");
+        TextField nomField = new TextField(hebergement.getNom());
+        TextField prixField = new TextField(String.valueOf(hebergement.getPrixParNuit()));
+        ComboBox<String> dispoBox = new ComboBox<>();
+        dispoBox.getItems().addAll("true", "false");
+        dispoBox.setValue(hebergement.isDisponible() ? "true" : "false");
 
-                Optional<String> dispoResult = dispoDialog.showAndWait();
-                dispoResult.ifPresent(nouvelleDispo -> {
-                    try {
-                        hebergement.setNom(nouveauNom);
-                        hebergement.setPrixParNuit(Double.parseDouble(nouveauPrix));
-                        hebergement.setDisponible(Boolean.parseBoolean(nouvelleDispo));
+        grid.add(new Label("Nom :"), 0, 0);
+        grid.add(nomField, 1, 0);
+        grid.add(new Label("Prix par nuit :"), 0, 1);
+        grid.add(prixField, 1, 1);
+        grid.add(new Label("Disponible :"), 0, 2);
+        grid.add(dispoBox, 1, 2);
 
-                        serviceHebergement.modifier(hebergement);
-                        loadHebergements();
-                        System.out.println("✅ Hébergement modifié avec succès !");
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        System.err.println("❌ Erreur lors de la modification !");
-                    }
-                });
-            });
-        });
+        dialog.getDialogPane().setContent(grid);
+
+        // Ajout des boutons
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        // Affichage de la boîte de dialogue
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // Vérifications de saisie
+            String nouveauNom = nomField.getText().trim();
+            String prixTexte = prixField.getText().trim();
+            String nouvelleDispo = dispoBox.getValue();
+
+            if (nouveauNom.isEmpty()) {
+                afficherAlerte("Erreur", "Le nom ne peut pas être vide !");
+                return;
+            }
+
+            double prix;
+            try {
+                prix = Double.parseDouble(prixTexte);
+                if (prix <= 0) {
+                    afficherAlerte("Erreur", "Le prix doit être un nombre positif !");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                afficherAlerte("Erreur", "Veuillez entrer un prix valide !");
+                return;
+            }
+
+            try {
+                // Mise à jour des informations
+                hebergement.setNom(nouveauNom);
+                hebergement.setPrixParNuit(prix);
+                hebergement.setDisponible(Boolean.parseBoolean(nouvelleDispo));
+
+                serviceHebergement.modifier(hebergement);
+                loadHebergements();
+                afficherAlerte("Succès", "Hébergement modifié avec succès !");
+            } catch (SQLException e) {
+                e.printStackTrace();
+                afficherAlerte("Erreur SQL", "Erreur lors de la modification !");
+            }
+        }
     }
+
+    // Méthode pour afficher une alerte
+    private void afficherAlerte(String titre, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(titre);
+        alert.setContentText(message);
+        alert.show();
+    }
+
+
+
+
 
     private void supprimerHebergement(Hebergement hebergement) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -210,21 +257,20 @@ public class HebergementController {
             alert.show();
         }
     }
+
     @FXML
     private void goToAjouterHebergement(ActionEvent event) throws IOException {
-        // Charger le fichier FXML du formulaire d'ajout d'hébergement
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/ajouterhebergement.fxml"));
         Parent root = loader.load();
 
-        // Créer une nouvelle scène pour le formulaire d'ajout
+        // Récupérer le contrôleur de la fenêtre AjouterHebergement
+        AjouterHebergementController ajouterController = loader.getController();
+
+        // Passer la référence de HebergementController
+        ajouterController.setHebergementController(this);
+
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
-
-        // Afficher la scène (la nouvelle fenêtre)
         stage.show();
-
-        // Fermer la fenêtre actuelle (optionnel)
-        Stage currentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        currentStage.close();
     }
 }

@@ -250,5 +250,26 @@ void ajouterResVoiture(ActionEvent event) {
     }
 
 
+    public boolean estReservee(int idVoiture, LocalDate debut, LocalDate fin) throws SQLException {
+        String query = "SELECT COUNT(*) FROM reservation_voiture WHERE voiture_id = ? AND " +
+                "(? BETWEEN datedebut AND datefin OR ? BETWEEN datedebut AND datefin OR " +
+                "datedebut BETWEEN ? AND ? OR datefin BETWEEN ? AND ?)";
+
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, idVoiture);
+            pstmt.setDate(2, java.sql.Date.valueOf(debut));
+            pstmt.setDate(3, java.sql.Date.valueOf(fin));
+            pstmt.setDate(4, java.sql.Date.valueOf(debut));
+            pstmt.setDate(5, java.sql.Date.valueOf(fin));
+            pstmt.setDate(6, java.sql.Date.valueOf(debut));
+            pstmt.setDate(7, java.sql.Date.valueOf(fin));
+
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
 
 }

@@ -32,11 +32,6 @@ public class AjouterResVoitureController {
     // Méthode pour recevoir l'objet voiture et pré-remplir les informations
     public void setVoitureData(Voiture voiture) {
         this.voiture = voiture;
-        if (voiture != null) {
-            // Pré-remplir les données de la voiture si nécessaire
-            // Par exemple, si vous voulez afficher la marque dans un champ texte ou autre
-            // marqueTextField.setText(voiture.getMarque()); // Si vous avez un champ pour afficher la marque
-        }
     }
 
     @FXML
@@ -54,6 +49,12 @@ public class AjouterResVoitureController {
                 return;
             }
 
+            // Vérifier si la voiture est disponible pendant la période sélectionnée
+            if (voiture != null && serviceResVoiture.estReservee(voiture.getIdvoiture(), datedebut, datefin)) {
+                afficherErreur("❌ La voiture est déjà réservée pour cette période !");
+                return;
+            }
+
             // Créer l'objet ReservationVoiture avec les informations de la voiture
             if (voiture != null) {
                 ReservationVoiture reservation = new ReservationVoiture(
@@ -62,7 +63,7 @@ public class AjouterResVoitureController {
                         java.sql.Date.valueOf(datefin),
                         prixtotal
                 );
-                reservation.setIdvoiture(voiture.getIdvoiture()); // Utiliser l'ID de la voiture
+                reservation.setIdvoiture(voiture.getIdvoiture());
 
                 // Appeler le service pour ajouter la réservation
                 serviceResVoiture.ajouter(reservation);
@@ -77,7 +78,7 @@ public class AjouterResVoitureController {
             afficherErreur("❌ Erreur : Prix total invalide !");
         } catch (SQLException e) {
             afficherErreur("❌ Problème lors de l'ajout à la base de données : " + e.getMessage());
-            e.printStackTrace(); // Afficher plus de détails sur l'erreur
+            e.printStackTrace();
         }
     }
 

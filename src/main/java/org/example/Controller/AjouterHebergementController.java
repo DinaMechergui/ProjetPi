@@ -24,6 +24,12 @@ public class AjouterHebergementController {
     private TextField dispotf;
 
     private final ServiceHebergement serviceHebergement = new ServiceHebergement();
+    private HebergementController hebergementController; // Référence du contrôleur principal
+
+    // Setter pour passer HebergementController
+    public void setHebergementController(HebergementController controller) {
+        this.hebergementController = controller;
+    }
 
     @FXML
     void AjouterHebergement(ActionEvent event) {
@@ -60,6 +66,11 @@ public class AjouterHebergementController {
             alert.setTitle("Succès");
             alert.setContentText("🏨 Hébergement ajouté avec succès !");
             alert.show();
+
+            // Met à jour la liste des hébergements
+            if (hebergementController != null) {
+                hebergementController.loadHebergements();
+            }
 
             // Ferme la fenêtre d'ajout
             ((Stage) ((Button) event.getSource()).getScene().getWindow()).close();
