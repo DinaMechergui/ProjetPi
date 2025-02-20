@@ -250,4 +250,58 @@ public class ServiceCommande implements IServiceCommande {
             psDeleteCommande.executeUpdate();
         }
     }
+
+    public List<Reservation> getAllReservations() {
+        List<Reservation> reservations = new ArrayList<>();
+        String query = "SELECT r.id, r.commande_id, r.produit_id, r.quantite, r.statut, " +
+                "p.nom AS produit_nom, c.id AS commande_id " +
+                "FROM reservation r " +
+                "JOIN produit p ON r.produit_id = p.id " +
+                "JOIN commande c ON r.commande_id = c.id";
+
+        try (PreparedStatement pst = connection.prepareStatement(query);
+             ResultSet rs = pst.executeQuery()) {
+
+            while (rs.next()) {
+                // Créer l'objet Produit
+                Produit produit = new Produit();
+                produit.setId(rs.getInt("produit_id"));
+                produit.setNom(rs.getString("produit_nom"));
+
+                // Créer l'objet Commande
+                Commande commande = new Commande();
+                commande.setId(rs.getInt("commande_id"));
+
+                // Convertir le statut en Enum
+                String statutStr = rs.getString("statut");
+                Reservation.StatutReservation statut = Reservation.StatutReservation.valueOf(statutStr);
+
+                // Créer l'objet Reservation
+                Reservation reservation = new Reservation(
+                        rs.getLong("id"),
+                        commande,
+                        produit,
+                        rs.getInt("quantite")
+                );
+                reservation.setStatut(statut);
+
+                // Ajouter à la liste
+                reservations.add(reservation);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return reservations;
+    }
+
+    public void deleteReservation(int idReservation) {
+        String query = "DELETE FROM reservation WHERE id = ?";
+        try (PreparedStatement pst = connection.prepareStatement(query)) {
+            pst.setInt(1, idReservation);
+            pst.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
