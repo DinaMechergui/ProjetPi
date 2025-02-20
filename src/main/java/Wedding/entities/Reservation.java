@@ -69,6 +69,11 @@ public class Reservation {
         return "Reservation{id=" + var10000 + ", produit=" + this.produit.getNom() + ", quantite=" + this.quantite + ", statut=" + this.statut + "}";
     }
 
+    public String getUtilisateur() {
+        return (commande != null) ? commande.getUtilisateur() : "Inconnu";
+    }
+
+
     public static enum StatutReservation {
         RESERVE,
         CONFIRME;
