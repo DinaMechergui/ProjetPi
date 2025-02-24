@@ -2,7 +2,7 @@ package tn.esprit.services;
 
 
 import tn.esprit.entities.Invite;
-import tn.esprit.utils.MyDatabase;
+import Wedding.utils.MyDatabase;
 
 import java.sql.*;
 import java.util.ArrayList;

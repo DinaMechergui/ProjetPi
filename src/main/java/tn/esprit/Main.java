@@ -1,12 +1,9 @@
 package tn.esprit;
 
-import tn.esprit.entities.Cadeau;
-import tn.esprit.entities.Evenement;
 import tn.esprit.entities.Invite;
 import tn.esprit.services.ServiceCadeau;
-import tn.esprit.services.ServiceEvenement;
 import tn.esprit.services.ServiceInvite;
-import tn.esprit.utils.MyDatabase;
+import Wedding.utils.MyDatabase;
 
 import java.sql.SQLException;
 
