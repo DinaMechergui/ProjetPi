@@ -1,45 +1,27 @@
-package tests;  // Changed package to match project structure
-
+package tests;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
 public class MainFX extends Application {
+
+
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    @Override
-    public void start(Stage primaryStage) {
-        try {
-            // Load the FXML file from root of classpath
-            Parent root = FXMLLoader.load(getClass().getResource("/reservation.fxml"));
+    public void start(Stage primaryStage) throws Exception {
+        // Charger le fichier FXML
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/reservation.fxml"));
+        Parent root = loader.load();
 
-            // Set up the scene and stage
-            Scene scene = new Scene(root);
-            primaryStage.setTitle("Event Manager");  // More appropriate title
-            primaryStage.setScene(scene);
-            primaryStage.show();
-
-        } catch (IOException e) {
-            // Proper error handling
-            System.err.println("Failed to load FXML file:");
-            e.printStackTrace();
-            showErrorAlert("Fatal Error", "Could not load application interface");
-        }
-    }
-
-    private void showErrorAlert(String title, String content) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        // Configurer la scène
+        Scene scene = new Scene(root, 800, 800);
+        primaryStage.setTitle("Admin Dashboard");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
 }
