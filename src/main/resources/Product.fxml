@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="Wedding.controllers.ProductController"
+            stylesheets="@styles.css" prefHeight="800.0" prefWidth="1000.0">
+    <children>
+        <!-- Navbar -->
+        <HBox styleClass="navbar" layoutX="0" layoutY="0" prefWidth="1000" prefHeight="60">
+            <!-- Logo -->
+            <ImageView fx:id="logo" fitHeight="50" fitWidth="50" pickOnBounds="true" preserveRatio="true">
+                <Image url="@/images/logo.jpg"/> <!-- Remplacez par le chemin de votre logo -->
+            </ImageView>
+
+            <!-- Liens de la navbar -->
+            <HBox spacing="20" alignment="CENTER_LEFT" styleClass="nav-links">
+                <Button text="Store" styleClass="nav-button" onAction="#goToStore" />
+                <Button text="Event" styleClass="nav-button"  />
+                <Button text="Drive and Stay" styleClass="nav-button" />
+                <Button text="Invité" styleClass="nav-button" />
+            </HBox>
+
+            <!-- Boutons de login/logout -->
+            <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="auth-buttons">
+                <Button fx:id="loginButton" text="Login" styleClass="auth-button"  />
+                <Button fx:id="logoutButton" text="Logout" styleClass="auth-button"  visible="false" />
+            </HBox>
+        </HBox>
+
+        <!-- Barre de recherche -->
+        <HBox layoutX="50" layoutY="70" spacing="10">
+            <TextField fx:id="searchBar" prefWidth="300" promptText="Type here to search" styleClass="search-bar" />
+            <Button text="Search" styleClass="search-button" />
+        </HBox>
+
+        <!-- Icône du panier -->
+        <ImageView fx:id="cartIcon" layoutX="900" layoutY="20" fitHeight="50" fitWidth="50" onMouseClicked="#goToCart">
+            <Image url="@/images/cart-icon.png"/>
+        </ImageView>
+
+        <!-- Grille des produits -->
+        <ScrollPane layoutX="50" layoutY="120" prefWidth="900" prefHeight="600">
+            <GridPane fx:id="gridPaneProduits" hgap="20" vgap="20" styleClass="grid-pane">
+                <!-- Les produits seront ajoutés dynamiquement ici -->
+            </GridPane>
+        </ScrollPane>
+    </children>
+</AnchorPane>

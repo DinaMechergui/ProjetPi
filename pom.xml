@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>workshopjdbc3A</artifactId>
+    <artifactId>WeddingPlanner</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
@@ -19,6 +19,18 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
         </dependency>
+
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.2.0.Final</version>
+        </dependency>
         <dependency>
 
             <groupId>org.openjfx</groupId>
@@ -28,8 +40,6 @@
             <version>21.0.2</version>
 
         </dependency>
-
-
 
         <dependency>
 
@@ -41,8 +51,9 @@
 
         </dependency>
 
-
     </dependencies>
+
+
 
     <build>
 
@@ -58,7 +69,7 @@
 
                 <configuration>
 
-                    <mainClass>org.example.MainFx</mainClass>
+                    <mainClass>tests.MainFX</mainClass>
 
                 </configuration>
 
@@ -67,7 +78,5 @@
         </plugins>
 
     </build>
-
-
 
 </project>
