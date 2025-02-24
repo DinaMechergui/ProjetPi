@@ -48,6 +48,6 @@ public class MenuOrganizerController {
 
     @FXML
     private void showAfficherCadeaux() {
-        loadPage("AfficherCadeau.fxml");
+        loadPage("AfficherCadeauClient.fxml");
     }
 }

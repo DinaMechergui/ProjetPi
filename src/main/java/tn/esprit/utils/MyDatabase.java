@@ -7,7 +7,7 @@ public class MyDatabase {
     private static MyDatabase instance;
     private Connection connection;
 
-    public MyDatabase() {
+    private MyDatabase() {
         try {
             connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/esprit", "root", "");
         } catch (SQLException e) {

@@ -69,7 +69,7 @@ public class mainFX extends Application {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }*/
-       /*   FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherCadeau.fxml"));
+FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherCadeau.fxml"));
         try {
             Parent parent = loader.load();
             Scene scene = new Scene(parent);
@@ -78,8 +78,10 @@ public class mainFX extends Application {
             primaryStage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }*/
-             FXMLLoader loader = new FXMLLoader(getClass().getResource("/menuOrganizer.fxml"));
+        }
+
+
+    /*    FXMLLoader loader = new FXMLLoader(getClass().getResource("/menuOrganizer.fxml"));
         try {
             Parent parent = loader.load();
             Scene scene = new Scene(parent);
@@ -88,6 +90,7 @@ public class mainFX extends Application {
             primaryStage.show();
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
+        }*/
     }
 }
+
