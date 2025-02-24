@@ -16,7 +16,7 @@ public class Main {
 
 
         // Connexion à la base de données
-        MyDatabase db = new MyDatabase();
+       // MyDatabase db = new MyDatabase();
               /*  ServiceVoiture serviceVoiture = new ServiceVoiture();
 
                 try {

@@ -18,7 +18,7 @@ public class MainFx extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-       /* FXMLLoader loader = new FXMLLoader(getClass().getResource("/voitureclient.fxml"));
+     /*  FXMLLoader loader = new FXMLLoader(getClass().getResource("/voitureclient.fxml"));
         try {
             Parent parent = loader.load();
             Scene scene = new Scene(parent);
@@ -30,7 +30,7 @@ public class MainFx extends Application {
         }*/
 
 
-       /* FXMLLoader loader = new FXMLLoader(getClass().getResource("/affichervoiture.fxml"));
+      /* FXMLLoader loader = new FXMLLoader(getClass().getResource("/affichervoiture.fxml"));
         try {
             Parent parent = loader.load();
             Scene scene = new Scene(parent);
@@ -41,7 +41,19 @@ public class MainFx extends Application {
             throw new RuntimeException(e);
         }*/
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherHebergement.fxml"));
+       /*FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherHebergement.fxml"));
+        try {
+            Parent parent = loader.load();
+            Scene scene = new Scene(parent);
+            primaryStage.setScene(scene);
+            primaryStage.setTitle("Gestion des hebergements");
+            primaryStage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }*/
+
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/hebergementclient.fxml"));
         try {
             Parent parent = loader.load();
             Scene scene = new Scene(parent);
@@ -51,8 +63,6 @@ public class MainFx extends Application {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-
 
     }
 
