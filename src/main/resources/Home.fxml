@@ -8,7 +8,7 @@
 
 <?import javafx.scene.shape.Circle?>
 <ScrollPane fitToWidth="true" fitToHeight="true" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Wedding.controllers.HomeController"
-            stylesheets="@styles.css">
+            stylesheets="@style.css">
     <AnchorPane prefHeight="1200.0" prefWidth="1200.0">
         <children>
             <!-- Navbar -->
