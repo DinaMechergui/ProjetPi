@@ -16,7 +16,6 @@ import org.example.services.ServiceHebergement;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 public class HebergementControllerClient {
     private final ServiceHebergement serviceHebergement = new ServiceHebergement();
@@ -60,17 +59,27 @@ public class HebergementControllerClient {
         hebergementDispo.setStyle(hebergement.isDisponible() ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
 
         Button reserverButton = new Button("Réserver");
-        reserverButton.setOnAction(event -> reserverHebergement(hebergement));
+        reserverButton.setOnAction(event -> ouvrirFormulaireReservation(event, hebergement));
 
         hebergementCard.getChildren().addAll(hebergementNom, hebergementAdresse, hebergementPrix, hebergementDispo, reserverButton);
         return hebergementCard;
     }
 
-    private void reserverHebergement(Hebergement hebergement) {
-        System.out.println("Hébergement réservé : " + hebergement.getNom());
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Réservation");
-        alert.setContentText("Vous avez réservé : " + hebergement.getNom());
-        alert.show();
+    private void ouvrirFormulaireReservation(ActionEvent event, Hebergement hebergement) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ajouterReservationHebergement.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer le contrôleur de la nouvelle page
+            AjouterResHebergementController controller = loader.getController();
+            controller.setHebergementData(hebergement); // Passer les données de l'hébergement
+
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Réservation Hébergement");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

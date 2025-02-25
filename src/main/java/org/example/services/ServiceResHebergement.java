@@ -6,6 +6,7 @@ import org.example.entities.ReservationHebergementDetail;
 import org.example.utils.MyDatabase;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,6 +153,31 @@ public class ServiceResHebergement implements IResHebergement<ReservationHeberge
 
         return reservations;
     }
+
+    public boolean estReserve(int idHebergement, LocalDate dateDebut, LocalDate dateFin) {
+        String requete = "SELECT COUNT(*) FROM reservation_hebergement WHERE idheb = ? " +
+                "AND ((datedebut BETWEEN ? AND ?) OR (datefin BETWEEN ? AND ?) " +
+                "OR (? BETWEEN datedebut AND datefin) OR (? BETWEEN datedebut AND datefin))";
+
+        try (PreparedStatement pst = connection.prepareStatement(requete)) {
+            pst.setInt(1, idHebergement);
+            pst.setDate(2, java.sql.Date.valueOf(dateDebut));
+            pst.setDate(3, java.sql.Date.valueOf(dateFin));
+            pst.setDate(4, java.sql.Date.valueOf(dateDebut));
+            pst.setDate(5, java.sql.Date.valueOf(dateFin));
+            pst.setDate(6, java.sql.Date.valueOf(dateDebut));
+            pst.setDate(7, java.sql.Date.valueOf(dateFin));
+
+            ResultSet rs = pst.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                return true; // L'hébergement est déjà réservé
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // L'hébergement est disponible
+    }
+
 }
 
 
