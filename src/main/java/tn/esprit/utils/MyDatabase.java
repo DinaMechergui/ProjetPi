@@ -9,7 +9,7 @@ public class MyDatabase {
 
     private MyDatabase() {
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/esprit", "root", "");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/weddingplanner", "root", "");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -26,7 +26,7 @@ public class MyDatabase {
         try {
             if (connection == null || connection.isClosed()) {
                 System.out.println("🔄 Réouverture de la connexion...");
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/esprit", "root", "");
+                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/weddingplanner", "root", "");
             }
         } catch (SQLException e) {
             e.printStackTrace();
