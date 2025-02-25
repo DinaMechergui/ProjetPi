@@ -8,14 +8,13 @@ import javafx.stage.Stage;
 public class MainFX extends Application {
 
 
-
     public static void main(String[] args) {
         launch(args);
     }
 
     public void start(Stage primaryStage) throws Exception {
         // Charger le fichier FXML
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/reservation.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/menuOrganizer.fxml"));
         Parent root = loader.load();
 
         // Configurer la scène
@@ -24,4 +23,5 @@ public class MainFX extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
-}
+    }
+

@@ -30,13 +30,33 @@ public class Ajouterinvite {
     private TextField confimationtf;
 
     @FXML
-    private ComboBox<String> evenementCB; // ComboBox pour la sélection de l'événement
+    private  ComboBox<String> evenementCB; // ComboBox pour la sélection de l'événement
+
+    // Label optionnel pour afficher l'événement courant
+    @FXML
+    private  Label evenementActuelLabel;
 
     private final ServiceEvenement serviceEvenement = new ServiceEvenement();
 
+    // Variable pour stocker l'événement actuellement sélectionné
+    private Evenement evenementActuel;
+
+    // Setter pour recevoir l'événement sélectionné
+    public void setEvenementActuel(Evenement evenement) {
+        this.evenementActuel = evenement;
+        // Afficher le nom de l'événement dans le label (si le label est présent dans le FXML)
+        if (evenementActuelLabel != null) {
+            evenementActuelLabel.setText("Événement : " + evenement.getNom());
+        }
+        // Pré-sélectionner cet événement dans le ComboBox
+        if (evenementCB != null) {
+            evenementCB.getSelectionModel().select(evenement.getNom());
+        }
+    }
+
     @FXML
     public void initialize() {
-        // Définition de placeholders pour améliorer l'expérience utilisateur
+        // Définition des placeholders
         nomtf.setPromptText("Entrez le nom");
         prenomtf.setPromptText("Entrez le prénom");
         emailtf.setPromptText("Entrez l'email");
@@ -59,14 +79,14 @@ public class Ajouterinvite {
     void ajouterInvite(ActionEvent event) {
         ServiceInvite serviceInvite = new ServiceInvite();
 
-        // Récupération et nettoyage des valeurs des champs
+        // Récupération des valeurs
         String nom = nomtf.getText().trim();
         String prenom = prenomtf.getText().trim();
         String email = emailtf.getText().trim();
         String telephone = teltf.getText().trim();
         String confirmationStr = confimationtf.getText().trim();
 
-        // Vérifier que l'utilisateur a sélectionné un événement
+        // Vérification qu'un événement est sélectionné
         String nomEvenement = evenementCB.getSelectionModel().getSelectedItem();
         if (nomEvenement == null) {
             afficherErreur("Veuillez sélectionner un événement !");
@@ -74,24 +94,24 @@ public class Ajouterinvite {
         }
 
         // Validation des champs obligatoires
-        if(nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || telephone.isEmpty() || confirmationStr.isEmpty()){
+        if (nom.isEmpty() || prenom.isEmpty() || email.isEmpty() || telephone.isEmpty() || confirmationStr.isEmpty()) {
             afficherErreur("Tous les champs doivent être renseignés !");
             return;
         }
 
-        // Validation du téléphone: exactement 8 chiffres
+        // Validation du téléphone : exactement 8 chiffres
         if (!telephone.matches("\\d{8}")) {
             afficherErreur("Le téléphone doit contenir exactement 8 chiffres.");
             return;
         }
 
-        // Validation de l'email: doit contenir au moins un '@'
+        // Validation de l'email
         if (!email.contains("@")) {
             afficherErreur("L'email doit contenir le caractère '@'.");
             return;
         }
 
-        // Conversion et validation de la confirmation
+        // Conversion de la confirmation en booléen
         boolean confirmation;
         try {
             confirmation = Boolean.parseBoolean(confirmationStr);
@@ -101,29 +121,29 @@ public class Ajouterinvite {
         }
 
         try {
-            // Récupérer l'ID de l'événement sélectionné
-            int evenementId = serviceEvenement.getIdByName(nomEvenement);
-            if(evenementId == -1) {
+            // Récupérer l'ID de l'événement
+            int evenementId;
+            if (evenementActuel != null && evenementActuel.getNom().equals(nomEvenement)) {
+                evenementId = evenementActuel.getId();
+            } else {
+                evenementId = serviceEvenement.getIdByName(nomEvenement);
+            }
+            if (evenementId == -1) {
                 afficherErreur("L'événement sélectionné est introuvable !");
                 return;
             }
 
-            // Création d'un nouvel objet Invite (id à 0 pour insertion auto)
+            // Créer l'objet Invite et l'ajouter
             Invite invite = new Invite(0, nom, prenom, email, telephone, confirmation, evenementId);
-
-            // Ajout de l'invité dans la base de données
             serviceInvite.ajouter(invite);
-
-            // Affichage du message de succès
             afficherInformation("✅ L'invité a été ajouté avec succès !");
             reinitialiserChamps();
-
         } catch (SQLException e) {
             afficherErreur("❌ Une erreur est survenue : " + e.getMessage());
         }
     }
 
-    // Réinitialiser les champs après un ajout réussi
+    // Réinitialiser les champs après ajout
     private void reinitialiserChamps() {
         nomtf.clear();
         prenomtf.clear();
@@ -133,25 +153,21 @@ public class Ajouterinvite {
         evenementCB.getSelectionModel().clearSelection();
     }
 
-    // Méthode pour afficher une alerte d'erreur avec style personnalisé (CSS optionnel)
+    // Affichage d'une alerte d'erreur
     private void afficherErreur(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Erreur");
         alert.setHeaderText("Problème de saisie ou de traitement");
         alert.setContentText(message);
-        // Si besoin, appliquer un CSS personnalisé
-        // alert.getDialogPane().getStylesheets().add(getClass().getResource("/styles/alert.css").toExternalForm());
         alert.showAndWait();
     }
 
-    // Méthode pour afficher une alerte d'information avec style personnalisé (CSS optionnel)
+    // Affichage d'une alerte d'information
     private void afficherInformation(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Succès");
         alert.setHeaderText("Opération réussie");
         alert.setContentText(message);
-        // Si besoin, appliquer un CSS personnalisé
-        // alert.getDialogPane().getStylesheets().add(getClass().getResource("/styles/alert.css").toExternalForm());
         alert.showAndWait();
     }
 }

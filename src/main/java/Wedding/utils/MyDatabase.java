@@ -5,11 +5,11 @@ import java.sql.SQLException;
 
 public class MyDatabase {
     private static MyDatabase instance;
-    private Connection connection;
+    private static Connection connection;
 
     public MyDatabase() {
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/esprit", "root", "");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/weddingplanner", "root", "");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -22,11 +22,11 @@ public class MyDatabase {
         return instance;
     }
 
-    public Connection getConnection() {
+    public static Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
                 System.out.println("🔄 Réouverture de la connexion...");
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/esprit", "root", "");
+                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/weddingplanner", "root", "");
             }
         } catch (SQLException e) {
             e.printStackTrace();
