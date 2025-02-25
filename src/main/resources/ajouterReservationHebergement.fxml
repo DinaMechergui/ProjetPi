@@ -24,6 +24,9 @@
       <Label layoutX="46.0" layoutY="200.0" text="Prix Total" />
       <TextField fx:id="prixttf" layoutX="200.0" layoutY="196.0" prefWidth="250.0" />
 
+      <Label fx:id="errorLabel" layoutX="200.0" layoutY="220.0" textFill="red"/>
+
+
       <!-- Bouton Réserver -->
       <Button layoutX="230.0" layoutY="260.0" mnemonicParsing="false" onAction="#ajouterResHebergement" text="Réserver" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
    </children>
