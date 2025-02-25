@@ -1,8 +1,10 @@
 package tn.esprit.controller;
 
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.fxml.FXML;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -11,6 +13,7 @@ import javafx.stage.Modality;
 import tn.esprit.entities.Evenement;
 import tn.esprit.services.ServiceEvenement;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -65,6 +68,31 @@ public class AfficherEvenement {
             modifierButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-border-radius: 5;");
             modifierButton.setOnAction(event -> ouvrirFenetreModification(evenement));
 
+            // Bouton "Ajouter invite" avec style personnalisé
+            Button ajouterInviteBtn = new Button("➕ Ajouter invite");
+            ajouterInviteBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-border-radius: 5;");
+            ajouterInviteBtn.setOnAction(event -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/Ajouterinvite.fxml"));
+                    Parent root = loader.load();
+
+                    // Récupérer le contrôleur de Ajouterinvite
+                    Ajouterinvite ajouterinviteCtrl = loader.getController();
+                    // Transmettre l'événement sélectionné
+                    ajouterinviteCtrl.setEvenementActuel(evenement);
+
+                    // Navigation vers la nouvelle vue
+                    // Ici, on utilise l'un des nœuds existants pour changer la scène
+                    ajouterInviteBtn.getScene().setRoot(root);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    afficherAlerte("Erreur", "Impossible de charger la page Ajouterinvite : " + ex.getMessage());
+                }
+            });
+
+
+
+
             Button supprimerButton = new Button("🗑️ Supprimer");
             supprimerButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-border-radius: 5;");
             supprimerButton.setOnAction(event -> {
@@ -77,7 +105,7 @@ public class AfficherEvenement {
                 }
             });
 
-            buttonBox.getChildren().addAll(modifierButton, supprimerButton);
+            buttonBox.getChildren().addAll(modifierButton, supprimerButton,ajouterInviteBtn);
             evenementCard.getChildren().addAll(evenementNom, evenementLieu, evenementDate, buttonBox);
             evenementCard.setPadding(new Insets(10));
 
@@ -145,4 +173,12 @@ public class AfficherEvenement {
         popupStage.setScene(scene);
         popupStage.showAndWait();
     }
+    // Méthode d'affichage d'alertes
+    private void afficherAlerte(String titre, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titre);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 }
