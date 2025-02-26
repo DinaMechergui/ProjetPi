@@ -12,12 +12,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-
+import javafx.util.Pair;
+import javafx.geometry.Insets;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CommandeController {
 
@@ -72,43 +76,109 @@ public class CommandeController {
     }
 
     // Réserver un produit
+
+
+
+
     @FXML
     private void reserveProduct() {
-        Produit selectedProduct = productListView.getSelectionModel().getSelectedItem(); // Produit sélectionné
-        if (selectedProduct != null) {
-            // Vérification du stock
-            if (selectedProduct.getStock() <= 0) {
-                showAlert("Stock épuisé", "Ce produit n'est plus en stock et ne peut pas être réservé.", Alert.AlertType.WARNING);
-                return; // Stoppe l'exécution si le stock est épuisé
+        Produit selectedProduct = productListView.getSelectionModel().getSelectedItem();
+
+        if (selectedProduct == null) {
+            showAlert("Aucun produit sélectionné", "Veuillez sélectionner un produit pour réserver.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        // Créer une boîte de dialogue personnalisée
+        Dialog<Pair<LocalDate, Integer>> dialog = new Dialog<>();
+        dialog.setTitle("Réserver un produit");
+        dialog.setHeaderText("Veuillez entrer la date et la quantité pour la réservation");
+
+        // Définir les boutons de la boîte de dialogue
+        ButtonType reserveButtonType = new ButtonType("Réserver", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(reserveButtonType, ButtonType.CANCEL);
+
+        // Créer les champs de formulaire
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        DatePicker datePicker = new DatePicker();
+        Spinner<Integer> quantitySpinner = new Spinner<>(1, selectedProduct.getStock(), 1);
+
+        grid.add(new Label("Date:"), 0, 0);
+        grid.add(datePicker, 1, 0);
+        grid.add(new Label("Quantité:"), 0, 1);
+        grid.add(quantitySpinner, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Convertir le résultat en Pair<LocalDate, Integer>
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == reserveButtonType) {
+                return new Pair<>(datePicker.getValue(), quantitySpinner.getValue());
+            }
+            return null;
+        });
+
+        // Afficher la boîte de dialogue et attendre la réponse
+        Optional<Pair<LocalDate, Integer>> result = dialog.showAndWait();
+
+        // Intégrer le code que vous avez fourni ici
+        result.ifPresent(dateQuantity -> {
+            LocalDate selectedDate = dateQuantity.getKey();
+            int selectedQuantity = dateQuantity.getValue(); // Récupérer la quantité sélectionnée
+
+            // Vérifier si la date est valide
+            if (selectedDate == null) {
+                showAlert("Aucune date sélectionnée", "Veuillez choisir une date pour la réservation.", Alert.AlertType.WARNING);
+                return;
+            }
+
+            if (selectedDate.isBefore(LocalDate.now())) {
+                showAlert("Date invalide", "Vous ne pouvez pas réserver pour une date passée.", Alert.AlertType.ERROR);
+                return;
             }
 
             try {
+                if (serviceCommande.dateDejaReservee(selectedProduct.getId(), selectedDate)) {
+                    showAlert("Date non disponible", "Ce produit est déjà réservé à cette date.", Alert.AlertType.WARNING);
+                    return;
+                }
+
+                if (selectedProduct.getStock() < selectedQuantity) {
+                    showAlert("Stock insuffisant", "Il n'y a pas assez de stock pour ce produit.", Alert.AlertType.WARNING);
+                    return;
+                }
+
                 if (currentCommande == null) {
                     currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>());
                 }
 
                 Reservation reservationExistante = trouverReservationExistante(selectedProduct);
-
                 if (reservationExistante != null) {
-                    reservationExistante.setQuantite(reservationExistante.getQuantite() + 1);
+                    reservationExistante.setQuantite(reservationExistante.getQuantite() + selectedQuantity);
                 } else {
-                    Reservation nouvelleReservation = new Reservation(null, currentCommande, selectedProduct, 1);
+                    Reservation nouvelleReservation = new Reservation(null, currentCommande, selectedProduct, selectedQuantity);
                     currentCommande.ajouterReservation(nouvelleReservation);
                 }
 
-                serviceCommande.ajouterOuMettreAJourReservation(currentCommande.getUtilisateur(), selectedProduct);
+                // Passer la quantité sélectionnée comme troisième argument
+                int commandeId = serviceCommande.ajouterOuMettreAJourReservation(currentCommande.getUtilisateur(), selectedProduct, selectedQuantity);
+
+                if (currentCommande.getId() == 0) {
+                    currentCommande.setId(commandeId);
+                }
+
+                System.out.println("Produit ajouté au panier : " + selectedProduct.getNom());
                 showAlert("Succès", "Votre réservation a été enregistrée avec succès.", Alert.AlertType.INFORMATION);
 
             } catch (SQLException e) {
-                showAlert("Erreur de réservation", "Une erreur s'est produite lors de la réservation : " + e.getMessage(), Alert.AlertType.ERROR);
+                showAlert("Erreur de réservation", "Une erreur s'est produite : " + e.getMessage(), Alert.AlertType.ERROR);
             }
-        } else {
-            showAlert("Aucun produit sélectionné", "Veuillez sélectionner un produit pour réserver.", Alert.AlertType.WARNING);
-        }
-    }
-
-    // Confirmer la commande
-    @FXML
+        });
+    }    @FXML
     private void confirmOrder() {
         if (currentCommande != null) {
             try {
