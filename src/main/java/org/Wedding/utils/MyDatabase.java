@@ -9,7 +9,7 @@ public class MyDatabase {
 
     public MyDatabase() {
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/esprit", "root", "");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/weddingplanner", "root", "");
         } catch (SQLException e) {
             e.printStackTrace();
         }
