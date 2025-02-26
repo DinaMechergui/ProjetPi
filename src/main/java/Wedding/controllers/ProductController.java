@@ -7,6 +7,7 @@ import Wedding.service.ServiceCommande;
 import Wedding.service.ServiceProduit;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -20,13 +21,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ProductController {
     private ServiceProduit serviceProduit = new ServiceProduit();
@@ -140,41 +144,122 @@ public class ProductController {
 
             // Bouton "Reserve"
             Button reserveButton = new Button("Reserve");
-            reserveButton.getStyleClass().addAll("button", "reserve-button"); // Correction ici
-            reserveButton.setOnAction(event -> {
-                try {
-                    if (currentCommande == null) {
-                        currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>());
-                    }
+            reserveButton.getStyleClass().addAll("button", "reserve-button");
 
-                    Reservation reservationExistante = trouverReservationExistante(product);
+            // Message de rupture de stock
+            Label outOfStockLabel = new Label("Rupture de stock");
+            outOfStockLabel.getStyleClass().add("out-of-stock-label");
+            outOfStockLabel.setTextFill(Color.RED); // Optionnel : changer la couleur du texte
 
-                    if (reservationExistante != null) {
-                        reservationExistante.setQuantite(reservationExistante.getQuantite() + 1);
-                    } else {
-                        Reservation nouvelleReservation = new Reservation(null, currentCommande, product, 1);
-                        currentCommande.ajouterReservation(nouvelleReservation);
-                    }
+            // Vérifier le stock
+            if (product.getStock() == 0) {
+                // Désactiver le bouton "Reserve" et afficher le message de rupture de stock
+                reserveButton.setDisable(true);
+                productCard.getChildren().addAll(productImage, productName, productPrice, outOfStockLabel);
+            } else {
+                // Activer le bouton "Reserve" et permettre la réservation
+                reserveButton.setDisable(false);
+                productCard.getChildren().addAll(productImage, productName, productPrice, reserveButton);
 
-                    int commandeId = serviceCommande.ajouterOuMettreAJourReservation("User1", product);
+                // Gestion de l'événement du bouton "Reserve"
+                reserveButton.setOnAction(event -> {
+                    // Créer une boîte de dialogue personnalisée
+                    Dialog<Pair<LocalDate, Integer>> dialog = new Dialog<>();
+                    dialog.setTitle("Réserver un produit");
+                    dialog.setHeaderText("Veuillez entrer la date et la quantité pour la réservation");
 
-                    if (currentCommande.getId() == 0) {
-                        currentCommande.setId(commandeId);
-                    }
+                    // Définir les boutons de la boîte de dialogue
+                    ButtonType reserveButtonType = new ButtonType("Réserver", ButtonBar.ButtonData.OK_DONE);
+                    dialog.getDialogPane().getButtonTypes().addAll(reserveButtonType, ButtonType.CANCEL);
 
-                    System.out.println("Produit ajouté au panier : " + product.getNom());
+                    // Créer les champs de formulaire
+                    GridPane grid = new GridPane();
+                    grid.setHgap(10);
+                    grid.setVgap(10);
+                    grid.setPadding(new Insets(20, 150, 10, 10));
 
-                    // 🚀 **Ajout de l'alerte ici**
-                    showAlert("Réservation réussie", "Le produit '" + product.getNom() + "' a été réservé avec succès !", Alert.AlertType.INFORMATION);
+                    DatePicker datePicker = new DatePicker();
+                    Spinner<Integer> quantitySpinner = new Spinner<>(1, product.getStock(), 1);
 
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    showAlert("Erreur", "Une erreur s'est produite lors de la réservation.", Alert.AlertType.ERROR);
-                }
-            });
+                    // Ajouter un ChangeListener pour gérer les changements de valeur
+                    quantitySpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
+                        if (newValue != null && newValue > product.getStock()) {
+                            // Si la nouvelle valeur dépasse le stock, réinitialiser à l'ancienne valeur
+                            quantitySpinner.getValueFactory().setValue(oldValue);
+                        }
+                    });
 
-            // Ajouter les éléments à la carte
-            productCard.getChildren().addAll(productImage, productName, productPrice, reserveButton);
+                    grid.add(new Label("Date:"), 0, 0);
+                    grid.add(datePicker, 1, 0);
+                    grid.add(new Label("Quantité:"), 0, 1);
+                    grid.add(quantitySpinner, 1, 1);
+
+                    dialog.getDialogPane().setContent(grid);
+
+                    // Convertir le résultat en Pair<LocalDate, Integer>
+                    dialog.setResultConverter(dialogButton -> {
+                        if (dialogButton == reserveButtonType) {
+                            return new Pair<>(datePicker.getValue(), quantitySpinner.getValue());
+                        }
+                        return null;
+                    });
+
+                    // Afficher la boîte de dialogue et attendre la réponse
+                    Optional<Pair<LocalDate, Integer>> result = dialog.showAndWait();
+
+                    result.ifPresent(dateQuantity -> {
+                        LocalDate selectedDate = dateQuantity.getKey();
+                        int selectedQuantity = dateQuantity.getValue();
+
+                        // Vérifier si la date est valide
+                        if (selectedDate == null) {
+                            showAlert("Aucune date sélectionnée", "Veuillez choisir une date pour la réservation.", Alert.AlertType.WARNING);
+                            return;
+                        }
+
+                        if (selectedDate.isBefore(LocalDate.now())) {
+                            showAlert("Date invalide", "Vous ne pouvez pas réserver pour une date passée.", Alert.AlertType.ERROR);
+                            return;
+                        }
+
+                        try {
+                            if (serviceCommande.dateDejaReservee(product.getId(), selectedDate)) {
+                                showAlert("Date non disponible", "Ce produit est déjà réservé à cette date.", Alert.AlertType.WARNING);
+                                return;
+                            }
+
+                            if (product.getStock() < selectedQuantity) {
+                                showAlert("Stock insuffisant", "Il n'y a pas assez de stock pour ce produit.", Alert.AlertType.WARNING);
+                                return;
+                            }
+
+                            if (currentCommande == null) {
+                                currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>());
+                            }
+
+                            Reservation reservationExistante = trouverReservationExistante(product);
+                            if (reservationExistante != null) {
+                                reservationExistante.setQuantite(reservationExistante.getQuantite() + selectedQuantity);
+                            } else {
+                                Reservation nouvelleReservation = new Reservation(null, currentCommande, product, selectedQuantity);
+                                currentCommande.ajouterReservation(nouvelleReservation);
+                            }
+
+                            int commandeId = serviceCommande.ajouterOuMettreAJourReservation("User1", product, selectedQuantity);
+
+                            if (currentCommande.getId() == 0) {
+                                currentCommande.setId(commandeId);
+                            }
+
+                            System.out.println("Produit ajouté au panier : " + product.getNom());
+                            showAlert("Succès", "Votre réservation a été enregistrée avec succès.", Alert.AlertType.INFORMATION);
+
+                        } catch (SQLException e) {
+                            showAlert("Erreur de réservation", "Une erreur s'est produite : " + e.getMessage(), Alert.AlertType.ERROR);
+                        }
+                    });
+                });
+            }
 
             // Ajouter la carte au GridPane
             gridPaneProduits.add(productCard, col, row);
@@ -186,8 +271,7 @@ public class ProductController {
                 row++;
             }
         }
-    }
-    private void showAlert(String title, String message, Alert.AlertType type) {
+    }    private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
