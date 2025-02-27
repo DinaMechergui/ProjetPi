@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controller.AfficherInvite"
-            prefHeight="600.0" prefWidth="800.0">
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml"
+            prefWidth="800" prefHeight="600"
+            fx:controller="tn.esprit.controller.AfficherInvite">
+
     <children>
-        <!-- Grille des invités -->
-        <ScrollPane layoutX="20" layoutY="20" prefWidth="760" prefHeight="560">
+        <!-- Titre centré -->
+        <Label text="Liste des Invités"
+               layoutX="300" layoutY="20"
+               style="-fx-font-size: 24px; -fx-font-weight: bold;"/>
+
+        <!-- ScrollPane pour scroller si trop d'invités -->
+        <ScrollPane layoutX="20" layoutY="60" prefWidth="760" prefHeight="500"
+                    AnchorPane.topAnchor="60.0"
+                    AnchorPane.bottomAnchor="20.0"
+                    AnchorPane.leftAnchor="20.0"
+                    AnchorPane.rightAnchor="20.0">
+
+            <!-- Grille des invités -->
             <GridPane fx:id="gridPaneInvites" hgap="20" vgap="20">
-                <!-- Les cartes d'invités seront ajoutées ici dynamiquement -->
+                <!-- Les cartes d'invités seront ajoutées dynamiquement -->
             </GridPane>
         </ScrollPane>
     </children>

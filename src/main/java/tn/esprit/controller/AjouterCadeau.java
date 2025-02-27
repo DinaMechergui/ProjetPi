@@ -3,16 +3,20 @@ package tn.esprit.controller;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import tn.esprit.entities.Cadeau;
 import tn.esprit.entities.Evenement;
 import tn.esprit.services.ServiceCadeau;
 import tn.esprit.services.ServiceEvenement;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-public class AjouterCadeau {
+public class
+AjouterCadeau {
 
     @FXML
     private Button boutontf;
@@ -29,15 +33,30 @@ public class AjouterCadeau {
     @FXML
     private TextField nomtf;
 
+    @FXML
+    private Label evenementActuelLabel;
+
     private final ServiceEvenement serviceEvenement = new ServiceEvenement();
     private final ServiceCadeau serviceCadeau = new ServiceCadeau();
+    private Evenement evenementActuel;
+
+    // Setter pour recevoir l'événement sélectionné
+    public void setEvenementActuel(Evenement evenement) {
+        this.evenementActuel = evenement;
+        if (evenementActuelLabel != null) {
+            evenementActuelLabel.setText("Événement : " + evenement.getNom());
+        }
+        if (idenementtf != null) {
+            idenementtf.getSelectionModel().select(evenement.getNom());
+        }
+    }
 
     @FXML
     public void initialize() {
         // Appliquer des styles dès l'initialisation (si besoin, par exemple pour des placeholders)
         nomtf.setPromptText("Entrez le nom du cadeau");
         descriptiontf.setPromptText("Entrez la description du cadeau");
-        diponibilitetf.setPromptText("true / false");
+        //diponibilitetf.setPromptText("true / false");
         idenementtf.setPromptText("Choisissez un événement");
 
         // Remplissage du ComboBox dans le fil d'exécution JavaFX
@@ -56,19 +75,19 @@ public class AjouterCadeau {
         // Récupération et nettoyage des valeurs des champs
         String nom = nomtf.getText().trim();
         String description = descriptiontf.getText().trim();
-        String disponibiliteStr = diponibilitetf.getText().trim();
+      // String disponibiliteStr = diponibilitetf.getText().trim();
         String nomEvenement = idenementtf.getSelectionModel().getSelectedItem();
 
         // Validation des champs obligatoires
-        if (nom.isEmpty() || description.isEmpty() || disponibiliteStr.isEmpty() || nomEvenement == null) {
+        if (nom.isEmpty() || description.isEmpty()  || nomEvenement == null) {
             afficherErreur("Veuillez remplir tous les champs !");
             return;
         }
 
         // Conversion et validation du champ de disponibilité
-        boolean disponibilite;
+       // boolean disponibilite;
         try {
-            disponibilite = Boolean.parseBoolean(disponibiliteStr);
+         //   disponibilite = Boolean.parseBoolean(disponibiliteStr);
         } catch (Exception e) {
             afficherErreur("Le champ 'Disponibilité' doit être 'true' ou 'false'.");
             return;
@@ -81,7 +100,7 @@ public class AjouterCadeau {
                 afficherErreur("L'événement sélectionné est introuvable.");
                 return;
             }
-
+            boolean disponibilite = false;
             // Création d'un nouvel objet Cadeau
             Cadeau cadeau = new Cadeau(0, nom, description, disponibilite, evenementId);
 
@@ -120,7 +139,20 @@ public class AjouterCadeau {
         alert.setTitle("Succès");
         alert.setHeaderText("Opération réussie");
         alert.setContentText(message);
-        alert.getDialogPane().getStylesheets().add(getClass().getResource("/styles/alert.css").toExternalForm());
+       // alert.getDialogPane().getStylesheets().add(getClass().getResource("/styles/alert.css").toExternalForm());
         alert.showAndWait();
+    }
+
+    @FXML
+    void retour(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MenuOrganizer.fxml"));
+            Parent root = loader.load();
+            // Ici, on suppose que la scène actuelle est récupérable via un des composants (par exemple, le bouton)
+            ((Button) event.getSource()).getScene().setRoot(root);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            //afficherErreur("Erreur", "Impossible de charger la page AffichageEvenement.fxml : " + ex.getMessage());
+        }
     }
 }

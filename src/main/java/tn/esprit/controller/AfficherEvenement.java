@@ -69,7 +69,7 @@ public class AfficherEvenement {
             modifierButton.setOnAction(event -> ouvrirFenetreModification(evenement));
 
             // Bouton "Ajouter invite" avec style personnalisé
-            Button ajouterInviteBtn = new Button("➕ Ajouter invite");
+            Button ajouterInviteBtn = new Button("➕ Add.invite");
             ajouterInviteBtn.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-border-radius: 5;");
             ajouterInviteBtn.setOnAction(event -> {
                 try {
@@ -89,6 +89,26 @@ public class AfficherEvenement {
                     afficherAlerte("Erreur", "Impossible de charger la page Ajouterinvite : " + ex.getMessage());
                 }
             });
+            // Bouton "Ajouter Cadeau"
+            Button ajouterCadeauButton = new Button("Ajouter Cadeau");
+            ajouterCadeauButton.setStyle("-fx-background-color: #8e44ad; -fx-text-fill: white; -fx-border-radius: 5;");
+            ajouterCadeauButton.setOnAction(event -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/AjouterCadeau.fxml"));
+                    Parent root = loader.load();
+
+                    // Récupérer le contrôleur si besoin
+                    AjouterCadeau ajouterCadeauCtrl = loader.getController();
+                    ajouterCadeauCtrl.setEvenementActuel(evenement); // Si vous souhaitez transmettre un événement
+
+                    // Navigation vers la vue AjouterCadeau
+                    ajouterCadeauButton.getScene().setRoot(root);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    afficherAlerte("Erreur", "Impossible de charger la page AjouterCadeau.fxml : " + ex.getMessage());
+                }
+            });
+
 
 
 
@@ -105,7 +125,7 @@ public class AfficherEvenement {
                 }
             });
 
-            buttonBox.getChildren().addAll(modifierButton, supprimerButton,ajouterInviteBtn);
+            buttonBox.getChildren().addAll(modifierButton, supprimerButton,ajouterInviteBtn,ajouterCadeauButton);
             evenementCard.getChildren().addAll(evenementNom, evenementLieu, evenementDate, buttonBox);
             evenementCard.setPadding(new Insets(10));
 

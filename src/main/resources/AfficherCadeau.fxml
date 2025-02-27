@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 
-<GridPane fx:controller="tn.esprit.controller.AfficherCadeau"
-          xmlns:fx="http://javafx.com/fxml/1"
-          xmlns="http://javafx.com/javafx/8.0.171"
-          hgap="10" vgap="10">
+<AnchorPane fx:id="root" xmlns:fx="http://javafx.com/fxml"
+            prefWidth="800" prefHeight="600"
+            fx:controller="tn.esprit.controller.AfficherCadeau"
+            stylesheets="@/styles1.css">
 
-    <!-- Définir la taille de la grille -->
+    <children>
+        <!-- Titre stylisé -->
+        <Label text="Liste des Cadeaux"
+               layoutX="250" layoutY="20"
+               styleClass="title-label"/>
 
+        <!-- Ajout d'un ScrollPane pour la grille des cadeaux -->
+        <ScrollPane layoutX="20" layoutY="60" prefWidth="760" prefHeight="500">
+            <GridPane fx:id="gridPaneCadeaux"
+                      hgap="15" vgap="15"
+                      styleClass="grid-pane">
+                <!-- Les cartes des cadeaux seront ajoutées ici dynamiquement -->
+            </GridPane>
+        </ScrollPane>
 
-    <!-- Titre -->
-    <Label text="Liste des Cadeaux" style="-fx-font-size: 24px; -fx-font-weight: bold;" GridPane.columnSpan="3" GridPane.rowIndex="0" />
-
-    <!-- GridPane pour les cadeaux -->
-    <GridPane fx:id="gridPaneCadeaux" GridPane.rowIndex="1" GridPane.columnSpan="3">
-        <!-- Les cartes des cadeaux seront ajoutées ici par le contrôleur -->
-    </GridPane>
-
-</GridPane>
+    </children>
+</AnchorPane>
