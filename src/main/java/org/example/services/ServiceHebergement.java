@@ -1,8 +1,10 @@
 package org.example.services;
 
+import javafx.scene.image.Image;
 import org.example.entities.Hebergement;
-import org.example.utils.MyDatabase;
+import Wedding.utils.MyDatabase;
 
+import java.io.ByteArrayInputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,28 +18,29 @@ public class ServiceHebergement implements IHebergement {
 
     @Override
     public void ajouter(Hebergement hebergement) throws SQLException {
-        String req = "INSERT INTO hebergement (nom, adresse, prixParNuit, disponible) VALUES ('"
+        String req = "INSERT INTO hebergement (nom, adresse, prixParNuit, disponible, imageUrl) VALUES ('"
                 + hebergement.getNom() + "', '"
                 + hebergement.getAdresse() + "', "
                 + hebergement.getPrixParNuit() + ", "
-                + hebergement.isDisponible() + ")";
-
+                + hebergement.isDisponible() + ", '"
+                + hebergement.getImageUrl() + "')";
 
         Statement statement = this.connection.createStatement();
         statement.executeUpdate(req);
-        System.out.println("✅ hebergement ajoutée avec succès !");
+        System.out.println("✅ Hébergement ajouté avec succès !");
     }
 
     @Override
     public void modifier(Hebergement hebergement) throws SQLException {
-        String req = "UPDATE hebergement SET nom = ?, adresse = ?, prixParNuit = ?, disponible = ? WHERE idheb = ?";
+        String req = "UPDATE hebergement SET nom = ?, adresse = ?, prixParNuit = ?, disponible = ?, imageUrl = ? WHERE idheb = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(req)) {
             preparedStatement.setString(1, hebergement.getNom());
             preparedStatement.setString(2, hebergement.getAdresse());
             preparedStatement.setDouble(3, hebergement.getPrixParNuit());
             preparedStatement.setBoolean(4, hebergement.isDisponible());
-            preparedStatement.setInt(5, hebergement.getIdheb());
+            preparedStatement.setString(5, hebergement.getImageUrl()); // Ajout du paramètre imageUrl
+            preparedStatement.setInt(6, hebergement.getIdheb());
 
             preparedStatement.executeUpdate();
             System.out.println("✅ Hébergement modifié avec succès !");
@@ -62,30 +65,32 @@ public class ServiceHebergement implements IHebergement {
         } catch (SQLException e) {
             System.err.println("❌ Erreur lors de la suppression de l'hébergement : " + e.getMessage());
         }
-
     }
+
     public List<Hebergement> afficher() throws SQLException {
         List<Hebergement> hebergements = new ArrayList<>();
-        String req = "SELECT idheb, nom, adresse, prixParNuit, disponible FROM hebergement";
+        String req = "SELECT * FROM hebergement"; // Ajout de imageUrl
         Statement statement = this.connection.createStatement();
         ResultSet rs = statement.executeQuery(req);
 
         while (rs.next()) {
             Hebergement hebergement = new Hebergement(
-                   rs.getInt("idheb"),
+                    rs.getInt("idheb"),
                     rs.getString("nom"),
                     rs.getString("adresse"),
                     rs.getDouble("prixParNuit"),
-                    rs.getBoolean("disponible")
+                    rs.getBoolean("disponible"),
+                    rs.getString("imageUrl") // Récupération de l'URL de l'image
             );
             hebergements.add(hebergement);
         }
         System.out.println("🏨 Hébergements affichés : " + hebergements);
         return hebergements;
     }
+
     public List<Hebergement> getAllHebergements() throws SQLException {
         List<Hebergement> hebergements = new ArrayList<>();
-        String query = "SELECT idheb, nom, adresse, prixParNuit, disponible FROM hebergement";
+        String query = "SELECT idheb, nom, adresse, prixParNuit, disponible, imageUrl FROM hebergement"; // Ajout de imageUrl
 
         Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);
@@ -96,12 +101,10 @@ public class ServiceHebergement implements IHebergement {
                     rs.getString("nom"),
                     rs.getString("adresse"),
                     rs.getDouble("prixParNuit"),
-                    rs.getBoolean("disponible")
+                    rs.getBoolean("disponible"),
+                    rs.getString("imageUrl") // Ajout de l'URL de l'image
             ));
         }
         return hebergements;
     }
-
-
 }
-

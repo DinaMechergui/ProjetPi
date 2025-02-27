@@ -1,6 +1,7 @@
 package Wedding.service;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,8 @@ import Wedding.entities.Commande;
 import Wedding.entities.Produit;
 import Wedding.entities.Reservation;
 import Wedding.utils.MyDatabase;
+import entities.ServiceItem;
+import javafx.util.Pair;
 
 public class ServiceCommande implements IServiceCommande {
     private Connection connection = MyDatabase.getInstance().getConnection();
@@ -24,7 +27,7 @@ public class ServiceCommande implements IServiceCommande {
      */
 
     public void removeProductFromCart(int commandeId, int produitId) throws SQLException {
-        String sqlDelete = "DELETE FROM reservation WHERE commande_id = ? AND produit_id = ? AND statut = 'RESERVE'";
+        String sqlDelete = "DELETE FROM reservation1 WHERE commande_id = ? AND produit_id = ? AND statut = 'RESERVE'";
         try (PreparedStatement stmt = connection.prepareStatement(sqlDelete)) {
             stmt.setInt(1, commandeId);
             stmt.setInt(2, produitId);
@@ -32,7 +35,7 @@ public class ServiceCommande implements IServiceCommande {
         }
     }
 
-    public int ajouterOuMettreAJourReservation(String utilisateur, Produit produit) throws SQLException {
+    public int ajouterOuMettreAJourReservation(String utilisateur, Produit produit, int quantite) throws SQLException {
         // Vérifier si le produit est en stock
         if (produit.getStock() <= 0) {
             throw new SQLException("Le produit " + produit.getNom() + " est en rupture de stock.");
@@ -57,7 +60,7 @@ public class ServiceCommande implements IServiceCommande {
             try (PreparedStatement stmt = connection.prepareStatement(sqlInsertCommande, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, utilisateur);
                 stmt.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-                stmt.setDouble(3, produit.getPrix());
+                stmt.setDouble(3, produit.getPrix() * quantite); // Calculer le total initial
                 stmt.executeUpdate();
 
                 ResultSet rs = stmt.getGeneratedKeys();
@@ -67,9 +70,9 @@ public class ServiceCommande implements IServiceCommande {
             }
         }
 
-        String sqlCheckProduit = "SELECT quantite FROM reservation WHERE commande_id = ? AND produit_id = ?";
+        String sqlCheckProduit = "SELECT quantite FROM reservation1 WHERE commande_id = ? AND produit_id = ?";
         boolean produitExiste = false;
-        int nouvelleQuantite = 1;
+        int nouvelleQuantite = quantite; // Utiliser la quantité passée en paramètre
 
         try (PreparedStatement stmt = connection.prepareStatement(sqlCheckProduit)) {
             stmt.setInt(1, idCommande);
@@ -77,12 +80,12 @@ public class ServiceCommande implements IServiceCommande {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 produitExiste = true;
-                nouvelleQuantite = rs.getInt("quantite") + 1;
+                nouvelleQuantite = rs.getInt("quantite") + quantite; // Ajouter la nouvelle quantité à l'existante
             }
         }
 
         if (produitExiste) {
-            String sqlUpdateQuantite = "UPDATE reservation SET quantite = ? WHERE commande_id = ? AND produit_id = ?";
+            String sqlUpdateQuantite = "UPDATE reservation1 SET quantite = ? WHERE commande_id = ? AND produit_id = ?";
             try (PreparedStatement updateStmt = connection.prepareStatement(sqlUpdateQuantite)) {
                 updateStmt.setInt(1, nouvelleQuantite);
                 updateStmt.setInt(2, idCommande);
@@ -90,98 +93,123 @@ public class ServiceCommande implements IServiceCommande {
                 updateStmt.executeUpdate();
             }
         } else {
-            String sqlInsertProduit = "INSERT INTO reservation (commande_id, produit_id, quantite, statut) VALUES (?, ?, ?, 'RESERVE')";
+            String sqlInsertProduit = "INSERT INTO reservation1 (commande_id, produit_id, quantite, statut) VALUES (?, ?, ?, 'RESERVE')";
             try (PreparedStatement insertStmt = connection.prepareStatement(sqlInsertProduit)) {
                 insertStmt.setInt(1, idCommande);
                 insertStmt.setInt(2, produit.getId());
-                insertStmt.setInt(3, 1);
+                insertStmt.setInt(3, quantite); // Utiliser la quantité passée en paramètre
                 insertStmt.executeUpdate();
             }
         }
 
+        // Mettre à jour le total de la commande
+        String sqlUpdateTotal = "UPDATE commande SET total = total + ? WHERE id = ?";
+        try (PreparedStatement updateTotalStmt = connection.prepareStatement(sqlUpdateTotal)) {
+            updateTotalStmt.setDouble(1, produit.getPrix() * quantite); // Ajouter le prix du produit multiplié par la quantité
+            updateTotalStmt.setInt(2, idCommande);
+            updateTotalStmt.executeUpdate();
+        }
+
         return idCommande;
     }
-        @Override
 
-        public int ajouterReservation(Commande commande) throws SQLException {
-            double total = 0;
+    public int ajouterReservation(Commande commande) throws SQLException {
+        double total = 0;
 
-            // Calculer le total en fonction des réservations
-            for (Reservation reservation : commande.getReservations()) {
-                total += reservation.getProduit().getPrix() * reservation.getQuantite();
-            }
-
-            int commandeId = -1;
-
-            // Vérifier si une commande "RESERVE" existe déjà pour cet utilisateur
-            String sqlCheckCommande = "SELECT id FROM commande WHERE utilisateur = ? AND statut = 'RESERVE'";
-            try (PreparedStatement stmtCheck = this.connection.prepareStatement(sqlCheckCommande)) {
-                stmtCheck.setString(1, commande.getUtilisateur());
-                ResultSet rs = stmtCheck.executeQuery();
-                if (rs.next()) {
-                    commandeId = rs.getInt("id");
-                }
-            }
-
-            if (commandeId == -1) {
-                // Si aucune commande "RESERVE" n'existe, créer une nouvelle commande directement en "RESERVE"
-                String req = "INSERT INTO commande (utilisateur, date, total, statut) VALUES (?, ?, ?, 'RESERVE')";
-                try (PreparedStatement preparedStatement = this.connection.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
-                    preparedStatement.setString(1, commande.getUtilisateur());
-                    preparedStatement.setTimestamp(2, Timestamp.valueOf(commande.getDate()));
-                    preparedStatement.setDouble(3, total);
-                    preparedStatement.executeUpdate();
-
-                    // Récupérer l'ID de la nouvelle commande
-                    ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-                    if (generatedKeys.next()) {
-                        commandeId = generatedKeys.getInt(1);
-                    }
-                }
-            }
-
-            // Ajouter ou mettre à jour les produits dans la table reservation
-            for (Reservation reservation : commande.getReservations()) {
-                Produit produit = reservation.getProduit();
-                int quantite = reservation.getQuantite();
-
-                String sqlCheckProduit = "SELECT quantite FROM reservation WHERE commande_id = ? AND produit_id = ?";
-                try (PreparedStatement stmtCheckProduit = this.connection.prepareStatement(sqlCheckProduit)) {
-                    stmtCheckProduit.setInt(1, commandeId);
-                    stmtCheckProduit.setInt(2, produit.getId());
-                    ResultSet rsProduit = stmtCheckProduit.executeQuery();
-
-                    if (rsProduit.next()) {
-                        // Si le produit existe déjà, mettre à jour la quantité
-                        int nouvelleQuantite = rsProduit.getInt("quantite") + quantite;
-                        String sqlUpdateProduit = "UPDATE reservation SET quantite = ? WHERE commande_id = ? AND produit_id = ?";
-                        try (PreparedStatement updateProduitStmt = this.connection.prepareStatement(sqlUpdateProduit)) {
-                            updateProduitStmt.setInt(1, nouvelleQuantite);
-                            updateProduitStmt.setInt(2, commandeId);
-                            updateProduitStmt.setInt(3, produit.getId());
-                            updateProduitStmt.executeUpdate();
-                        }
-                    } else {
-                        // Si le produit n'existe pas encore, l'ajouter avec statut "RESERVE"
-                        String reqReservation = "INSERT INTO reservation (commande_id, produit_id, quantite, statut) VALUES (?, ?, ?, 'RESERVE')";
-                        try (PreparedStatement psInsert = this.connection.prepareStatement(reqReservation)) {
-                            psInsert.setInt(1, commandeId);
-                            psInsert.setInt(2, produit.getId());
-                            psInsert.setInt(3, quantite);
-                            psInsert.executeUpdate();
-                        }
-                    }
-                }
-            }
-
-            return commandeId;
+        // Calculer le total en fonction des réservations
+        for (Reservation reservation : commande.getReservations()) {
+            total += reservation.getProduit().getPrix() * reservation.getQuantite();
         }
+
+        int commandeId = -1;
+
+        // Vérifier si une commande "RESERVE" existe déjà pour cet utilisateur
+        String sqlCheckCommande = "SELECT id FROM commande WHERE utilisateur = ? AND statut = 'RESERVE'";
+        try (PreparedStatement stmtCheck = this.connection.prepareStatement(sqlCheckCommande)) {
+            stmtCheck.setString(1, commande.getUtilisateur());
+            ResultSet rs = stmtCheck.executeQuery();
+            if (rs.next()) {
+                commandeId = rs.getInt("id");
+            }
+        }
+
+        if (commandeId == -1) {
+            // Si aucune commande "RESERVE" n'existe, créer une nouvelle commande directement en "RESERVE"
+            String req = "INSERT INTO commande (utilisateur, date, total, statut) VALUES (?, ?, ?, 'RESERVE')";
+            try (PreparedStatement preparedStatement = this.connection.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, commande.getUtilisateur());
+                preparedStatement.setTimestamp(2, Timestamp.valueOf(commande.getDateCommande()));
+                preparedStatement.setDouble(3, total);
+                preparedStatement.executeUpdate();
+
+                // Récupérer l'ID de la nouvelle commande
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    commandeId = generatedKeys.getInt(1);
+                }
+            }
+        }
+
+        // Ajouter ou mettre à jour les produits dans la table reservation
+        for (Reservation reservation : commande.getReservations()) {
+            Produit produit = reservation.getProduit();
+            int quantite = reservation.getQuantite();
+
+            String sqlCheckProduit = "SELECT quantite FROM reservation1 WHERE commande_id = ? AND produit_id = ?";
+            try (PreparedStatement stmtCheckProduit = this.connection.prepareStatement(sqlCheckProduit)) {
+                stmtCheckProduit.setInt(1, commandeId);
+                stmtCheckProduit.setInt(2, produit.getId());
+                ResultSet rsProduit = stmtCheckProduit.executeQuery();
+
+                if (rsProduit.next()) {
+                    // Si le produit existe déjà, mettre à jour la quantité
+                    int nouvelleQuantite = rsProduit.getInt("quantite") + quantite;
+                    String sqlUpdateProduit = "UPDATE reservation1 SET quantite = ? WHERE commande_id = ? AND produit_id = ?";
+                    try (PreparedStatement updateProduitStmt = this.connection.prepareStatement(sqlUpdateProduit)) {
+                        updateProduitStmt.setInt(1, nouvelleQuantite);
+                        updateProduitStmt.setInt(2, commandeId);
+                        updateProduitStmt.setInt(3, produit.getId());
+                        updateProduitStmt.executeUpdate();
+                    }
+                } else {
+                    // Si le produit n'existe pas encore, l'ajouter avec statut "RESERVE"
+                    String reqReservation = "INSERT INTO reservation1 (commande_id, produit_id, quantite, statut) VALUES (?, ?, ?, 'RESERVE')";
+                    try (PreparedStatement psInsert = this.connection.prepareStatement(reqReservation)) {
+                        psInsert.setInt(1, commandeId);
+                        psInsert.setInt(2, produit.getId());
+                        psInsert.setInt(3, quantite);
+                        psInsert.executeUpdate();
+                    }
+                }
+            }
+        }
+
+        return commandeId;
+    }
+
     /**
      * Confirmer une commande, en réduisant le stock des produits réservés et en changeant le statut de la commande.
      */
+
+    public List<Pair<ServiceItem, LocalDate>> getServicesReserves(int commandeId) throws SQLException {
+        List<Pair<ServiceItem, LocalDate>> servicesReserves = new ArrayList<>();
+        String sql = "SELECT s.*, sr.date FROM service_reserve sr JOIN service s ON sr.service_id = s.id WHERE sr.commande_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, commandeId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                // Créer un ServiceItem à partir de l'ID
+                ServiceItem service = new ServiceItem(rs.getInt("id"), connection);  // Utilize the constructor to fetch from DB
+                LocalDate date = rs.getDate("date").toLocalDate();
+                servicesReserves.add(new Pair<>(service, date));
+            }
+        }
+        return servicesReserves;
+    }
+
     public void confirmerCommande(int idCommande) throws SQLException {
         // Récupérer les produits réservés dans la commande
-        String sqlGetProduits = "SELECT produit_id, quantite FROM reservation WHERE commande_id = ?";
+        String sqlGetProduits = "SELECT produit_id, quantite FROM reservation1 WHERE commande_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sqlGetProduits)) {
             stmt.setInt(1, idCommande);
             ResultSet rs = stmt.executeQuery();
@@ -207,11 +235,12 @@ public class ServiceCommande implements IServiceCommande {
             stmt.executeUpdate();
         }
     }
-    public List<Produit> getProduitsDansPanier(int commandeId) throws SQLException {
-        List<Produit> produits = new ArrayList<>();
-        String query = "SELECT p.id, p.nom, p.description, p.prix, p.categorie, p.stock, p.imageUrl " +
+
+    public List<Pair<Produit, Integer>> getProduitsEtQuantitesDansPanier(int commandeId) throws SQLException {
+        List<Pair<Produit, Integer>> produitsEtQuantites = new ArrayList<>();
+        String query = "SELECT p.id, p.nom, p.description, p.prix, p.categorie, p.stock, p.imageUrl, r.quantite " +
                 "FROM produit p " +
-                "JOIN reservation r ON p.id = r.produit_id " +
+                "JOIN reservation1 r ON p.id = r.produit_id " +
                 "WHERE r.commande_id = ? AND r.statut = 'RESERVE'";
 
         PreparedStatement statement = connection.prepareStatement(query);
@@ -228,16 +257,18 @@ public class ServiceCommande implements IServiceCommande {
                     resultSet.getInt("stock"),
                     resultSet.getString("imageUrl") // Récupérer l'URL de l'image
             );
-            produits.add(produit);
+            int quantite = resultSet.getInt("quantite"); // Récupérer la quantité réservée
+            produitsEtQuantites.add(new Pair<>(produit, quantite));
         }
-        return produits;
+        return produitsEtQuantites;
     }
+
     /**
      * Annuler une réservation, en supprimant les produits réservés et la commande correspondante.
      */
     public void annulerReservation(int commandeId) throws SQLException {
         // Supprimer les produits réservés dans la commande
-        String reqDeleteReservation = "DELETE FROM reservation WHERE commande_id = ?";
+        String reqDeleteReservation = "DELETE FROM reservation1 WHERE commande_id = ?";
         try (PreparedStatement psDelete = this.connection.prepareStatement(reqDeleteReservation)) {
             psDelete.setInt(1, commandeId);
             psDelete.executeUpdate();
@@ -255,7 +286,7 @@ public class ServiceCommande implements IServiceCommande {
         List<Reservation> reservations = new ArrayList<>();
         String query = "SELECT r.id, r.commande_id, r.produit_id, r.quantite, r.statut, " +
                 "p.nom AS produit_nom, c.id AS commande_id " +
-                "FROM reservation r " +
+                "FROM reservation1 r " +
                 "JOIN produit p ON r.produit_id = p.id " +
                 "JOIN commande c ON r.commande_id = c.id";
 
@@ -295,7 +326,7 @@ public class ServiceCommande implements IServiceCommande {
     }
 
     public void deleteReservation(int idReservation) {
-        String query = "DELETE FROM reservation WHERE id = ?";
+        String query = "DELETE FROM reservation1 WHERE id = ?";
         try (PreparedStatement pst = connection.prepareStatement(query)) {
             pst.setInt(1, idReservation);
             pst.executeUpdate();
@@ -304,4 +335,31 @@ public class ServiceCommande implements IServiceCommande {
         }
     }
 
-}
+    public boolean dateDejaReservee(int produitId, LocalDate date) throws SQLException {
+        String query = """
+        SELECT COUNT(*) 
+        FROM reservation1 r
+        JOIN commande c ON r.commande_id = c.id
+        WHERE r.produit_id = ? AND c.date = ?
+    """;
+
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, produitId);
+            ps.setDate(2, java.sql.Date.valueOf(date));
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
+
+    public void ajouterServiceReserve(int commandeId, ServiceItem service, LocalDate dateReservation) throws SQLException {
+        String sql = "INSERT INTO service_reserve (commande_id, service_id, date_reservation) VALUES (?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, commandeId);
+            stmt.setInt(2, service.getId());
+            stmt.setDate(3, java.sql.Date.valueOf(dateReservation));
+            stmt.executeUpdate();
+        }
+    }}

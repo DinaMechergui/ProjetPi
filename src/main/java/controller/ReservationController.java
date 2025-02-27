@@ -6,15 +6,24 @@ import entities.ReservationCartItem;
 import entities.reserve;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import services.ServiceEvent;
 import services.ServiceReservation;
 import services.ServiceService;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.ZoneId;
 import java.util.Date;
@@ -30,7 +39,10 @@ public class ReservationController {
     @FXML private Label totalPriceLabel; // Label pour afficher le prix total
     @FXML private Label statutLabel; // Label pour afficher le statut de l'événement
     @FXML private ImageView serviceImage; // ImageView pour afficher l'image du service
-
+    @FXML
+    private GridPane serviceGrid;
+    @FXML
+    private Button loginButton;
     // Liste observable pour stocker les éléments du panier
     private ObservableList<ReservationCartItem> cartItems = FXCollections.observableArrayList();
 
@@ -43,7 +55,7 @@ public class ReservationController {
     @FXML
     public void initialize() {
         loadEvents(); // Charge les événements dans la ComboBox
-        loadServices(); // Charge les services dans la ComboBox
+        loadServicesGrid(); // Charge les services dans la ComboBox
         setupPriceListener(); // Configure un écouteur pour mettre à jour le prix
         updateCartGrid(); // Met à jour la grille du panier
 
@@ -113,22 +125,60 @@ public class ReservationController {
     }
 
     // Méthode pour charger les services dans la ComboBox
-    private void loadServices() {
+    private void loadServicesGrid() {
         try {
-            List<ServiceItem> services = serviceService.afficher(); // Récupère la liste des services
-            serviceCombo.setItems(FXCollections.observableArrayList(services)); // Ajoute les services à la ComboBox
+            List<ServiceItem> services = serviceService.afficher(); // Charger les services
+            serviceGrid.getChildren().clear(); // Vider le grid avant d'ajouter les nouveaux éléments
+
+            int row = 0;
+            int col = 0;
+
+            for (ServiceItem service : services) {
+                VBox serviceCard = new VBox(10);
+                serviceCard.getStyleClass().add("service-card");
+
+                // Image du service
+                ImageView serviceImage = new ImageView(new Image(service.getImageUrl()));
+                serviceImage.setFitWidth(150);
+                serviceImage.setFitHeight(150);
+                serviceImage.setPreserveRatio(true);
+
+                // Nom du service
+                Label serviceName = new Label(service.getNom());
+                serviceName.getStyleClass().add("service-name");
+
+                // Prix du service
+                Label servicePrice = new Label("Prix: " + service.getPrix() + " TND");
+                servicePrice.getStyleClass().add("service-price");
+
+                // Bouton "Réserver"
+                Button reserveButton = new Button("Réserver");
+                reserveButton.getStyleClass().addAll("button", "reserve-button");
+
+                reserveButton.setOnAction(event -> {
+                    serviceCombo.setValue(service); // Sélectionner le service dans la ComboBox
+                });
+
+                // Ajouter les éléments dans la carte
+                serviceCard.getChildren().addAll(serviceImage, serviceName, servicePrice, reserveButton);
+
+                // Ajouter la carte dans le GridPane
+                serviceGrid.add(serviceCard, col, row);
+
+                col++;
+                if (col == 3) { // Passer à la ligne suivante après 3 colonnes
+                    col = 0;
+                    row++;
+                }
+            }
         } catch (SQLException e) {
-            showAlert("Erreur", "Erreur de chargement des services", e.getMessage()); // Affiche une alerte en cas d'erreur
+            showAlert("Erreur", "Erreur de chargement des services", e.getMessage());
         }
     }
 
     // Méthode pour configurer un écouteur sur la sélection d'un service
     private void setupPriceListener() {
-        serviceCombo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) {
-                priceField.setText(String.valueOf(newVal.getPrix())); // Met à jour le champ de prix
-            }
-        });
+
     }
 
     // Méthode pour ajouter un service au panier
@@ -261,5 +311,92 @@ public class ReservationController {
     private void clearForm() {
         serviceCombo.getSelectionModel().clearSelection(); // Réinitialise la sélection du service
         datePicker.setValue(null); // Réinitialise la date
+    }
+
+    @FXML
+    private void goToStore() {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Product.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+    public void goToEvent(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/reservation.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+
+    }
+
+    public void goToDriveAndStay(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/hebergementclient.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+    public void goToGuest(ActionEvent actionEvent) {
+    }
+
+    @FXML
+    public void goToCart(MouseEvent event) {
+        try {
+            // Charger la page du panier
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Cart.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle pour accéder à la fenêtre (Stage)
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root)); // Changer la scène vers la page du panier
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void goToInvite() {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/menuOrganizer.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
     }
 }

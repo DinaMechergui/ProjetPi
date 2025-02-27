@@ -8,23 +8,29 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Pair;
 import org.example.entities.Hebergement;
 import org.example.services.ServiceHebergement;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 public class HebergementController {
     private final ServiceHebergement serviceHebergement = new ServiceHebergement();
-
+    @FXML
+    private ImageView imageView;
     @FXML
     private GridPane gridPaneHebergements;
-
+    @FXML
+    private Button loginButton;
     @FXML
     private TextField nomtf;
 
@@ -66,22 +72,111 @@ public class HebergementController {
         VBox hebergementCard = new VBox(10);
         hebergementCard.getStyleClass().add("hebergement-card");
 
-        Label hebergementNom = new Label("Nom : " + hebergement.getNom());
-        Label hebergementAdresse = new Label("Adresse : " + hebergement.getAdresse());
+        // Image de l'hébergement
+        ImageView hebergementImage = new ImageView();
+        String imageUrl = hebergement.getImageUrl();
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                Image image = new Image(imageUrl); // Si c'est une URL valide
+                hebergementImage.setImage(image);
+            } catch (Exception e) {
+                hebergementImage.setImage(new Image("file:defaultImage.jpg")); // Image par défaut en cas d'erreur
+                e.printStackTrace();
+            }
+        } else {
+            hebergementImage.setImage(new Image("file:defaultImage.jpg")); // Image par défaut si l'URL est vide
+        }
+
+        // Paramètres pour l'affichage de l'image
+        hebergementImage.setFitWidth(150);
+        hebergementImage.setFitHeight(150);
+        hebergementImage.setPreserveRatio(true);
+
+        // Nom de l'hébergement
+        Label hebergementNom = new Label(hebergement.getNom());
+        hebergementNom.getStyleClass().add("hebergement-name");
+
+        // Prix de l'hébergement
         Label hebergementPrix = new Label("Prix/Nuit : " + String.format("%.2f", hebergement.getPrixParNuit()) + " TND");
+        hebergementPrix.getStyleClass().add("hebergement-price");
+
+        // Message de disponibilité
         Label hebergementDispo = new Label(hebergement.isDisponible() ? "Disponible" : "Indisponible");
         hebergementDispo.setStyle(hebergement.isDisponible() ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
 
+        // Bouton de réservation
+        Button reserverButton = new Button("Réserver");
+        reserverButton.getStyleClass().addAll("button", "reserve-button");
 
-        Button modifierButton = new Button("Modifier");
-        modifierButton.setOnAction(event -> modifierHebergement(hebergement));
+        // Ajouter les éléments à la carte de l'hébergement
+        hebergementCard.getChildren().addAll(hebergementImage, hebergementNom, hebergementPrix, hebergementDispo, reserverButton);
 
-        Button supprimerButton = new Button("Supprimer");
-        supprimerButton.setOnAction(event -> supprimerHebergement(hebergement));
+        // Si l'hébergement est disponible, on peut cliquer sur réserver
+        if (!hebergement.isDisponible()) {
+            reserverButton.setDisable(true); // Désactiver le bouton si non disponible
+            hebergementCard.getChildren().add(new Label("Rupture de stock"));
+        }
 
-        hebergementCard.getChildren().addAll(hebergementNom, hebergementAdresse, hebergementPrix, hebergementDispo, modifierButton, supprimerButton);
+        // Gestion de l'événement du bouton "Réserver"
+        reserverButton.setOnAction(event -> {
+            Dialog<Pair<LocalDate, Integer>> dialog = new Dialog<>();
+            dialog.setTitle("Réserver un hébergement");
+            dialog.setHeaderText("Veuillez entrer la date et la quantité pour la réservation");
+
+            ButtonType reserveButtonType = new ButtonType("Réserver", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(reserveButtonType, ButtonType.CANCEL);
+
+            // Formulaire de réservation
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            DatePicker datePicker = new DatePicker();
+            Spinner<Integer> quantitySpinner = new Spinner<>(1, 5, 1);
+
+            grid.add(new Label("Date:"), 0, 0);
+            grid.add(datePicker, 1, 0);
+            grid.add(new Label("Quantité:"), 0, 1);
+            grid.add(quantitySpinner, 1, 1);
+
+            dialog.getDialogPane().setContent(grid);
+
+            // Convertir les résultats
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == reserveButtonType) {
+                    return new Pair<>(datePicker.getValue(), quantitySpinner.getValue());
+                }
+                return null;
+            });
+
+            Optional<Pair<LocalDate, Integer>> result = dialog.showAndWait();
+
+            result.ifPresent(dateQuantity -> {
+                LocalDate selectedDate = dateQuantity.getKey();
+                int selectedQuantity = dateQuantity.getValue();
+
+                // Validation des entrées
+                if (selectedDate == null || selectedDate.isBefore(LocalDate.now())) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Erreur de réservation");
+                    alert.setContentText("La date est invalide.");
+                    alert.showAndWait();
+                    return;
+                }
+
+                // Si tout est validé, confirmer la réservation
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Réservation confirmée");
+                alert.setContentText("Vous avez réservé " + hebergement.getNom() + " pour " + selectedDate);
+                alert.showAndWait();
+            });
+        });
+
         return hebergementCard;
     }
+
 
     private void reserverHebergement(Hebergement hebergement) {
         System.out.println("Hébergement réservé : " + hebergement.getNom());
@@ -221,9 +316,10 @@ public class HebergementController {
                 throw new IllegalArgumentException("⚠ La disponibilité doit être 1 (Oui) ou 0 (Non) !");
             }
             boolean disponible = dispoText.equals("1");
-
+            String imageUrl = "defaultImage.jpg";
             // ✅ Création de l'objet Hebergement
-            Hebergement hebergement = new Hebergement(0, nom, adresse, prix, disponible);
+
+            Hebergement hebergement = new Hebergement(0, nom, adresse, prix, disponible,imageUrl);
 
             // ✅ Ajout dans la base de données
             serviceHebergement.ajouter(hebergement);
@@ -272,5 +368,65 @@ public class HebergementController {
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
         stage.show();
+    }
+
+    public void goToReservation(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ServiceAdmin.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+    public void goToHotel(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherHebergement.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+    public void goTStore(ActionEvent actionEvent) {
+    }
+
+    public void goToProduit(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AdminDashboardProduit.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
     }
 }

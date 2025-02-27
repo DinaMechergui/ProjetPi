@@ -7,7 +7,7 @@
 <?import javafx.geometry.Insets?>
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="Wedding.controllers.ProductController"
-            stylesheets="@styles.css" prefHeight="800.0" prefWidth="1000.0">
+            stylesheets="@style.css" prefHeight="800.0" prefWidth="1000.0">
     <children>
         <!-- Navbar -->
         <HBox styleClass="navbar" layoutX="0" layoutY="0" prefWidth="1000" prefHeight="60">
@@ -19,9 +19,9 @@
             <!-- Liens de la navbar -->
             <HBox spacing="20" alignment="CENTER_LEFT" styleClass="nav-links">
                 <Button text="Store" styleClass="nav-button" onAction="#goToStore" />
-                <Button text="Event" styleClass="nav-button"  />
-                <Button text="Drive and Stay" styleClass="nav-button" />
-                <Button text="Invité" styleClass="nav-button" />
+                <Button text="Event" styleClass="nav-button" onAction="#goToEvent" />
+                <Button text="Drive and Stay" styleClass="nav-button" onAction="#goToDriveAndStay" />
+                <Button text="Invité" styleClass="nav-button" onAction="#goToInvite" />
             </HBox>
 
             <!-- Boutons de login/logout -->

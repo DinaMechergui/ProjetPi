@@ -2,10 +2,12 @@ package Wedding.controllers;
 
 import Wedding.entities.Commande;
 import Wedding.entities.Facture;
+import Wedding.entities.PdfGenerator;
 import Wedding.entities.Produit;
 import Wedding.service.ServiceCommande;
 import Wedding.service.ServiceFacture;
 import Wedding.utils.MyDatabase;
+import com.itextpdf.text.DocumentException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -19,14 +21,21 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 
 import javafx.scene.input.MouseEvent;
+import javafx.util.Pair;
+
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CartController {
@@ -62,7 +71,7 @@ public class CartController {
                 stmt.setString(1, "User1"); // Remplacer par l'utilisateur actuel
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    currentCommande = new Commande();
+                    currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>());
                     currentCommande.setId(rs.getInt("id"));
                     System.out.println("Commande trouvée : ID = " + currentCommande.getId());
                 } else {
@@ -75,11 +84,14 @@ public class CartController {
     private void loadCart() throws SQLException {
         if (currentCommande == null || currentCommande.getId() == -1) {
             System.out.println("Aucune commande en attente trouvée.");
+            totalPriceLabel.setText("Total: 0.00 TND"); // Mettre à jour le total à 0 si le panier est vide
             return;
         }
 
-        List<Produit> cartProducts = serviceCommande.getProduitsDansPanier(currentCommande.getId());
-        if (cartProducts == null || cartProducts.isEmpty()) {
+        // Récupérer les produits et leurs quantités réservées
+        List<Pair<Produit, Integer>> cartProductsWithQuantity = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
+
+        if (cartProductsWithQuantity == null || cartProductsWithQuantity.isEmpty()) {
             System.out.println("Le panier est vide.");
             totalPriceLabel.setText("Total: 0.00 TND"); // Mettre à jour le total à 0 si le panier est vide
             return;
@@ -87,7 +99,12 @@ public class CartController {
 
         gridPaneCart.getChildren().clear(); // Nettoyer l'affichage
         int row = 0;
-        for (Produit produit : cartProducts) {
+        double total = 0.0;
+
+        for (Pair<Produit, Integer> pair : cartProductsWithQuantity) {
+            Produit produit = pair.getKey();
+            int quantiteReservee = pair.getValue();
+
             // Créer un ImageView pour l'image du produit
             ImageView productImageView = new ImageView();
             try {
@@ -107,14 +124,27 @@ public class CartController {
                 System.out.println("Erreur lors du chargement de l'image : " + e.getMessage());
             }
 
-            // Créer les labels pour le nom et le prix du produit
+            // Créer les labels pour le nom, le prix et la quantité du produit
             Label productName = new Label(produit.getNom());
             productName.setFont(Font.font("Georgia", 18));
             productName.setTextFill(Color.web("#6d8c7a"));
 
-            Label productPrice = new Label("Prix: " + String.format("%.2f", produit.getPrix()) + " TND");
+            Label productPrice = new Label("Prix unitaire: " + String.format("%.2f", produit.getPrix()) + " TND");
             productPrice.setFont(Font.font("Georgia", 16));
             productPrice.setTextFill(Color.web("#6d8c7a"));
+
+            Label productQuantity = new Label("Quantité: " + quantiteReservee);
+            productQuantity.setFont(Font.font("Georgia", 16));
+            productQuantity.setTextFill(Color.web("#6d8c7a"));
+
+            // Calculer le prix total pour ce produit (prix unitaire * quantité)
+            double prixTotalProduit = produit.getPrix() * quantiteReservee;
+            Label productTotalPrice = new Label("Total: " + String.format("%.2f", prixTotalProduit) + " TND");
+            productTotalPrice.setFont(Font.font("Georgia", 16));
+            productTotalPrice.setTextFill(Color.web("#6d8c7a"));
+
+            // Ajouter le prix total de ce produit au total général
+            total += prixTotalProduit;
 
             // Créer le bouton "Supprimer"
             Button removeButton = new Button("Supprimer");
@@ -133,14 +163,15 @@ public class CartController {
             // Ajouter les éléments à la GridPane
             gridPaneCart.add(productImageView, 0, row); // Image du produit
             gridPaneCart.add(productName, 1, row); // Nom du produit
-            gridPaneCart.add(productPrice, 2, row); // Prix du produit
-            gridPaneCart.add(removeButton, 3, row); // Bouton "Supprimer"
+            gridPaneCart.add(productPrice, 2, row); // Prix unitaire du produit
+            gridPaneCart.add(productQuantity, 3, row); // Quantité réservée
+            gridPaneCart.add(productTotalPrice, 4, row); // Prix total pour ce produit
+            gridPaneCart.add(removeButton, 5, row); // Bouton "Supprimer"
 
             row++; // Passer à la ligne suivante
         }
 
-        // Calculer et afficher le total
-        double total = calculateTotal(cartProducts);
+        // Afficher le total général
         totalPriceLabel.setText("Total: " + String.format("%.2f", total) + " TND");
     }    private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
@@ -149,18 +180,49 @@ public class CartController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    public void openPaymentWindow(ActionEvent event, double totalAmount) {
+        try {
+            // Vérifiez que le fichier FXML existe
+            URL fxmlLocation = getClass().getResource("/Payment.fxml");
+            if (fxmlLocation == null) {
+                System.err.println("Fichier FXML introuvable : /Payment.fxml");
+                return;
+            }
 
+            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            Parent root = loader.load();
+
+            // Passer le montant total au contrôleur de paiement
+            PaymentController paymentController = loader.getController();
+            paymentController.initData(totalAmount);
+
+            // Afficher la fenêtre de paiement
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Paiement");
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @FXML
-    private void handleConfirmOrder() {
+    private void handleConfirmOrder(ActionEvent event) { // Ajoutez ActionEvent comme paramètre
         try {
             if (currentCommande != null && currentCommande.getId() != -1) {
                 // Confirmer la commande
                 serviceCommande.confirmerCommande(currentCommande.getId());
                 System.out.println("Commande confirmée avec ID : " + currentCommande.getId());
 
+                // Récupérer les produits et leurs quantités réservées
+                List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
+
+                // Calculer le total en fonction de la quantité réservée
+                double total = calculateTotal(produitsEtQuantites);
+                openPaymentWindow(event, total); // Utilisez le total calculé
+
                 // Créer une facture après la confirmation de la commande
                 ServiceFacture serviceFacture = new ServiceFacture();
-                double total = calculateTotal(serviceCommande.getProduitsDansPanier(currentCommande.getId()));
                 Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), total);
 
                 serviceFacture.ajouterFacture(facture);
@@ -192,10 +254,12 @@ public class CartController {
             showAlert("Erreur", "Une erreur est survenue lors de l'annulation.", Alert.AlertType.ERROR);
         }
     }
-    private double calculateTotal(List<Produit> cartProducts) {
+    private double calculateTotal(List<Pair<Produit, Integer>> cartProductsWithQuantity) {
         double total = 0.0;
-        for (Produit produit : cartProducts) {
-            total += produit.getPrix();
+        for (Pair<Produit, Integer> pair : cartProductsWithQuantity) {
+            Produit produit = pair.getKey();
+            int quantite = pair.getValue();
+            total += produit.getPrix() * quantite;
         }
         return total;
     }
@@ -231,17 +295,50 @@ public class CartController {
                 Facture facture = serviceFacture.getFactureByCommandeId(currentCommande.getId());
 
                 if (facture != null) {
-                    showAlert("Facture", "Date : " + facture.getDateFacture() +
-                            "\nTotal : " + facture.getTotal() + " TND", Alert.AlertType.INFORMATION);
+                    // Ouvrir un FileChooser pour choisir l'emplacement du fichier
+                    FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle("Enregistrer la facture");
+                    fileChooser.setInitialFileName("Facture_Commande_" + currentCommande.getId() + ".pdf");
+                    File file = fileChooser.showSaveDialog(null);
+
+                    if (file != null) {
+                        // Générer le PDF à l'emplacement choisi
+                        PdfGenerator.generateInvoicePdf(facture, file.getAbsolutePath());
+
+                        // Afficher un message dans la console (optionnel)
+                        System.out.println("Facture générée avec succès : " + file.getAbsolutePath());
+                    }
                 } else {
-                    showAlert("Aucune facture", "Aucune facture trouvée pour cette commande.", Alert.AlertType.WARNING);
+                    System.out.println("Aucune facture trouvée pour cette commande.");
                 }
-            } catch (SQLException e) {
-                showAlert("Erreur", "Erreur lors de la récupération de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
+            } catch (SQLException | IOException | DocumentException e) {
+                System.err.println("Erreur lors de la génération de la facture : " + e.getMessage());
             }
         } else {
-            showAlert("Aucune commande sélectionnée", "Veuillez sélectionner une commande pour voir la facture.", Alert.AlertType.WARNING);
+            System.out.println("Aucune commande sélectionnée.");
+        }
+    }
+
+    @FXML
+    private void handlePayment(ActionEvent event) {
+        try {
+            if (currentCommande != null && currentCommande.getId() != -1) {
+                // Récupérer les produits et leurs quantités réservées
+                List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
+
+                // Calculer le total en fonction de la quantité réservée
+                double total = calculateTotal(produitsEtQuantites);
+
+                // Ouvrir la fenêtre de paiement avec le montant total
+                openPaymentWindow(event, total);
+            } else {
+                showAlert("Aucune commande", "Il n'y a aucune commande à payer.", Alert.AlertType.WARNING);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Une erreur est survenue lors du calcul du total : " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 
 }
+

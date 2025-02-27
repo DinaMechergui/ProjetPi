@@ -1,37 +1,36 @@
 package Wedding.utils;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class MyDatabase {
-    private static MyDatabase instance;
-    private static Connection connection;
 
-    public MyDatabase() {
+    final String URL="jdbc:mysql://localhost:3306/weddingplanner";
+
+    final String USERNAME="root";
+    final String PASSWORD="";
+    static Connection connection;
+
+    static MyDatabase instance;
+
+    public MyDatabase(){
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/weddingplanner", "root", "");
+            connection= DriverManager.getConnection(URL,USERNAME,PASSWORD);
+            System.out.println("Connexion établie");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 
-    public static MyDatabase getInstance() {
-        if (instance == null) {
-            instance = new MyDatabase();
+    public static MyDatabase getInstance(){
+        if (instance==null){
+            instance= new MyDatabase();
         }
         return instance;
     }
 
     public static Connection getConnection() {
-        try {
-            if (connection == null || connection.isClosed()) {
-                System.out.println("🔄 Réouverture de la connexion...");
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/esprit", "root", "");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
         return connection;
     }
-
 }

@@ -162,3 +162,42 @@
 .contact-button:hover {
     -fx-background-color: #5a7364; /* Couleur plus foncée au survol */
 }
+/* Cartes d'hébergement */
+.hebergement-card {
+    -fx-background-color: white; /* Fond blanc */
+    -fx-border-radius: 10; /* Coins arrondis */
+    -fx-background-radius: 10; /* Coins arrondis */
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 0); /* Ombre légère */
+    -fx-padding: 15; /* Espace intérieur */
+    -fx-spacing: 10; /* Espace entre les éléments */
+    -fx-alignment: center; /* Centrer le contenu */
+}
+
+.hebergement-name {
+    -fx-font-size: 18px; /* Taille de la police */
+    -fx-font-weight: bold; /* Gras */
+    -fx-text-fill: #6d8c7a; /* Couleur principale */
+}
+
+.hebergement-price {
+    -fx-font-size: 16px; /* Taille de la police */
+    -fx-text-fill: #333333; /* Texte gris foncé */
+}
+
+.hebergement-availability {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333333; /* Texte gris foncé */
+    -fx-font-weight: bold;
+}
+.hebergement-available {
+    -fx-text-fill: green; /* Disponible en vert */
+}
+
+.hebergement-unavailable {
+    -fx-text-fill: red; /* Indisponible en rouge */
+}
+.hebergement-image {
+    -fx-fit-width: 150px;
+    -fx-fit-height: 150px;
+    -fx-preserve-ratio: true;
+}
