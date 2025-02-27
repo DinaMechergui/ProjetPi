@@ -1,34 +1,22 @@
 package tn.esprit.controller;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.Parent;
+import javafx.scene.layout.StackPane;
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class MenuOrganizerController {
+    @FXML
+    private StackPane contentArea; // Assurez-vous que cela correspond bien au FXML
 
     @FXML
-    private AnchorPane contentPane;
-
-    private void loadPage(String fxmlFile) {
-        try {
-            // Charge dynamiquement la page FXML demandée
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/" + fxmlFile));
-            AnchorPane pane = loader.load();
-            contentPane.getChildren().setAll(pane);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void showAjouterInvite() {
-        loadPage("Ajouterinvite.fxml");
-    }
-
-    @FXML
-    private void showAjouterCadeau() {
-        loadPage("AjouterCadeau.fxml");
+    public void initialize(URL url, ResourceBundle rb) {
+        System.out.println("contentArea: " + contentArea);
+        Platform.runLater(() -> loadPage("")); // Exécute après l'initialisation
     }
 
     @FXML
@@ -37,17 +25,28 @@ public class MenuOrganizerController {
     }
 
     @FXML
-    private void showAfficherEvenements() {
-        loadPage("affichageEvenement.fxml");
-    }
-
-    @FXML
-    private void showAfficherInvites() {
+    private void showAfficherInvite() {
         loadPage("Afficherinvite.fxml");
     }
 
     @FXML
-    private void showAfficherCadeaux() {
-        loadPage("AfficherCadeauClient.fxml");
+    private void showAfficherCadeau() {
+        loadPage("AfficherCadeau.fxml");
+    }
+
+    @FXML
+    private void showAfficherevenement() {
+        loadPage("AffichageEvenement.fxml");
+    }
+
+
+    private void loadPage(String fxmlFile) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/" + fxmlFile));
+            Parent root = loader.load();
+            contentArea.getChildren().setAll(root); // Remplace le contenu affiché
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

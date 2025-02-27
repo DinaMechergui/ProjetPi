@@ -1,9 +1,0 @@
-.button {
-    -fx-background-color: transparent;
-    -fx-border-width: 0;
-    -fx-padding: 5;
-}
-
-.button:hover {
-    -fx-opacity: 0.7;
-}
