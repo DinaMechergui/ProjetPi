@@ -4,7 +4,8 @@ package services;
 import entities.reserve; // Importation de la classe reserve qui représente une réservation
 import entities.Event; // Importation de la classe Event qui représente un événement
 import entities.ServiceItem; // Importation de la classe ServiceItem qui représente un service
-import org.Wedding.utils.MyDatabase; // Importation de la classe MyDatabase pour la connexion à la base de données
+import Wedding.utils.MyDatabase;
+
 import java.sql.*; // Importation des classes SQL nécessaires (Connection, PreparedStatement, ResultSet, etc.)
 import java.util.ArrayList; // Importation de la classe ArrayList pour stocker les réservations
 import java.util.List; // Importation de la classe List pour manipuler des listes d'objets
