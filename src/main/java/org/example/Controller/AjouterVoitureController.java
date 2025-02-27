@@ -14,8 +14,6 @@ public class AjouterVoitureController {
     private TextField marqueField;
     @FXML
     private TextField prixField;
-    @FXML
-    private TextField dispoField;
 
     private ServiceVoiture serviceVoiture = new ServiceVoiture();
 
@@ -29,11 +27,8 @@ public class AjouterVoitureController {
             float prix = Float.parseFloat(prixField.getText().trim());
             if (prix <= 0) throw new IllegalArgumentException("⚠ Le prix doit être un nombre positif !");
 
-            String dispoText = dispoField.getText().trim();
-            if (!dispoText.equals("true") && !dispoText.equals("false"))
-                throw new IllegalArgumentException("⚠ La disponibilité doit être 'true' ou 'false' !");
-
-            boolean disponible = Boolean.parseBoolean(dispoText);
+            // La disponibilité est toujours vraie (true)
+            boolean disponible = true;
 
             // Ajouter la voiture à la base de données
             Voiture voiture = new Voiture(0, prix, marque, disponible);

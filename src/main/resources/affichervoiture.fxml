@@ -1,35 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import javafx.geometry.Pos?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Circle?>
 
-<?import java.net.URL?>
-<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.VoitureController">
-   <!-- Lien vers le fichier CSS -->
-   <stylesheets>
-      <URL value="@style.css"/>
-   </stylesheets>
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.VoitureController" stylesheets="@style.css">
+   <top>
+      <HBox style="-fx-background-color: #6d8c7a; -fx-padding: 10;" spacing="10" alignment="CENTER_LEFT">
+         <Label text="Gestion des Voitures" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" />
+      </HBox>
+   </top>
 
-   <children>
-      <!-- Titre -->
-      <Label layoutX="317.0" layoutY="20.0" text="Gestion des Voitures" textFill="#d2b5c6">
-         <font>
-            <Font size="24.0" />
-         </font>
-      </Label>
+   <left>
+      <!-- Barre latérale (Sidebar) -->
+      <VBox style="-fx-background-color: #5a7364; -fx-padding: 10;" spacing="20" prefWidth="200" alignment="TOP_CENTER">
+         <!-- Image de voiture -->
+         <ImageView fx:id="carImage" fitHeight="80" fitWidth="80" preserveRatio="true">
+            <image>
+               <Image url="@/images/car.jpg" />
+            </image>
+            <clip>
+               <Circle centerX="40" centerY="40" radius="40" />
+            </clip>
+         </ImageView>
 
-      <!-- Liste des voitures au centre -->
-      <Label layoutX="320.0" layoutY="80.0" text="Liste des Voitures :" />
-      <GridPane fx:id="gridPaneVoitures" layoutX="150.0" layoutY="110.0" hgap="10" vgap="10" alignment="CENTER">
-         <!-- Les voitures seront ajoutées dynamiquement ici -->
-      </GridPane>
+         <!-- Boutons de gestion -->
+         <Button fx:id="ajouterVoitureBtn" text="Ajouter Voiture" onAction="#goToAjouterVoiture" layoutX="650.0" layoutY="20.0" prefWidth="120" styleClass="button" />
+         <Button text="Retour" onAction="#goToStore" layoutX="20.0" layoutY="550.0" prefWidth="120" styleClass="button" />
+      </VBox>
+   </left>
 
-      <!-- Bouton Ajouter Voiture en haut à droite -->
-      <Button fx:id="ajouterVoitureBtn" text="Ajouter Voiture" onAction="#goToAjouterVoiture" layoutX="650.0" layoutY="20.0" prefWidth="120"/>
+   <center>
+      <VBox spacing="10" style="-fx-padding: 10;">
+         <!-- Label -->
+         <Label text="Liste des Voitures" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #6d8c7a;" />
 
-      <!-- Bouton Retour en bas à gauche -->
-      <Button text="Retour" onAction="#goToStore" layoutX="20.0" layoutY="550.0" prefWidth="120"/>
-   </children>
-</AnchorPane>
+         <!-- ScrollPane pour la grille des voitures -->
+         <ScrollPane>
+            <GridPane fx:id="gridPaneVoitures" style="-fx-padding: 20;" hgap="10" vgap="10">
+               <!-- Les voitures seront ajoutées dynamiquement ici -->
+            </GridPane>
+         </ScrollPane>
+      </VBox>
+   </center>
+</BorderPane>

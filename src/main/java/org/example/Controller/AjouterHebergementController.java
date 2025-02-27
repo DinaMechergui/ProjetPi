@@ -20,9 +20,6 @@ public class AjouterHebergementController {
     @FXML
     private TextField prixtf;
 
-    @FXML
-    private TextField dispotf;
-
     private final ServiceHebergement serviceHebergement = new ServiceHebergement();
     private HebergementController hebergementController; // Référence du contrôleur principal
 
@@ -53,11 +50,8 @@ public class AjouterHebergementController {
                 throw new IllegalArgumentException("⚠ Le prix doit être un nombre positif !");
             }
 
-            String dispoText = dispotf.getText().trim();
-            if (!dispoText.equals("0") && !dispoText.equals("1")) {
-                throw new IllegalArgumentException("⚠ La disponibilité doit être 1 (Oui) ou 0 (Non) !");
-            }
-            boolean disponible = dispoText.equals("1");
+            // La disponibilité est toujours vraie (1)
+            boolean disponible = true;
 
             Hebergement hebergement = new Hebergement(0, nom, adresse, prix, disponible);
             serviceHebergement.ajouter(hebergement);

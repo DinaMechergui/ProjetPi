@@ -19,8 +19,7 @@
       <Label text="Prix:" layoutX="20" layoutY="100"/>
       <TextField fx:id="prixField" layoutX="100" layoutY="100"/>
 
-      <Label text="Disponibilité (true/false):" layoutX="20" layoutY="140"/>
-      <TextField fx:id="dispoField" layoutX="180" layoutY="140"/>
+
 
       <!-- Bouton pour enregistrer la voiture -->
       <Button text="Ajouter" onAction="#ajouterVoiture" layoutX="100" layoutY="180"/>
