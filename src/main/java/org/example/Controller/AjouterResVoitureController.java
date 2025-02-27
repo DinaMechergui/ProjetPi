@@ -1,5 +1,6 @@
 package org.example.Controller;
 
+import javafx.scene.control.DateCell;
 import org.example.entities.ReservationVoiture;
 import org.example.services.ServiceResVoiture;
 import org.example.entities.Voiture;
@@ -80,6 +81,47 @@ public class AjouterResVoitureController {
             afficherErreur("❌ Problème lors de l'ajout à la base de données : " + e.getMessage());
             e.printStackTrace();
         }
+    }
+    @FXML
+    public void initialize() {
+        // Désactiver les dates passées pour ddtf (Date Début)
+        ddtf.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                if (date.isBefore(LocalDate.now())) { // Si la date est passée, on la désactive
+                    setDisable(true);
+                    setStyle("-fx-background-color: #ffc0cb;"); // Rouge clair pour indiquer désactivation
+                }
+            }
+        });
+
+        // Désactiver les dates passées et s'assurer que la fin est après le début
+        dftf.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                if (date.isBefore(LocalDate.now()) || (ddtf.getValue() != null && date.isBefore(ddtf.getValue()))) {
+                    setDisable(true);
+                    setStyle("-fx-background-color: #ffc0cb;");
+                }
+            }
+        });
+
+        // Ajouter un écouteur pour mettre à jour la date de fin dynamiquement
+        ddtf.valueProperty().addListener((obs, oldValue, newValue) -> {
+            dftf.setValue(null); // Réinitialiser la date de fin
+            dftf.setDayCellFactory(picker -> new DateCell() {
+                @Override
+                public void updateItem(LocalDate date, boolean empty) {
+                    super.updateItem(date, empty);
+                    if (date.isBefore(LocalDate.now()) || date.isBefore(newValue)) {
+                        setDisable(true);
+                        setStyle("-fx-background-color: #ffc0cb;");
+                    }
+                }
+            });
+        });
     }
 
     // Méthode pour afficher les erreurs

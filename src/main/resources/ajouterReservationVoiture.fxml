@@ -16,6 +16,8 @@
         <Label layoutX="47.0" layoutY="133.0" text="Date Début" />
         <Label layoutX="47.0" layoutY="166.0" text="Date Fin" />
         <Label layoutX="47.0" layoutY="198.0" text="Prix Total" />
+        <Label fx:id="errorLabel" />
+
 
         <TextField fx:id="nompretf" layoutX="202.0" layoutY="102.0" />
         <DatePicker fx:id="ddtf" layoutX="202.0" layoutY="131.0" />
