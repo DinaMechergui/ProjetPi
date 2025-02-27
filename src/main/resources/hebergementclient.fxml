@@ -6,7 +6,7 @@
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="Wedding.controllers.ProductController"
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.HebergementControllerClient"
             stylesheets="@style.css" prefHeight="800.0" prefWidth="1000.0">
     <children>
         <!-- Navbar -->
@@ -21,13 +21,12 @@
                 <Button text="Store" styleClass="nav-button" onAction="#goToStore" />
                 <Button text="Event" styleClass="nav-button" onAction="#goToEvent" />
                 <Button text="Drive and Stay" styleClass="nav-button" onAction="#goToDriveAndStay" />
-                <Button text="Invité" styleClass="nav-button" onAction="#goToInvite" />
+                <Button text="Invité" styleClass="nav-button" onAction="#goToInvite"/>
             </HBox>
 
             <!-- Boutons de login/logout -->
             <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="auth-buttons">
-                <Button fx:id="loginButton" text="Login" styleClass="auth-button"  />
-                <Button fx:id="logoutButton" text="Logout" styleClass="auth-button"  visible="false" />
+                <Button fx:id="logoutButton" text="Logout" styleClass="auth-button" visible="false" />
             </HBox>
         </HBox>
 
@@ -42,10 +41,10 @@
             <Image url="@/images/cart-icon.png"/>
         </ImageView>
 
-        <!-- Grille des produits -->
+        <!-- Grille des hébergements -->
         <ScrollPane layoutX="50" layoutY="120" prefWidth="900" prefHeight="600">
-            <GridPane fx:id="gridPaneProduits" hgap="20" vgap="20" styleClass="grid-pane">
-                <!-- Les produits seront ajoutés dynamiquement ici -->
+            <GridPane fx:id="gridPaneHebergements" hgap="20" vgap="20" styleClass="grid-pane">
+                <!-- Les cartes d'hébergement seront ajoutées dynamiquement ici -->
             </GridPane>
         </ScrollPane>
     </children>

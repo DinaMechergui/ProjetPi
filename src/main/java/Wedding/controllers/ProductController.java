@@ -5,6 +5,7 @@ import Wedding.entities.Produit;
 import Wedding.entities.Reservation;
 import Wedding.service.ServiceCommande;
 import Wedding.service.ServiceProduit;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
@@ -23,7 +24,6 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
-import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -49,14 +49,14 @@ public class ProductController {
     private ImageView cartIcon;
 
     @FXML
-    private void goToStore() {
+    private void goToStore(ActionEvent event) {
         try {
             // Charger le fichier FXML de la page des produits
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Product.fxml"));
             Parent root = loader.load();
 
             // Récupérer la scène actuelle
-            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
 
             // Changer la scène pour afficher la page des produits
             Scene scene = new Scene(root);
@@ -74,23 +74,6 @@ public class ProductController {
         alert.setHeaderText(null);
         alert.setContentText("Ceci est une alerte !");
         alert.showAndWait(); // Utilisez showAndWait() pour bloquer jusqu'à ce que l'utilisateur ferme l'alerte
-    }
-    @FXML
-    private void goToEvent() {
-        // Logique pour aller à la page Event
-        System.out.println("Naviguer vers Event");
-    }
-
-    @FXML
-    private void goToDriveAndStay() {
-        // Logique pour aller à la page Drive and Stay
-        System.out.println("Naviguer vers Drive and Stay");
-    }
-
-    @FXML
-    private void goToInvite() {
-        // Logique pour aller à la page Invité
-        System.out.println("Naviguer vers Invité");
     }
 
     @FXML
@@ -234,7 +217,7 @@ public class ProductController {
                             }
 
                             if (currentCommande == null) {
-                                currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>());
+                                currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>());
                             }
 
                             Reservation reservationExistante = trouverReservationExistante(product);
@@ -302,4 +285,64 @@ public class ProductController {
             e.printStackTrace();
         }
     }
+    @FXML
+    private void goToEvent(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/reservation.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+
+    @FXML
+    private void goToInvite(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/menuOrganizer.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+    @FXML
+    private void goToDriveAndStay(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/hebergementclient.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
 }

@@ -30,9 +30,12 @@ import javafx.util.Pair;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CartController {
@@ -68,7 +71,7 @@ public class CartController {
                 stmt.setString(1, "User1"); // Remplacer par l'utilisateur actuel
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
-                    currentCommande = new Commande();
+                    currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>());
                     currentCommande.setId(rs.getInt("id"));
                     System.out.println("Commande trouvée : ID = " + currentCommande.getId());
                 } else {
@@ -177,9 +180,34 @@ public class CartController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    public void openPaymentWindow(ActionEvent event, double totalAmount) {
+        try {
+            // Vérifiez que le fichier FXML existe
+            URL fxmlLocation = getClass().getResource("/Payment.fxml");
+            if (fxmlLocation == null) {
+                System.err.println("Fichier FXML introuvable : /Payment.fxml");
+                return;
+            }
 
+            FXMLLoader loader = new FXMLLoader(fxmlLocation);
+            Parent root = loader.load();
+
+            // Passer le montant total au contrôleur de paiement
+            PaymentController paymentController = loader.getController();
+            paymentController.initData(totalAmount);
+
+            // Afficher la fenêtre de paiement
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Paiement");
+            stage.show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @FXML
-    private void handleConfirmOrder() {
+    private void handleConfirmOrder(ActionEvent event) { // Ajoutez ActionEvent comme paramètre
         try {
             if (currentCommande != null && currentCommande.getId() != -1) {
                 // Confirmer la commande
@@ -191,6 +219,7 @@ public class CartController {
 
                 // Calculer le total en fonction de la quantité réservée
                 double total = calculateTotal(produitsEtQuantites);
+                openPaymentWindow(event, total); // Utilisez le total calculé
 
                 // Créer une facture après la confirmation de la commande
                 ServiceFacture serviceFacture = new ServiceFacture();
@@ -290,4 +319,26 @@ public class CartController {
         }
     }
 
+    @FXML
+    private void handlePayment(ActionEvent event) {
+        try {
+            if (currentCommande != null && currentCommande.getId() != -1) {
+                // Récupérer les produits et leurs quantités réservées
+                List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
+
+                // Calculer le total en fonction de la quantité réservée
+                double total = calculateTotal(produitsEtQuantites);
+
+                // Ouvrir la fenêtre de paiement avec le montant total
+                openPaymentWindow(event, total);
+            } else {
+                showAlert("Aucune commande", "Il n'y a aucune commande à payer.", Alert.AlertType.WARNING);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Une erreur est survenue lors du calcul du total : " + e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
 }
+

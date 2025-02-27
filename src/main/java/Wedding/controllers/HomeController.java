@@ -42,15 +42,40 @@ public class HomeController {
     }
 
     @FXML
+
     private void goToEvent() {
-        // Logique pour aller à la page Event
-        System.out.println("Naviguer vers Event");
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/reservation.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
     }
+
 
     @FXML
     private void goToDriveAndStay() {
-        // Logique pour aller à la page Drive and Stay
-        System.out.println("Naviguer vers Drive and Stay");
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/hebergementclient.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
     }
 
     @FXML
