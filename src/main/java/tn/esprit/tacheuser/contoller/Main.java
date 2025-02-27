@@ -12,7 +12,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/tn/esprit/tacheuser/User/login.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 900, 600);
-        primaryStage.setTitle("Inscription");
+        primaryStage.setTitle("ouayesszidi");
         primaryStage.setScene(scene);
         primaryStage.show();
     }

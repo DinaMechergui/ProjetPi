@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.Label?>
+
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:id="statisticPane" fx:controller="tn.esprit.tacheuser.contoller.Stat" prefWidth="800" prefHeight="600">
+    <!-- Graphique à barres pour les statistiques selon le genre -->
+    <BarChart fx:id="genderBarChart" layoutX="50" layoutY="50" prefWidth="350" prefHeight="300">
+        <xAxis>
+            <CategoryAxis fx:id="genderXAxis" label="Genre" />
+        </xAxis>
+        <yAxis>
+            <NumberAxis fx:id="genderYAxis" label="Nombre d'utilisateurs" />
+        </yAxis>
+    </BarChart>
+
+    <!-- Graphique circulaire pour les statistiques selon l'âge -->
+    <PieChart fx:id="agePieChart" layoutX="450" layoutY="50" prefWidth="350" prefHeight="300">
+    </PieChart>
+
+    <!-- Labels pour les statistiques -->
+    <Label fx:id="totalUsersLabel" layoutX="50" layoutY="380" text="Total utilisateurs : " />
+    <Label fx:id="maleUsersLabel" layoutX="50" layoutY="420" text="Hommes : " />
+    <Label fx:id="femaleUsersLabel" layoutX="50" layoutY="450" text="Femmes : " />
+    <Label fx:id="ageRangeLabel" layoutX="450" layoutY="380" text="Répartition par âge : " />
+</AnchorPane>
+

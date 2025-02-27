@@ -8,7 +8,11 @@ module tn.esprit.tacheuser {
     requires org.kordamp.bootstrapfx.core;
     requires java.sql;
     requires bcrypt;
+    requires kernel;
+    requires layout;
+    requires itextpdf;
 
+    requires javafx.graphics;
     opens tn.esprit.tacheuser to javafx.fxml;
     exports tn.esprit.tacheuser;
     exports tn.esprit.tacheuser.contoller;

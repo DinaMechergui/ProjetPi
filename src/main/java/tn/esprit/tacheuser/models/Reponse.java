@@ -8,13 +8,13 @@ public class Reponse {
     private String message;
     private Timestamp dateReponse;
 
-    // ✅ Constructeur sans ID (pour l'ajout)
+
     public Reponse(int reclamationId, String message) {
         this.reclamationId = reclamationId;
         this.message = message;
     }
 
-    // ✅ Constructeur avec ID (pour la récupération depuis la base)
+
     public Reponse(int id, int reclamationId, String message, Timestamp dateReponse) {
         this.id = id;
         this.reclamationId = reclamationId;
