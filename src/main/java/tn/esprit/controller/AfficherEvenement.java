@@ -15,6 +15,8 @@ import tn.esprit.services.ServiceEvenement;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class AfficherEvenement {
@@ -89,6 +91,7 @@ public class AfficherEvenement {
                     afficherAlerte("Erreur", "Impossible de charger la page Ajouterinvite : " + ex.getMessage());
                 }
             });
+
             // Bouton "Ajouter Cadeau"
             Button ajouterCadeauButton = new Button("Ajouter Cadeau");
             ajouterCadeauButton.setStyle("-fx-background-color: #8e44ad; -fx-text-fill: white; -fx-border-radius: 5;");
@@ -109,23 +112,25 @@ public class AfficherEvenement {
                 }
             });
 
-
-
-
-
             Button supprimerButton = new Button("🗑️ Supprimer");
             supprimerButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-border-radius: 5;");
             supprimerButton.setOnAction(event -> {
                 try {
-                    serviceEvenement.supprimer(evenement.getId());
-                    loadEvenements(); // Rafraîchir la liste après suppression
-                    System.out.println("Événement supprimé : " + evenement.getNom());
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Confirmation de suppression");
+                    alert.setHeaderText("Êtes-vous sûr de vouloir supprimer cet événement ?");
+                    alert.setContentText("Cette action est irréversible.");
+                    if (alert.showAndWait().get() == ButtonType.OK) {
+                        serviceEvenement.supprimer(evenement.getId());
+                        loadEvenements(); // Rafraîchir la liste après suppression
+                        System.out.println("Événement supprimé : " + evenement.getNom());
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             });
 
-            buttonBox.getChildren().addAll(modifierButton, supprimerButton,ajouterInviteBtn,ajouterCadeauButton);
+            buttonBox.getChildren().addAll(modifierButton, supprimerButton, ajouterInviteBtn, ajouterCadeauButton);
             evenementCard.getChildren().addAll(evenementNom, evenementLieu, evenementDate, buttonBox);
             evenementCard.setPadding(new Insets(10));
 
@@ -159,11 +164,18 @@ public class AfficherEvenement {
 
         TextField nomField = new TextField(evenement.getNom());
         TextField lieuField = new TextField(evenement.getLieu());
-        TextField dateField = new TextField(evenement.getDate());
+
+        // Utilisation de DatePicker pour la date
+        DatePicker datePicker = new DatePicker();
+
+        // Convertir la date de la base de données (yyyy-MM-dd) en LocalDate
+        DateTimeFormatter dbFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate localDate = LocalDate.parse(evenement.getDate(), dbFormatter); // Convertir la chaîne en LocalDate
+        datePicker.setValue(localDate);
 
         formGrid.addRow(0, new Label("Nom :"), nomField);
         formGrid.addRow(1, new Label("Lieu :"), lieuField);
-        formGrid.addRow(2, new Label("Date :"), dateField);
+        formGrid.addRow(2, new Label("Date :"), datePicker);
 
         HBox buttonBox = new HBox(15);
         buttonBox.setAlignment(Pos.CENTER);
@@ -171,13 +183,27 @@ public class AfficherEvenement {
         Button confirmerButton = new Button("✅ Enregistrer");
         confirmerButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-border-radius: 5;");
         confirmerButton.setOnAction(event -> {
-            try {
-                serviceEvenement.modifier(evenement.getId(), nomField.getText(), lieuField.getText(), dateField.getText());
-                loadEvenements(); // Rafraîchir la liste après modification
-                popupStage.close();
-                System.out.println("Événement modifié : " + nomField.getText());
-            } catch (SQLException e) {
-                e.printStackTrace();
+            // Contrôle de saisie
+            String nom = nomField.getText();
+            String lieu = lieuField.getText();
+            LocalDate date = datePicker.getValue();
+
+            // Vérifier que les champs ne sont pas vides
+            if (nom.isEmpty() || lieu.isEmpty() || date == null) {
+                afficherAlerte("Erreur", "Tous les champs doivent être remplis.");
+            } else {
+                // Convertir la date en format "yyyy-MM-dd" avant de l'enregistrer dans la base de données
+                String formattedDate = date.format(DateTimeFormatter.ISO_LOCAL_DATE);
+                try {
+                    // Appeler la méthode de service pour modifier l'événement
+                    serviceEvenement.modifier(evenement.getId(), nom, lieu, formattedDate);
+                    loadEvenements(); // Rafraîchir la liste après modification
+                    popupStage.close();
+                    System.out.println("Événement modifié : " + nom);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    afficherAlerte("Erreur", "Une erreur est survenue lors de la modification.");
+                }
             }
         });
 
@@ -193,6 +219,10 @@ public class AfficherEvenement {
         popupStage.setScene(scene);
         popupStage.showAndWait();
     }
+
+
+
+
     // Méthode d'affichage d'alertes
     private void afficherAlerte(String titre, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -200,5 +230,4 @@ public class AfficherEvenement {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
 }

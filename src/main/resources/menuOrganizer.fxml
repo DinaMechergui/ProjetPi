@@ -11,7 +11,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controller.MenuOrganizerController" stylesheets="@styles1.css" >
     <top>
         <HBox style="-fx-background-color: #6d8c7a; -fx-padding: 10;" spacing="10" alignment="CENTER_LEFT">
-            <Label text="Admin Dashboard" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" />
+            <Label text="Gestion des Invités" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" />
         </HBox>
     </top>
 

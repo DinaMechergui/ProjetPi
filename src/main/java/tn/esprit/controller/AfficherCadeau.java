@@ -1,9 +1,13 @@
 package tn.esprit.controller;
 
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import tn.esprit.entities.Cadeau;
 import tn.esprit.services.ServiceCadeau;
 
@@ -27,79 +31,67 @@ public class AfficherCadeau {
 
     private void loadCadeaux() throws SQLException {
         List<Cadeau> cadeaux = serviceCadeau.afficher();
-        gridPaneCadeaux.getChildren().clear(); // Nettoyer avant d'ajouter
+        gridPaneCadeaux.getChildren().clear();
+        gridPaneCadeaux.setHgap(15);
+        gridPaneCadeaux.setVgap(15);
 
-        int row = 0;
-        int col = 0;
-
+        int row = 0, col = 0;
         for (Cadeau cadeau : cadeaux) {
-            // Créer une carte pour chaque cadeau
             VBox cadeauCard = new VBox(10);
-            cadeauCard.setStyle("-fx-border-color: #ccc; " +
-                    "-fx-background-color: #f9f9f9; " +
-                    "-fx-border-radius: 10; " +
-                    "-fx-background-radius: 10; " +
-                    "-fx-padding: 15; " +
-                    "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 5);");
+            cadeauCard.setStyle("""
+                -fx-background-color: #ffffff;
+                -fx-border-radius: 10;
+                -fx-background-radius: 10;
+                -fx-border-color: #e0e0e0;
+                -fx-padding: 15;
+                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 10, 0, 0, 5);
+            """);
 
-            // Nom du cadeau
-            Label cadeauNom = new Label("Nom : " + cadeau.getNom());
-            cadeauNom.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333;");
+            Label cadeauNom = new Label("🎁 " + cadeau.getNom());
+            cadeauNom.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;");
 
-            // Description du cadeau
-            Label cadeauDescription = new Label("Description : " + cadeau.getDescription());
-            cadeauDescription.setStyle("-fx-font-size: 12px; -fx-text-fill: #555;");
+            Label cadeauDescription = new Label("📜 " + cadeau.getDescription());
+            cadeauDescription.setStyle("-fx-text-fill: #666;");
 
-            // Disponibilité du cadeau
-            Label cadeauDisponibilite = new Label("Disponibilité : " + (cadeau.isDisponibilite() ? "Disponible" : "Non disponible"));
-            cadeauDisponibilite.setStyle("-fx-font-size: 12px; -fx-text-fill: " + (cadeau.isDisponibilite() ? "green;" : "red;"));
+            Label cadeauDisponibilite = new Label(cadeau.isDisponibilite() ? "✅ Disponible" : "❌ Non disponible");
+            cadeauDisponibilite.setStyle("-fx-font-weight: bold; -fx-text-fill: "
+                    + (cadeau.isDisponibilite() ? "#2ecc71" : "#e74c3c") + ";");
 
-            // Bouton "Réserver"
-            Button reserverButton = new Button("Réserver");
-            reserverButton.setStyle("-fx-background-color: green; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5;");
+            HBox buttonBox = new HBox(10);
+            buttonBox.setAlignment(Pos.CENTER_RIGHT);
+
+            Button reserverButton = new Button("🛒 Réserver");
+            reserverButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-border-radius: 5;");
             reserverButton.setOnAction(event -> {
                 try {
                     cadeau.setDisponibilite(false);
                     serviceCadeau.modifier(cadeau);
                     loadCadeaux();
-                    System.out.println("Cadeau réservé : " + cadeau.getNom());
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             });
 
-            // Bouton "Modifier"
-            Button modifierButton = new Button("Modifier");
-            modifierButton.setStyle("-fx-background-color: blue; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5;");
-            modifierButton.setOnAction(event -> showModifierDialog(cadeau));
+            Button modifierButton = new Button("✏️ Modifier");
+            modifierButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-border-radius: 5;");
+            modifierButton.setOnAction(event -> ouvrirFenetreModification(cadeau));
 
-            // Bouton "Supprimer"
-            Button supprimerButton = new Button("Supprimer");
-            supprimerButton.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-size: 12px; -fx-background-radius: 5;");
+            Button supprimerButton = new Button("🗑️ Supprimer");
+            supprimerButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-border-radius: 5;");
             supprimerButton.setOnAction(event -> {
                 try {
-                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    alert.setTitle("Confirmation de suppression");
-                    alert.setHeaderText("Êtes-vous sûr de vouloir supprimer ce cadeau ?");
-                    alert.setContentText("Cette action est irréversible.");
-
-                    if (alert.showAndWait().get() == ButtonType.OK) {
-                        serviceCadeau.supprimer(cadeau.getId());
-                        loadCadeaux();
-                        System.out.println("Cadeau supprimé : " + cadeau.getNom());
-                    }
+                    serviceCadeau.supprimer(cadeau.getId());
+                    loadCadeaux();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             });
 
-            // Ajouter les éléments à la carte
-            cadeauCard.getChildren().addAll(cadeauNom, cadeauDescription, cadeauDisponibilite, modifierButton, supprimerButton);
+            buttonBox.getChildren().addAll( modifierButton, supprimerButton);
+            cadeauCard.getChildren().addAll(cadeauNom, cadeauDescription, cadeauDisponibilite, buttonBox);
+            cadeauCard.setPadding(new Insets(10));
 
-            // Ajouter la carte au GridPane
             gridPaneCadeaux.add(cadeauCard, col, row);
-
-            // Gestion dynamique des colonnes (3 par ligne)
             col++;
             if (col > 2) {
                 col = 0;
@@ -108,38 +100,60 @@ public class AfficherCadeau {
         }
     }
 
-    private void showModifierDialog(Cadeau cadeau) {
-        Dialog<Cadeau> dialog = new Dialog<>();
-        dialog.setTitle("Modifier Cadeau");
+    private void ouvrirFenetreModification(Cadeau cadeau) {
+        Stage popupStage = new Stage();
+        popupStage.initModality(Modality.APPLICATION_MODAL);
+        popupStage.setTitle("Modifier Cadeau");
+
+        VBox layout = new VBox(15);
+        layout.setPadding(new Insets(20));
+        layout.setAlignment(Pos.CENTER);
+        layout.setStyle("-fx-background-color: #f9f9f9; -fx-border-radius: 10;");
+
+        Label titleLabel = new Label("📝 Modifier le Cadeau");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;");
+
+        GridPane formGrid = new GridPane();
+        formGrid.setHgap(10);
+        formGrid.setVgap(10);
+        formGrid.setAlignment(Pos.CENTER);
 
         TextField nomField = new TextField(cadeau.getNom());
         TextArea descriptionField = new TextArea(cadeau.getDescription());
         CheckBox disponibiliteCheckBox = new CheckBox("Disponible");
         disponibiliteCheckBox.setSelected(cadeau.isDisponibilite());
 
-        dialog.getDialogPane().setContent(new VBox(10, new Label("Nom:"), nomField, new Label("Description:"), descriptionField, new Label("Disponibilité:"), disponibiliteCheckBox));
+        formGrid.addRow(0, new Label("Nom :"), nomField);
+        formGrid.addRow(1, new Label("Description :"), descriptionField);
+        formGrid.addRow(2, new Label("Disponibilité :"), disponibiliteCheckBox);
 
-        ButtonType okButton = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("Annuler", ButtonBar.ButtonData.CANCEL_CLOSE);
-        dialog.getDialogPane().getButtonTypes().addAll(okButton, cancelButton);
+        HBox buttonBox = new HBox(15);
+        buttonBox.setAlignment(Pos.CENTER);
 
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == okButton) {
+        Button confirmerButton = new Button("✅ Enregistrer");
+        confirmerButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-border-radius: 5;");
+        confirmerButton.setOnAction(event -> {
+            try {
                 cadeau.setNom(nomField.getText());
                 cadeau.setDescription(descriptionField.getText());
                 cadeau.setDisponibilite(disponibiliteCheckBox.isSelected());
-
-                try {
-                    serviceCadeau.modifier(cadeau);
-                    loadCadeaux();
-                    System.out.println("Cadeau modifié : " + cadeau.getNom());
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                serviceCadeau.modifier(cadeau);
+                loadCadeaux();
+                popupStage.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            return null;
         });
 
-        dialog.showAndWait();
+        Button annulerButton = new Button("❌ Annuler");
+        annulerButton.setStyle("-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-border-radius: 5;");
+        annulerButton.setOnAction(event -> popupStage.close());
+
+        buttonBox.getChildren().addAll(annulerButton, confirmerButton);
+        layout.getChildren().addAll(titleLabel, formGrid, buttonBox);
+
+        Scene scene = new Scene(layout, 350, 300);
+        popupStage.setScene(scene);
+        popupStage.showAndWait();
     }
 }
