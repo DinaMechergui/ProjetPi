@@ -2,7 +2,8 @@ package services;
 
 // Importation des classes nécessaires
 import entities.Event;  // Importation de la classe Event qui représente un événement
-import org.Wedding.utils.MyDatabase;  // Importation de la classe MyDatabase pour gérer la connexion à la base de données
+import Wedding.utils.MyDatabase;
+
 import java.sql.*;  // Importation des classes SQL nécessaires (Connection, PreparedStatement, ResultSet, etc.)
 import java.util.ArrayList;  // Importation de la classe ArrayList pour stocker les événements
 import java.util.List;  // Importation de la classe List pour manipuler des listes d'événements

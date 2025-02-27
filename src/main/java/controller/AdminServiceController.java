@@ -1,6 +1,10 @@
 package controller;
 
 import entities.ServiceItem;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import services.ServiceService;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -10,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.geometry.Pos;
 import javafx.scene.image.*;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -17,7 +22,8 @@ public class AdminServiceController {
 
     @FXML
     private GridPane gridPane;
-
+    @FXML
+    private Button loginButton;
     @FXML
     private Button btnAdd, btnEdit, btnDelete;
 
@@ -223,5 +229,64 @@ public class AdminServiceController {
         alert.setHeaderText(header);  // Définit le texte d'en-tête
         alert.setContentText(content);  // Définit le contenu de l'alerte
         alert.showAndWait();  // Affiche l'alerte et attend que l'utilisateur la ferme
+    }
+    public void goToReservation(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ServiceAdmin.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+    public void goToHotel(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherHebergement.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+    public void goTStore(ActionEvent actionEvent) {
+    }
+
+    public void goToProduit(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AdminDashboardProduit.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
     }
 }

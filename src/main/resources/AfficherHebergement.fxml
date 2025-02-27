@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.shape.Circle?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.HebergementController" stylesheets="@style.css">
+    <top>
+        <HBox style="-fx-background-color: #6d8c7a; -fx-padding: 10;" spacing="10" alignment="CENTER_LEFT">
+            <Label text="Gestion des Hébergements" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" />
+        </HBox>
+    </top>
+
+    <left>
+        <!-- Barre latérale (Sidebar) -->
+        <VBox style="-fx-background-color: #5a7364; -fx-padding: 10;" spacing="20" prefWidth="200" alignment="TOP_CENTER">
+            <!-- Photo d'admin en cercle -->
+            <ImageView fx:id="adminPhoto" fitHeight="80" fitWidth="80" preserveRatio="true">
+                <image>
+                    <Image url="@/images/admin.jpg" />
+                </image>
+                <clip>
+                    <Circle centerX="40" centerY="40" radius="40" />
+                </clip>
+            </ImageView>
+
+            <!-- Boutons de gestion -->
+            <Button text="Gestion Utilisateurs" styleClass="nav-button" />
+            <Button text="Gestion Hébergements" styleClass="nav-button" onAction="#goToHotel"/>
+            <Button text="Gestion des Services" styleClass="nav-button" onAction="#goToReservation" />
+            <Button text="Gestion des Produits" styleClass="nav-button" onAction="#goToProduit" />
+            <Button text="Gestion des Événements" styleClass="nav-button" />    <Button text="Gestion des Invités" styleClass="nav-button" />
+        </VBox>
+    </left>
+
+    <center>
+        <VBox spacing="10" style="-fx-padding: 10;">
+            <!-- Bouton "Ajouter Hébergement" -->
+            <Button text="Ajouter Hébergement" fx:id="addHebergementButton" styleClass="button" onAction="#goToAjouterHebergement" />
+
+            <!-- ScrollPane pour la grille des hébergements -->
+            <ScrollPane>
+                <GridPane fx:id="gridPaneHebergements" style="-fx-padding: 20;" hgap="10" vgap="10">
+                    <!-- Les cartes d'hébergement seront ajoutées dynamiquement ici -->
+                </GridPane>
+            </ScrollPane>
+        </VBox>
+    </center>
+</BorderPane>
