@@ -20,6 +20,9 @@
         <VBox style="-fx-background-color: #5a7364; -fx-padding: 10;" spacing="20" prefWidth="200" alignment="TOP_CENTER">
             <!-- Photo d'admin en cercle -->
             <ImageView fx:id="adminPhoto" fitHeight="80" fitWidth="80" preserveRatio="true">
+                <image>
+                    <Image url="@img.jpg" />
+                </image>
 
                 <clip>
                     <Circle centerX="40" centerY="40" radius="40" />
@@ -37,6 +40,14 @@
     </left>
 
     <center>
+        <ImageView fx:id="adminPhoto4" fitHeight="80" fitWidth="80" preserveRatio="true">
+            <image>
+                <Image url="@img.jpg" />
+            </image>
+
+
+        </ImageView>
+
         <VBox spacing="10" style="-fx-padding: 10;">
             <!-- Bouton "Ajouter Produit" -->
             <Button text="Ajouter Produit" fx:id="addProductButton" styleClass="button" />
@@ -51,6 +62,7 @@
         <StackPane fx:id="contentArea">
             <!-- C'est ici que les différentes pages seront chargées -->
         </StackPane>
+
     </center>
 </BorderPane>
 
