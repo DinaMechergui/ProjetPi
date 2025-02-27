@@ -1,5 +1,6 @@
 package org.example.Controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import org.example.entities.Hebergement;
@@ -144,4 +145,6 @@ public class AjouterResHebergementController {
             });
         });
     }
+
+
 }

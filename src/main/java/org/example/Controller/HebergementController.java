@@ -178,9 +178,7 @@ public class HebergementController {
     }
 
 
-    private void reserverHebergement(Hebergement hebergement) {
-        System.out.println("Hébergement réservé : " + hebergement.getNom());
-    }
+
 
     private void modifierHebergement(Hebergement hebergement) {
         // Création de la boîte de dialogue

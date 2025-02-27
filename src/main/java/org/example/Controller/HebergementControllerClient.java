@@ -28,21 +28,17 @@ public class HebergementControllerClient {
     private final ServiceHebergement serviceHebergement = new ServiceHebergement();
 
     @FXML
-    private GridPane gridPaneHebergements;
+    private GridPane gridPaneHebergements; // GridPane pour afficher les hébergements
     @FXML
-    private Button loginButton;
+    private Button loginButton; // Bouton de connexion pour navigation
 
+    // Méthode pour naviguer vers la page des produits
     @FXML
     private void goToStore() {
         try {
-            // Charger le fichier FXML de la page des produits
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Product.fxml"));
             Parent root = loader.load();
-
-            // Récupérer la scène actuelle
             Stage stage = (Stage) loginButton.getScene().getWindow();
-
-            // Changer la scène pour afficher la page des produits
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
@@ -52,17 +48,19 @@ public class HebergementControllerClient {
         }
     }
 
+    // Méthode d'initialisation pour charger les hébergements à l'ouverture
     public void initialize() {
         try {
-            loadHebergements(); // Charger les données
+            loadHebergements(); // Charger les données des hébergements
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    // Méthode pour charger les hébergements et afficher des cartes dans le GridPane
     private void loadHebergements() throws SQLException {
         gridPaneHebergements.getChildren().clear(); // Réinitialiser l'affichage
-        List<Hebergement> hebergements = serviceHebergement.afficher();
+        List<Hebergement> hebergements = serviceHebergement.afficher(); // Récupérer la liste des hébergements
         int row = 0;
         int col = 0;
 
@@ -113,7 +111,7 @@ public class HebergementControllerClient {
             if (!hebergement.isDisponible()) {
                 reserverButton.setDisable(true); // Désactiver le bouton si l'hébergement est indisponible
             }
-            reserverButton.setOnAction(event -> reserverHebergement(hebergement));
+            reserverButton.setOnAction(event -> ouvrirFormulaireReservation(hebergement));
 
             // Ajouter les éléments à la carte
             hebergementCard.getChildren().addAll(hebergementImage, hebergementNom, hebergementAdresse, hebergementPrix, hebergementDispo, reserverButton);
@@ -127,123 +125,27 @@ public class HebergementControllerClient {
             }
         }
     }
-    private VBox createHebergementCard(Hebergement hebergement) {
-        VBox hebergementCard = new VBox(10);
-        hebergementCard.getStyleClass().add("hebergement-card");
 
-        // Image de l'hébergement
-        ImageView hebergementImage = new ImageView();
-        String imageUrl = hebergement.getImageUrl();
+    // Méthode pour ouvrir un formulaire de réservation avec les détails d'un hébergement
+    private void ouvrirFormulaireReservation(Hebergement hebergement) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ajouterReservationHebergement.fxml"));
+            Parent root = loader.load();
 
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-            try {
-                Image image = new Image(imageUrl);
-                hebergementImage.setImage(image);
-            } catch (Exception e) {
-                hebergementImage.setImage(new Image("file:defaultImage.jpg"));
-                e.printStackTrace();
-            }
-        } else {
-            hebergementImage.setImage(new Image("file:defaultImage.jpg"));
+            // Récupérer le contrôleur de la nouvelle page et passer les données de l'hébergement
+            AjouterResHebergementController controller = loader.getController();
+            controller.setHebergementData(hebergement);
+
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Réservation Hébergement");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        hebergementImage.setFitWidth(150);
-        hebergementImage.setFitHeight(150);
-        hebergementImage.setPreserveRatio(true);
-
-        // Nom de l'hébergement
-        Label hebergementNom = new Label(hebergement.getNom());
-        hebergementNom.getStyleClass().add("hebergement-name");
-
-        // Prix de l'hébergement
-        Label hebergementPrix = new Label("Prix/Nuit: " + String.format("%.2f", hebergement.getPrixParNuit()) + " TND");
-        hebergementPrix.getStyleClass().add("hebergement-price");
-
-        // Disponibilité de l'hébergement
-        Label hebergementDispo = new Label(hebergement.isDisponible() ? "Disponible" : "Indisponible");
-        hebergementDispo.setStyle(hebergement.isDisponible() ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
-
-        // Bouton "Réserver"
-        Button reserverButton = new Button("Réserver");
-        reserverButton.getStyleClass().add("reserve-button");
-
-        // Ajouter les éléments à la carte de l'hébergement
-        hebergementCard.getChildren().addAll(hebergementImage, hebergementNom, hebergementPrix, hebergementDispo, reserverButton);
-
-        // Désactiver le bouton "Réserver" si l'hébergement n'est pas disponible
-        if (!hebergement.isDisponible()) {
-            reserverButton.setDisable(true);
-            hebergementCard.getChildren().add(new Label("Rupture de stock"));
-        }
-
-        // Action lors du clic sur "Réserver"
-        reserverButton.setOnAction(event -> {
-            // Logique pour gérer la réservation
-            Dialog<Pair<LocalDate, Integer>> dialog = new Dialog<>();
-            dialog.setTitle("Réservation d'Hébergement");
-            dialog.setHeaderText("Veuillez entrer la date et la quantité pour la réservation");
-
-            ButtonType reserveButtonType = new ButtonType("Réserver", ButtonBar.ButtonData.OK_DONE);
-            dialog.getDialogPane().getButtonTypes().addAll(reserveButtonType, ButtonType.CANCEL);
-
-            // Formulaire de réservation
-            GridPane grid = new GridPane();
-            grid.setHgap(10);
-            grid.setVgap(10);
-            grid.setPadding(new Insets(20, 150, 10, 10));
-
-            DatePicker datePicker = new DatePicker();
-            Spinner<Integer> quantitySpinner = new Spinner<>(1, 5, 1);
-
-            grid.add(new Label("Date:"), 0, 0);
-            grid.add(datePicker, 1, 0);
-            grid.add(new Label("Quantité:"), 0, 1);
-            grid.add(quantitySpinner, 1, 1);
-
-            dialog.getDialogPane().setContent(grid);
-
-            // Convertir le résultat
-            dialog.setResultConverter(dialogButton -> {
-                if (dialogButton == reserveButtonType) {
-                    return new Pair<>(datePicker.getValue(), quantitySpinner.getValue());
-                }
-                return null;
-            });
-
-            Optional<Pair<LocalDate, Integer>> result = dialog.showAndWait();
-
-            result.ifPresent(dateQuantity -> {
-                LocalDate selectedDate = dateQuantity.getKey();
-                int selectedQuantity = dateQuantity.getValue();
-
-                // Validation de la date
-                if (selectedDate == null || selectedDate.isBefore(LocalDate.now())) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Erreur de réservation");
-                    alert.setContentText("La date est invalide.");
-                    alert.showAndWait();
-                    return;
-                }
-
-                // Confirmation de la réservation
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Réservation confirmée");
-                alert.setContentText("Réservation de " + hebergement.getNom() + " pour " + selectedDate);
-                alert.showAndWait();
-            });
-        });
-
-        return hebergementCard;
     }
 
-    private void reserverHebergement(Hebergement hebergement) {
-        System.out.println("Hébergement réservé : " + hebergement.getNom());
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Réservation");
-        alert.setContentText("Vous avez réservé : " + hebergement.getNom());
-        alert.show();
-    }
-
+    // Méthode pour naviguer vers la page des événements
     @FXML
     private void goToEvent() {
         try {
@@ -255,29 +157,27 @@ public class HebergementControllerClient {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des produits.");
+            System.out.println("Erreur lors du chargement de la page des événements.");
         }
     }
+
+    // Méthode pour naviguer vers la page des invités
     @FXML
     private void goToInvite() {
         try {
-            // Charger le fichier FXML de la page des produits
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/menuOrganizer.fxml"));
             Parent root = loader.load();
-
-            // Récupérer la scène actuelle
             Stage stage = (Stage) loginButton.getScene().getWindow();
-
-            // Changer la scène pour afficher la page des produits
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des produits.");
+            System.out.println("Erreur lors du chargement de la page des invités.");
         }
     }
 
+    // Méthode pour revenir à la page des hébergements
     @FXML
     private void goToDriveAndStay() {
         try {
@@ -289,17 +189,18 @@ public class HebergementControllerClient {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des produits.");
+            System.out.println("Erreur lors du chargement de la page des hébergements.");
         }
     }
 
+    // Méthode pour ouvrir la page du panier
     @FXML
     public void goToCart(MouseEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Cart.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(new Scene(root)); // Changer la scène vers la page du panier
+            stage.setScene(new Scene(root));
         } catch (IOException e) {
             e.printStackTrace();
         }
