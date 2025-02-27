@@ -5,6 +5,8 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -19,6 +21,11 @@
     <VBox layoutX="20.0" layoutY="20.0" prefHeight="560.0" prefWidth="250.0" spacing="10" style="-fx-background-color: #e9ddd7; -fx-padding: 15; -fx-border-radius: 10; -fx-background-radius: 10;">
         <Text style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-fill: #92a69b;" text="📋 Mes Réclamations" />
         <ListView fx:id="reclamationsListView" onMouseClicked="#handleSelection" prefHeight="500.0" />
+      <ImageView fitHeight="59.0" fitWidth="94.0" onMouseClicked="#handleexportpdf" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../utils/8243027.png" />
+         </image>
+      </ImageView>
     </VBox>
 
     <!-- Details Section -->
@@ -39,16 +46,15 @@
          </rowConstraints>
         </GridPane>
 
-         <Label style="-fx-text-fill: #c2c2c2;" text="Statut:" />
+         <Label style="-fx-text-fill: #7ca68e;" text="Statut:" />
          <TextField fx:id="statutField" editable="false" prefHeight="30.0" prefWidth="332.0" promptText="Statut" style="-fx-background-color: #e9ddd7; -fx-border-color: #c2c2c2; -fx-border-radius: 5; -fx-padding: 5;" />
 
         <!-- Buttons -->
         <HBox spacing="10">
-            <Button onAction="#handleAdd" style="-fx-background-color: #6f9375; -fx-text-fill: white; -fx-border-radius: 5; -fx-background-radius: 5;" text="Ajouter" />
-            <Button onAction="#handleUpdate" style="-fx-background-color: #ae9558; -fx-text-fill: white; -fx-border-radius: 5; -fx-background-radius: 5;" text="Modifier" />
+
             <Button onAction="#handleDelete" style="-fx-background-color: #9c4b50; -fx-text-fill: white; -fx-border-radius: 5; -fx-background-radius: 5;" text="Supprimer" />
+            <Button onAction="#handleCloseStatus" style="-fx-background-color: #6c757d; -fx-text-fill: white;" text="Fermer" />
             <Button onAction="#goToUsers" style="-fx-background-color: #325371; -fx-text-fill: white; -fx-border-radius: 5; -fx-background-radius: 5;" text="Utilisateurs" />
-            <Button onAction="#handleCloseStatus" text="Fermer" style="-fx-background-color: #6c757d; -fx-text-fill: white;"/>
         </HBox>
     </VBox>
 </AnchorPane>

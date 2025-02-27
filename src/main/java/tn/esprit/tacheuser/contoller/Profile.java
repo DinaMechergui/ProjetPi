@@ -22,9 +22,9 @@ public class Profile {
     @FXML
     private TextField genderField;
 
-    private static User currentUser; // Stocke l'utilisateur connecté
+    private static User currentUser;
 
-    // Méthode pour définir l'utilisateur connecté
+
     public static void setCurrentUser(User user) {
         currentUser = user;
     }
@@ -46,7 +46,7 @@ public class Profile {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/tacheuser/User/login.fxml"));
             Scene loginScene = new Scene(loader.load());
 
-            // Récupérer la scène actuelle et la remplacer
+
             Stage stage = (Stage) nameField.getScene().getWindow();
             stage.setScene(loginScene);
             stage.show();
@@ -55,14 +55,14 @@ public class Profile {
         }
     }
 
-    // Méthode pour naviguer vers l'écran de réclamation
+
     @FXML
     private void handleGoToReclamation() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/tacheuser/User/ajoutreclamtion.fxml"));
             Scene reclamationScene = new Scene(loader.load());
 
-            // Récupérer la scène actuelle et la remplacer
+
             Stage stage = (Stage) nameField.getScene().getWindow();
             stage.setScene(reclamationScene);
             stage.show();

@@ -39,17 +39,18 @@ public class Login {
             showSuccess("Connexion réussie !");
 
             if (email.equals("admin@admin.com") && password.equals("123456")) {
-                loadUsersScreen(); // Rediriger l'admin vers users.fxml
+                loadUsersScreen();
             } else {
-                Profile.setCurrentUser(authenticatedUser); // Stocker l'utilisateur connecté
-                loadProfileScreen();  // Rediriger vers le profil utilisateur
+                Profile.setCurrentUser(authenticatedUser);
+                AjoutReclamationController.setCurrentUser(authenticatedUser);
+                loadProfileScreen();
             }
         } else {
             showError("Identifiants incorrects. Veuillez réessayer.");
         }
     }
 
-    // Charger users.fxml
+
     private void loadUsersScreen() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/tacheuser/User/users.fxml"));
@@ -63,7 +64,7 @@ public class Login {
         }
     }
 
-    // Afficher un message d'erreur
+
     private void showError(String message) {
         Alert alert = new Alert(AlertType.ERROR);
         alert.setTitle("Erreur de Connexion");
@@ -72,7 +73,19 @@ public class Login {
         alert.showAndWait();
     }
 
-    // Afficher un message de succès
+    public void handleNavigateToResponsableInscription() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/tacheuser/User/responsable_inscription.fxml"));
+            Scene scene = new Scene(loader.load());
+
+            // Get the current stage and set the new scene
+            Stage stage = (Stage) mailField.getScene().getWindow();
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     private void showSuccess(String message) {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Connexion réussie");
@@ -81,13 +94,13 @@ public class Login {
         alert.showAndWait();
     }
 
-    // Après une connexion réussie
+
     private void loadProfileScreen() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/tacheuser/User/profil.fxml"));  // Remplacer par le bon chemin
             Scene profileScene = new Scene(loader.load());
 
-            // Récupérer la scène actuelle et la remplacer
+
             Stage stage = (Stage) mailField.getScene().getWindow();
             stage.setScene(profileScene);
             stage.show();
@@ -99,11 +112,11 @@ public class Login {
 
     @FXML
     private void handleRegister() throws IOException {
-        // Charger la scène d'inscription
+
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/tacheuser/User/register.fxml"));
         Scene registerScene = new Scene(loader.load());
 
-        // Récupérer la scène actuelle et la remplacer
+
         Stage stage = (Stage) mailField.getScene().getWindow();
         stage.setScene(registerScene);
         stage.show();

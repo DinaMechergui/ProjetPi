@@ -2,14 +2,25 @@ package tn.esprit.tacheuser.service;
 
 import tn.esprit.tacheuser.utils.MySQLConnection;
 import tn.esprit.tacheuser.models.Reclamation;
+import tn.esprit.tacheuser.utils.SessionManager;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import tn.esprit.tacheuser.models.User;
 
 public class ReclamationService {
 
+    // Ajouter une réclamation dans la base de données
     public boolean addReclamation(Reclamation reclamation) {
+        if (!SessionManager.isUserLoggedIn()) {
+            System.err.println("❌ L'utilisateur n'est pas connecté !");
+            return false;
+        }
+
+        User user = SessionManager.getUser(); // Récupérer l'utilisateur connecté
+        reclamation.setUserId(user.getId()); // Assigner l'ID de l'utilisateur à la réclamation
+
         String query = "INSERT INTO reclamations (user_id, sujet, description, statut) VALUES (?, ?, ?, ?)";
         try (Connection conn = MySQLConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -17,14 +28,19 @@ public class ReclamationService {
             stmt.setString(2, reclamation.getSujet());
             stmt.setString(3, reclamation.getDescription());
             stmt.setString(4, reclamation.getStatut());
-            stmt.executeUpdate();
-            System.out.println("✅ Réclamation ajoutée !");
+
+            int rowsInserted = stmt.executeUpdate();
+            if (rowsInserted > 0) {
+                System.out.println("✅ Réclamation ajoutée pour " + user.getNom());
+                return true;
+            }
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de l'ajout : " + e.getMessage());
+            System.err.println("❌ Erreur lors de l'ajout de la réclamation : " + e.getMessage());
         }
         return false;
     }
 
+    // Récupérer toutes les réclamations
     public List<Reclamation> getAllReclamations() {
         List<Reclamation> reclamations = new ArrayList<>();
         String query = "SELECT id, user_id, sujet, description, statut FROM reclamations";
@@ -42,11 +58,12 @@ public class ReclamationService {
                 ));
             }
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de l'affichage : " + e.getMessage());
+            System.err.println("❌ Erreur lors de la récupération des réclamations : " + e.getMessage());
         }
         return reclamations;
     }
 
+    // Mettre à jour une réclamation
     public boolean updateReclamation(Reclamation reclamation) {
         String query = "UPDATE reclamations SET sujet = ?, description = ?, statut = ? WHERE id = ?";
         try (Connection conn = MySQLConnection.getInstance().getConnection();
@@ -59,6 +76,7 @@ public class ReclamationService {
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated > 0) {
                 System.out.println("✅ Réclamation mise à jour avec succès !");
+                return true;
             } else {
                 System.out.println("⚠️ Aucune réclamation trouvée avec cet ID !");
             }
@@ -67,7 +85,9 @@ public class ReclamationService {
         }
         return false;
     }
-    public void deleteReclamation(int id) {
+
+    // Supprimer une réclamation par ID
+    public boolean deleteReclamation(int id) {
         String query = "DELETE FROM reclamations WHERE id = ?";
         try (Connection conn = MySQLConnection.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -76,12 +96,38 @@ public class ReclamationService {
             int rowsDeleted = stmt.executeUpdate();
             if (rowsDeleted > 0) {
                 System.out.println("✅ Réclamation supprimée avec succès !");
+                return true;
             } else {
                 System.out.println("⚠️ Aucune réclamation trouvée avec cet ID !");
             }
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de la suppression : " + e.getMessage());
+            System.err.println("❌ Erreur lors de la suppression de la réclamation : " + e.getMessage());
         }
+        return false;
     }
 
+    // Récupérer les réclamations d'un utilisateur spécifique
+    public List<Reclamation> getReclamationsByUserId(int userId) {
+        List<Reclamation> reclamations = new ArrayList<>();
+        String query = "SELECT id, user_id, sujet, description, statut FROM reclamations WHERE user_id = ?";
+
+        try (Connection conn = MySQLConnection.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                reclamations.add(new Reclamation(
+                        rs.getInt("id"),
+                        rs.getInt("user_id"),
+                        rs.getString("sujet"),
+                        rs.getString("description"),
+                        rs.getString("statut")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur lors de la récupération des réclamations : " + e.getMessage());
+        }
+        return reclamations;
+    }
 }

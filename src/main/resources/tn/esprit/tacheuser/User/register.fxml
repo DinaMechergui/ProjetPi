@@ -23,7 +23,6 @@
         <TextField fx:id="genderField" promptText="Genre" style="-fx-background-color: #e9ddd7; -fx-border-color: #e4c2b9; -fx-border-radius: 5; -fx-padding: 5;" />
         <PasswordField fx:id="passwordField" promptText="Mot de passe" style="-fx-background-color: #e9ddd7; -fx-border-color: #e4c2b9; -fx-border-radius: 5; -fx-padding: 5;" />
         <TextField fx:id="ageField" promptText="Âge" style="-fx-background-color: #e9ddd7; -fx-border-color: #e4c2b9; -fx-border-radius: 5; -fx-padding: 5;" />
-        <TextField fx:id="statusField" promptText="Statut" style="-fx-background-color: #e9ddd7; -fx-border-color: #e4c2b9; -fx-border-radius: 5; -fx-padding: 5;" />
         <TextField fx:id="roleField" promptText="Rôle" style="-fx-background-color: #e9ddd7; -fx-border-color: #e4c2b9; -fx-border-radius: 5; -fx-padding: 5;" />
         <Button onAction="#handleRegister" prefHeight="26.0" prefWidth="124.0" style="-fx-background-color: #5b8c66; -fx-text-fill: white; -fx-border-radius: 5; -fx-background-radius: 5;" text="S'inscrire" />
         <Button onAction="#goToLogin" style="-fx-background-color: #5b7088; -fx-text-fill: white; -fx-border-radius: 5; -fx-background-radius: 5;" text="Retour à la connexion" />

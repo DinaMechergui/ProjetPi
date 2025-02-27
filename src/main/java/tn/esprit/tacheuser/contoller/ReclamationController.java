@@ -1,14 +1,23 @@
 package tn.esprit.tacheuser.contoller;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseEvent;
 import tn.esprit.tacheuser.models.Reclamation;
+import tn.esprit.tacheuser.models.User;
 import tn.esprit.tacheuser.service.ReclamationService;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.io.FileOutputStream;
 import java.util.List;
 import java.io.IOException;
 import javafx.scene.control.Alert;
@@ -168,5 +177,49 @@ public class ReclamationController {
             showAlert("Sélection requise", "Veuillez sélectionner une réclamation à fermer.");
         }
     }
+    @FXML
+    public void handleexportpdf(MouseEvent event) throws IOException {
+        Document document = new Document();
+        try {
+            // Spécifier le fichier de sortie pour le PDF
+            PdfWriter.getInstance(document, new FileOutputStream("reclamation_liste.pdf"));
+
+            // Ouvrir le document pour écrire
+            document.open();
+
+            // Titre du document
+            Font titleFont = new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD);
+            Paragraph title = new Paragraph("Liste des Réclamations", titleFont);
+            document.add(title);
+
+            // Espacement avant la liste
+            document.add(new Paragraph("\n"));
+
+            // Obtenir la liste des réclamations
+            List<Reclamation> reclamations = reclamationService.getAllReclamations();
+
+            // Style de texte pour les informations des réclamations
+            Font reclamationFont = new Font(Font.FontFamily.TIMES_ROMAN, 12);
+
+            // Ajouter chaque réclamation dans le PDF
+            for (Reclamation reclamation : reclamations) {
+                String reclamationDetails = "Sujet: " + reclamation.getSujet() + "\n" +
+                        "Description: " + reclamation.getDescription() + "\n" +
+                        "Statut: " + reclamation.getStatut() + "\n";
+                document.add(new Paragraph(reclamationDetails, reclamationFont));
+                document.add(new Paragraph("\n"));
+            }
+
+            // Fermer le document
+            document.close();
+
+            // Afficher un message de confirmation
+            showAlert("Succès", "Le PDF des réclamations a été exporté avec succès!");
+        } catch (DocumentException | IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Erreur lors de l'exportation du PDF.");
+        }
+    }
+
 
 }

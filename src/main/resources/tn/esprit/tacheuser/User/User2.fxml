@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.GridPane?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="tn.esprit.tacheuser.contoller.User2Controller">
+    <!-- Bouton pour naviguer vers une autre page, positionné en haut à gauche -->
+    <Button fx:id="navigateButton" layoutX="10" layoutY="10" onAction="#handleNavigate" text="return" />
+
+    <GridPane fx:id="userGrid" hgap="20" layoutX="0" layoutY="50" style="-fx-padding: 20; -fx-alignment: center;" vgap="20">
+        <!-- Les cartes des utilisateurs seront ajoutées dynamiquement dans le contrôleur -->
+    </GridPane>
+</AnchorPane>
