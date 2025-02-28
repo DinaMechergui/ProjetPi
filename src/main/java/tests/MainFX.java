@@ -15,7 +15,7 @@ public class MainFX extends Application {
 
     public void start(Stage primaryStage) throws Exception {
         // Charger le fichier FXML
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/ServiceAdmin.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/AdminDashboardProduit.fxml"));
         Parent root = loader.load();
 
         // Configurer la scène

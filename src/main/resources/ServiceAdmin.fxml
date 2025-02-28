@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Circle?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.AdminServiceController" stylesheets="@styles1.css">
+<BorderPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="controller.AdminServiceController"
+            stylesheets="@styles1.css">
+
+    <!-- Top Section -->
     <top>
-        <HBox style="-fx-background-color: #6d8c7a; -fx-padding: 10;" spacing="10" alignment="CENTER_LEFT">
+        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #6d8c7a; -fx-padding: 10;">
             <Label text="Gestion des Services" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" />
         </HBox>
     </top>
 
+    <!-- Left Sidebar -->
     <left>
-        <!-- Barre latérale (Sidebar) -->
-        <VBox style="-fx-background-color: #5a7364; -fx-padding: 10;" spacing="20" prefWidth="200" alignment="TOP_CENTER">
-            <!-- Photo d'admin en cercle -->
-            <ImageView fx:id="adminPhoto" fitHeight="80" fitWidth="80" preserveRatio="true">
+        <VBox spacing="20"  prefWidth="200" style="-fx-background-color: #5a7364; -fx-padding: 20;">
+            <ImageView fx:id="adminPhoto" fitHeight="80" fitWidth="80" preserveRatio="true" styleClass="imageView">
                 <image>
                     <Image url="@/images/admin.jpg" />
                 </image>
@@ -26,32 +29,34 @@
                     <Circle centerX="40" centerY="40" radius="40" />
                 </clip>
             </ImageView>
-
-            <!-- Boutons de gestion -->
-            <Button text="Gestion Hébergements" styleClass="nav-button" onAction="#goToHotel"/>
-            <Button text="Gestion des Réservations" styleClass="nav-button" onAction="#goToReservation" />
-            <Button text="Gestion des Produits" styleClass="nav-button" onAction="#goToProduit" />
-            <Button text="Gestion des Invités" styleClass="nav-button" />
+            <Button text="Gestion Hébergements" onAction="#goToHotel" styleClass="nav-button" />
+            <Button text="Gestion des Réservations" onAction="#goToReservation" styleClass="nav-button" />
+            <Button text="Gestion des Produits" onAction="#goToProduit" styleClass="nav-button" />
+            <Button text="Gestion des Services" styleClass="nav-button-active" />
         </VBox>
     </left>
 
+    <!-- Center Section -->
     <center>
         <VBox spacing="10" style="-fx-padding: 10; -fx-background-color: #f4f4f4;">
-            <!-- Header avec le titre -->
-            <HBox GridPane.columnSpan="2" alignment="CENTER" spacing="20" styleClass="header">
-                <Label text="Gestion des Services" styleClass="header-title"/>
+
+            <!-- Header -->
+            <HBox alignment="CENTER" spacing="20" style="-fx-padding: 10; -fx-background-color: #eeeeee;">
+                <Label text="Liste des Services" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
             </HBox>
 
-            <!-- Grille des services -->
-            <GridPane fx:id="gridPane" GridPane.rowIndex="1" GridPane.columnSpan="2" alignment="CENTER" hgap="10" vgap="10">
-                <!-- Les services seront ajoutés dynamiquement ici -->
-            </GridPane>
+            <!-- ScrollPane containing dynamically added GridPane -->
+            <ScrollPane fitToWidth="true" fitToHeight="true">
+                <GridPane fx:id="gridPane" alignment="CENTER" vgap="20" hgap="20" style="-fx-padding: 10;">
+                    <!-- Dynamically filled by loadServices() -->
+                </GridPane>
+            </ScrollPane>
 
-            <!-- Boutons CRUD -->
-            <HBox GridPane.rowIndex="2" spacing="10" alignment="CENTER" styleClass="header">
-                <Button fx:id="btnAdd" text="Ajouter" styleClass="button"/>
-                <Button fx:id="btnEdit" text="Modifier" styleClass="button"/>
-                <Button fx:id="btnDelete" text="Supprimer" styleClass="button"/>
+            <!-- CRUD Buttons -->
+            <HBox alignment="CENTER" spacing="10" style="-fx-padding: 10;">
+                <Button fx:id="btnAdd" text="Ajouter" styleClass="crud-button" />
+                <Button fx:id="btnEdit" text="Modifier" styleClass="crud-button"  />
+                <Button fx:id="btnDelete" text="Supprimer" styleClass="crud-button"  />
             </HBox>
         </VBox>
     </center>

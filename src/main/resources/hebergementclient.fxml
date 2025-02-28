@@ -26,6 +26,7 @@
 
             <!-- Boutons de login/logout -->
             <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="auth-buttons">
+                <Button fx:id="loginButton" text="Login" styleClass="auth-button" />
                 <Button fx:id="logoutButton" text="Logout" styleClass="auth-button" visible="false" />
             </HBox>
         </HBox>

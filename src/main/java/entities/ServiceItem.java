@@ -81,4 +81,5 @@ public class ServiceItem {
         return this.nom;  // Retourne seulement le nom du service
     }
 
+
 }

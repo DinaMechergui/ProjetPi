@@ -281,7 +281,7 @@ public class HebergementControllerClient {
     @FXML
     private void goToDriveAndStay() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherHebergement.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/hebergementclient.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) loginButton.getScene().getWindow();
             Scene scene = new Scene(root);
