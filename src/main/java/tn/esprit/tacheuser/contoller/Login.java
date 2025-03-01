@@ -39,11 +39,11 @@ public class Login {
             showSuccess("Connexion réussie !");
 
             if (email.equals("admin@admin.com") && password.equals("123456")) {
-                loadUsersScreen();
+                loadUsersScreen();  // Redirection pour l'admin
             } else {
                 Profile.setCurrentUser(authenticatedUser);
                 AjoutReclamationController.setCurrentUser(authenticatedUser);
-                loadProfileScreen();
+                loadHomeScreen();  // Redirection vers home.fxml pour le client
             }
         } else {
             showError("Identifiants incorrects. Veuillez réessayer.");
@@ -120,5 +120,17 @@ public class Login {
         Stage stage = (Stage) mailField.getScene().getWindow();
         stage.setScene(registerScene);
         stage.show();
+    }
+    private void loadHomeScreen() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/home.fxml"));
+            Scene homeScene = new Scene(loader.load());
+
+            Stage stage = (Stage) mailField.getScene().getWindow();
+            stage.setScene(homeScene);
+            stage.show();
+        } catch (IOException e) {
+            showError("Erreur lors du chargement de la page d'accueil.");
+        }
     }
 }
