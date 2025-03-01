@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.control.TextField?>
+
+<GridPane xmlns:fx="http://javafx.com/fxml/1"
+          xmlns="http://javafx.com/javafx/23.0.1"
+          fx:controller="tn.esprit.tacheuser.contoller.ResponsableProfileController"
+          alignment="CENTER" hgap="20" vgap="20" style="-fx-background-color: #f5f5f5; -fx-padding: 20px;">
+
+    <!-- Title -->
+    <Label text="Mon Profil" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #6b8e23;" GridPane.columnSpan="2" GridPane.rowIndex="0" />
+
+    <!-- Nom -->
+    <Label text="Nom:" style="-fx-font-size: 16px; -fx-text-fill: #6b8e23;" GridPane.rowIndex="1" />
+    <TextField fx:id="nomField" style="-fx-font-size: 16px; -fx-border-radius: 5px; -fx-background-color: #e0f7fa; -fx-border-color: #b2ebf2;" GridPane.columnIndex="1" GridPane.rowIndex="1" editable="false" />
+
+    <!-- Prénom -->
+    <Label text="Prénom:" style="-fx-font-size: 16px; -fx-text-fill: #6b8e23;" GridPane.rowIndex="2" />
+    <TextField fx:id="prenomField" style="-fx-font-size: 16px; -fx-border-radius: 5px; -fx-background-color: #e0f7fa; -fx-border-color: #b2ebf2;" GridPane.columnIndex="1" GridPane.rowIndex="2" editable="false" />
+
+    <!-- Description -->
+    <Label text="Description:" style="-fx-font-size: 16px; -fx-text-fill: #6b8e23;" GridPane.rowIndex="3" />
+    <TextField fx:id="descriptionField" style="-fx-font-size: 16px; -fx-border-radius: 5px; -fx-background-color: #e0f7fa; -fx-border-color: #b2ebf2;" GridPane.columnIndex="1" GridPane.rowIndex="3" editable="false" />
+
+    <!-- Tel -->
+    <Label text="Téléphone:" style="-fx-font-size: 16px; -fx-text-fill: #6b8e23;" GridPane.rowIndex="4" />
+    <TextField fx:id="telField" style="-fx-font-size: 16px; -fx-border-radius: 5px; -fx-background-color: #e0f7fa; -fx-border-color: #b2ebf2;" GridPane.columnIndex="1" GridPane.rowIndex="4" editable="false" />
+
+    <!-- Logout Button -->
+    <Button text="Logout" GridPane.rowIndex="5" GridPane.columnSpan="2" style="-fx-background-color: #f7b7a3; -fx-text-fill: #ffffff; -fx-font-size: 16px; -fx-padding: 10px 20px; -fx-border-radius: 5px;" onAction="#handleLogout"/>
+</GridPane>

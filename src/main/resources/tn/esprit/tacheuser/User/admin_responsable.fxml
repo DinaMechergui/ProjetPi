@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<GridPane alignment="CENTER" hgap="10" style="-fx-background-color: #f5f5f5;" vgap="10" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.tacheuser.contoller.AdminResponsableController">
+
+    <!-- Titre -->
+    <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #6b8e23;" text="Gestion des Responsables" GridPane.columnSpan="3" />
+
+    <!-- Liste dynamique des responsables (ajouté via Java) -->
+    <GridPane fx:id="responsableGrid" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+   <columnConstraints>
+      <ColumnConstraints />
+      <ColumnConstraints />
+      <ColumnConstraints />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints />
+      <RowConstraints />
+      <RowConstraints />
+   </rowConstraints>
+
+</GridPane>
