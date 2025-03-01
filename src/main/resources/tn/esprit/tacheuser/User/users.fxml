@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="484.0" prefWidth="710.0" style="-fx-background-color: #D3D3D3;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.tacheuser.contoller.Users">
+
+    <!-- Liste des utilisateurs -->
+    <ListView fx:id="usersListView" layoutX="20.0" layoutY="20.0" onMouseClicked="#handleUserSelection" prefHeight="200.0" prefWidth="650.0" style="-fx-background-color: #e9ddd7; -fx-border-radius: 5; -fx-padding: 5;" />
+
+    <!-- Champs de saisie -->
+    <VBox layoutX="20.0" layoutY="230.0" spacing="10" style="-fx-padding: 10; -fx-background-color: #e9ddd7; -fx-border-radius: 10; -fx-background-radius: 10;">
+        <TextField fx:id="nomField" promptText="Nom" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;" />
+        <TextField fx:id="prenomField" promptText="Prénom" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;" />
+        <TextField fx:id="mailField" promptText="Email" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;" />
+        <TextField fx:id="telField" promptText="Téléphone" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;" />
+        <TextField fx:id="roleField" promptText="Rôle" style="-fx-background-color: #b37e6f; -fx-border-radius: 5; -fx-padding: 5;" />
+    </VBox>
+
+    <!-- Boutons d'actions -->
+    <HBox layoutX="224.0" layoutY="256.0" spacing="10">
+        <Button onAction="#handleAdd" style="-fx-background-color: #8fbd9a; -fx-text-fill: white; -fx-border-radius: 5;" text="Ajouter" />
+        <Button onAction="#handleUpdate" style="-fx-background-color: #ac9d66; -fx-text-fill: white; -fx-border-radius: 5;" text="Modifier" />
+        <Button onAction="#handleDelete" style="-fx-background-color: #c57077; -fx-text-fill: white; -fx-border-radius: 5;" text="Supprimer" />
+    </HBox>
+
+    <!-- Bouton vers les réclamations -->
+    <Button layoutX="300.0" layoutY="354.0" onAction="#goToReclamations" style="-fx-background-color: #6888a8; -fx-text-fill: white; -fx-border-radius: 5;" text="Réclamations" />
+
+    <!-- Nouveau bouton vers l'interface Admin Responsable -->
+    <Button layoutX="450.0" layoutY="354.0" onAction="#goToAdminResponsable" style="-fx-background-color: #5a9c79; -fx-text-fill: white; -fx-border-radius: 5;" text="Responsables" />
+
+    <ImageView fitHeight="49.0" fitWidth="55.0" layoutX="625.0" layoutY="230.0" onMouseClicked="#handleImageClick" pickOnBounds="true" preserveRatio="true">
+        <image>
+            <Image url="@../utils/7028093.png" />
+        </image>
+    </ImageView>
+   <ImageView fitHeight="64.0" fitWidth="55.0" layoutX="546.0" layoutY="227.0" onMouseClicked="#handleexportpdf" pickOnBounds="true" preserveRatio="true">
+      <image>
+         <Image url="@../utils/8243027.png" />
+      </image>
+   </ImageView>
+   <ImageView fitHeight="55.0" fitWidth="49.0" layoutX="476.0" layoutY="232.0" onMouseClicked="#handlestat" pickOnBounds="true" preserveRatio="true">
+      <image>
+         <Image url="@../utils/901467.png" />
+      </image>
+   </ImageView>
+
+</AnchorPane>
