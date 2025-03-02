@@ -8,45 +8,67 @@
 
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.HebergementControllerClient"
             stylesheets="@style.css" prefHeight="800.0" prefWidth="1000.0">
-    <children>
-        <!-- Navbar -->
-        <HBox styleClass="navbar" layoutX="0" layoutY="0" prefWidth="1000" prefHeight="60">
-            <!-- Logo -->
-            <ImageView fx:id="logo" fitHeight="50" fitWidth="50" pickOnBounds="true" preserveRatio="true">
-                <Image url="@/images/logo.jpg"/> <!-- Remplacez par le chemin de votre logo -->
-            </ImageView>
 
-            <!-- Liens de la navbar -->
-            <HBox spacing="20" alignment="CENTER_LEFT" styleClass="nav-links">
-                <Button text="Store" styleClass="nav-button" onAction="#goToStore" />
-                <Button text="Event" styleClass="nav-button" onAction="#goToEvent" />
-                <Button text="Drive and Stay" styleClass="nav-button" onAction="#goToDriveAndStay" />
-                <Button text="Invité" styleClass="nav-button" onAction="#goToInvite"/>
-            </HBox>
-
-            <!-- Boutons de login/logout -->
-            <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="auth-buttons">
-                <Button fx:id="loginButton" text="Login" styleClass="auth-button" />
-                <Button fx:id="logoutButton" text="Logout" styleClass="auth-button" visible="false" />
-            </HBox>
-        </HBox>
-
-        <!-- Barre de recherche -->
-        <HBox layoutX="50" layoutY="70" spacing="10">
-            <TextField fx:id="searchBar" prefWidth="300" promptText="Type here to search" styleClass="search-bar" />
-            <Button text="Search" styleClass="search-button" />
-        </HBox>
-
-        <!-- Icône du panier -->
-        <ImageView fx:id="cartIcon" layoutX="900" layoutY="20" fitHeight="50" fitWidth="50" onMouseClicked="#goToCart">
-            <Image url="@/images/cart-icon.png"/>
+    <!-- Navbar -->
+    <HBox styleClass="navbar" layoutX="0" layoutY="0" prefWidth="1000" prefHeight="60">
+        <!-- Logo -->
+        <ImageView fx:id="logo" fitHeight="50" fitWidth="50" pickOnBounds="true" preserveRatio="true">
+            <Image url="@/images/logo.jpg"/> <!-- Remplacez par le chemin de votre logo -->
         </ImageView>
 
+        <!-- Liens de la navbar -->
+        <HBox spacing="20" alignment="CENTER_LEFT" styleClass="nav-links">
+            <Button text="Store" styleClass="nav-button" onAction="#goToStore" />
+            <Button text="Event" styleClass="nav-button" onAction="#goToEvent" />
+            <Button text="Drive and Stay" styleClass="nav-button" onAction="#goToDriveAndStay" />
+            <Button text="Invité" styleClass="nav-button" onAction="#goToInvite"/>
+        </HBox>
+
+        <!-- Boutons de login/logout -->
+        <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="auth-buttons">
+            <Button fx:id="loginButton" text="Login" styleClass="auth-button" />
+            <Button fx:id="logoutButton" text="Logout" styleClass="auth-button" visible="false" />
+        </HBox>
+    </HBox>
+
+    <!-- Barre de recherche -->
+    <HBox layoutX="50" layoutY="70" spacing="10">
+        <TextField fx:id="searchBar" prefWidth="300" promptText="Type here to search" styleClass="search-bar" />
+        <Button text="Search" styleClass="search-button" />
+    </HBox>
+
+    <!-- Icône du panier -->
+    <ImageView fx:id="cartIcon" layoutX="900" layoutY="20" fitHeight="50" fitWidth="50" onMouseClicked="#goToCart">
+        <Image url="@/images/cart-icon.png"/>
+    </ImageView>
+
+    <!-- Section des hébergements -->
+    <VBox layoutX="50" layoutY="120" spacing="20" prefWidth="900">
+        <!-- Titre de la section des hébergements -->
+        <Label text="Hébergements Disponibles" styleClass="section-title" />
+
         <!-- Grille des hébergements -->
-        <ScrollPane layoutX="50" layoutY="120" prefWidth="900" prefHeight="600">
+        <ScrollPane prefWidth="900" prefHeight="400">
             <GridPane fx:id="gridPaneHebergements" hgap="20" vgap="20" styleClass="grid-pane">
                 <!-- Les cartes d'hébergement seront ajoutées dynamiquement ici -->
             </GridPane>
         </ScrollPane>
-    </children>
+    </VBox>
+
+    <VBox layoutX="50" layoutY="550" spacing="10" prefWidth="900">
+        <!-- Titre de la section des avis -->
+        <Label text="Donner votre avis" styleClass="section-title" />
+
+        <!-- Conteneur pour les étoiles -->
+        <HBox fx:id="starRatingContainer" spacing="10" alignment="CENTER_LEFT">
+            <!-- Les étoiles seront ajoutées dynamiquement ici -->
+        </HBox>
+
+        <!-- Champ de commentaire (plus petit) -->
+        <TextArea fx:id="commentaireField" prefWidth="300" prefHeight="50" promptText="Votre commentaire..." styleClass="commentaire-field" />
+
+        <!-- Bouton pour poster l'avis -->
+        <Button text="Poster Avis" onAction="#submitAvis" styleClass="submit-button" />
+        <Button fx:id="submitAvisButton" text="Poster Avis" onAction="#submitAvis" styleClass="submit-button" />
+    </VBox>
 </AnchorPane>

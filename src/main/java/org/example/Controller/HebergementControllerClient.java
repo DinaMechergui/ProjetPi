@@ -1,9 +1,9 @@
 package org.example.Controller;
 
+import com.sun.javafx.menu.MenuItemBase;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -12,25 +12,37 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Pair;
+import org.example.components.StarRatingInput;
+import org.example.entities.Avis;
 import org.example.entities.Hebergement;
+import org.example.services.AvisService;
 import org.example.services.ServiceHebergement;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public class HebergementControllerClient {
     private final ServiceHebergement serviceHebergement = new ServiceHebergement();
+    private final AvisService avisService = new AvisService();
 
     @FXML
     private GridPane gridPaneHebergements; // GridPane pour afficher les hébergements
     @FXML
     private Button loginButton; // Bouton de connexion pour navigation
+    @FXML
+    private HBox starRatingContainer; // Conteneur pour les étoiles
+    @FXML
+    private TextArea commentaireField; // Champ de commentaire
+    @FXML
+    private Button submitAvisButton; // Bouton pour poster l'avis
+
+    private StarRatingInput starRatingInput; // Composant pour la notation
+    private Hebergement currentHebergement; // Hébergement actuellement sélectionné
 
     // Méthode pour naviguer vers la page des produits
     @FXML
@@ -51,7 +63,15 @@ public class HebergementControllerClient {
     // Méthode d'initialisation pour charger les hébergements à l'ouverture
     public void initialize() {
         try {
-            loadHebergements(); // Charger les données des hébergements
+            // Initialiser le composant des étoiles
+            starRatingInput = new StarRatingInput();
+            starRatingContainer.getChildren().add(starRatingInput);
+
+            // Désactiver la section de notation par défaut
+            enableRatingSection(false);
+
+            // Charger les hébergements
+            loadHebergements();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -65,65 +85,89 @@ public class HebergementControllerClient {
         int col = 0;
 
         for (Hebergement hebergement : hebergements) {
-            // Créer la carte de l'hébergement
-            VBox hebergementCard = new VBox(10);
-            hebergementCard.getStyleClass().add("hebergement-card");
-
-            // Image de l'hébergement
-            ImageView hebergementImage = new ImageView();
-            String imageUrl = hebergement.getImageUrl();
-
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                try {
-                    Image image = new Image(imageUrl); // Si c'est une URL valide
-                    hebergementImage.setImage(image);
-                } catch (Exception e) {
-                    hebergementImage.setImage(new Image("file:defaultImage.jpg")); // Image par défaut en cas d'erreur
-                    e.printStackTrace();
-                }
-            } else {
-                hebergementImage.setImage(new Image("file:defaultImage.jpg")); // Image par défaut si l'URL est vide
-            }
-
-            // Paramètres pour l'affichage de l'image
-            hebergementImage.setFitWidth(150);
-            hebergementImage.setFitHeight(150);
-            hebergementImage.setPreserveRatio(true);
-
-            // Nom, adresse et prix
-            Label hebergementNom = new Label(hebergement.getNom());
-            hebergementNom.getStyleClass().add("hebergement-name");
-
-            Label hebergementAdresse = new Label("Adresse : " + hebergement.getAdresse());
-            hebergementAdresse.getStyleClass().add("hebergement-address");
-
-            Label hebergementPrix = new Label("Prix/Nuit : " + String.format("%.2f", hebergement.getPrixParNuit()) + " TND");
-            hebergementPrix.getStyleClass().add("hebergement-price");
-
-            // Disponibilité
-            Label hebergementDispo = new Label(hebergement.isDisponible() ? "Disponible" : "Indisponible");
-            hebergementDispo.getStyleClass().add("hebergement-availability");
-            hebergementDispo.setStyle(hebergement.isDisponible() ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
-
-            // Bouton de réservation
-            Button reserverButton = new Button("Réserver");
-            reserverButton.getStyleClass().add("button");
-            if (!hebergement.isDisponible()) {
-                reserverButton.setDisable(true); // Désactiver le bouton si l'hébergement est indisponible
-            }
-            reserverButton.setOnAction(event -> ouvrirFormulaireReservation(hebergement));
-
-            // Ajouter les éléments à la carte
-            hebergementCard.getChildren().addAll(hebergementImage, hebergementNom, hebergementAdresse, hebergementPrix, hebergementDispo, reserverButton);
-
-            // Ajouter la carte au GridPane
+            VBox hebergementCard = createHebergementCard(hebergement);
             gridPaneHebergements.add(hebergementCard, col, row);
             col++;
-            if (col > 2) {
+            if (col > 2) { // 3 colonnes par ligne
                 col = 0;
                 row++;
             }
         }
+    }
+
+    private VBox createHebergementCard(Hebergement hebergement) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("hebergement-card");
+
+        // Image de l'hébergement
+        ImageView hebergementImage = new ImageView();
+        String imageUrl = hebergement.getImageUrl();
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                Image image = new Image(imageUrl); // Si c'est une URL valide
+                hebergementImage.setImage(image);
+            } catch (Exception e) {
+                hebergementImage.setImage(new Image("file:defaultImage.jpg")); // Image par défaut en cas d'erreur
+                e.printStackTrace();
+            }
+        } else {
+            hebergementImage.setImage(new Image("file:defaultImage.jpg")); // Image par défaut si l'URL est vide
+        }
+
+        // Paramètres pour l'affichage de l'image
+        hebergementImage.setFitWidth(150);
+        hebergementImage.setFitHeight(150);
+        hebergementImage.setPreserveRatio(true);
+
+        // Nom, adresse et prix
+        Label hebergementNom = new Label(hebergement.getNom());
+        hebergementNom.getStyleClass().add("hebergement-name");
+
+        Label hebergementAdresse = new Label("Adresse : " + hebergement.getAdresse());
+        hebergementAdresse.getStyleClass().add("hebergement-address");
+
+        Label hebergementPrix = new Label("Prix/Nuit : " + String.format("%.2f", hebergement.getPrixParNuit()) + " TND");
+        hebergementPrix.getStyleClass().add("hebergement-price");
+
+        // Disponibilité
+        Label hebergementDispo = new Label(hebergement.isDisponible() ? "Disponible" : "Indisponible");
+        hebergementDispo.getStyleClass().add("hebergement-availability");
+        hebergementDispo.setStyle(hebergement.isDisponible() ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
+
+        // Bouton de réservation
+        Button reserverButton = new Button("Réserver");
+        reserverButton.getStyleClass().add("button");
+        if (!hebergement.isDisponible()) {
+            reserverButton.setDisable(true); // Désactiver le bouton si l'hébergement est indisponible
+        }
+        reserverButton.setOnAction(event -> {
+            currentHebergement = hebergement; // Définir l'hébergement actuel
+            ouvrirFormulaireReservation(hebergement); // Ouvrir le formulaire de réservation
+        });
+
+        // Bouton pour donner un avis
+        Button avisButton = new Button("Donner un avis");
+        avisButton.getStyleClass().add("button");
+        avisButton.setOnAction(event -> {
+            currentHebergement = hebergement; // Définir l'hébergement actuel
+            enableRatingSection(true); // Activer la section de notation
+        });
+
+        // Ajouter les éléments à la carte
+        HBox buttonContainer = new HBox(10); // Conteneur pour les boutons
+        buttonContainer.getChildren().addAll(reserverButton, avisButton); // Ajouter les boutons
+
+        card.getChildren().addAll(hebergementImage, hebergementNom, hebergementAdresse, hebergementPrix, hebergementDispo, buttonContainer);
+
+        return card;
+    }
+
+    private void enableRatingSection(boolean enable) {
+        starRatingContainer.setDisable(!enable); // Activer/désactiver les étoiles
+        commentaireField.setDisable(!enable); // Activer/désactiver le champ de commentaire
+
+        submitAvisButton.setDisable(!enable); // Activer/désactiver le bouton "Poster Avis"
     }
 
     // Méthode pour ouvrir un formulaire de réservation avec les détails d'un hébergement
@@ -141,6 +185,67 @@ public class HebergementControllerClient {
             stage.setTitle("Réservation Hébergement");
             stage.show();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Méthode pour poster un avis
+    @FXML
+    private void submitAvis() {
+        try {
+            int note = starRatingInput.getRating(); // Récupérer la note sélectionnée
+            String commentaire = commentaireField.getText();
+
+            if (note < 1 || note > 5) {
+                throw new IllegalArgumentException("Veuillez sélectionner une note entre 1 et 5.");
+            }
+
+            // Créer un nouvel avis
+            Avis avis = new Avis();
+            avis.setIdheb(currentHebergement.getIdheb()); // Hébergement actuel
+            avis.setNote(note);
+            avis.setCommentaire(commentaire);
+            avis.setDateCreation(new Date());
+
+            // Ajouter l'avis
+            avisService.ajouterAvis(avis);
+
+            // Recharger les avis après ajout
+            loadAvis(currentHebergement.getIdheb());
+        } catch (IllegalArgumentException | SQLException e) {
+            afficherAlerte("Erreur", e.getMessage());
+        }
+    }
+
+    // Méthode pour afficher une alerte
+    private void afficherAlerte(String titre, String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(titre);
+        alert.setContentText(message);
+        alert.show();
+    }
+
+    // Méthode pour charger les avis d'un hébergement
+    private void loadAvis(int hebergementId) {
+        try {
+            List<Avis> avisList = avisService.getAvisByHebergement(hebergementId);
+
+            // Afficher les avis dans un VBox ou un GridPane
+            VBox avisContainer = new VBox(10);
+            for (Avis avis : avisList) {
+                VBox avisCard = new VBox(5);
+                avisCard.getStyleClass().add("avis-card");
+
+                Label noteLabel = new Label("Note : " + avis.getNote() + "/5");
+                Label commentaireLabel = new Label(avis.getCommentaire());
+
+                avisCard.getChildren().addAll(noteLabel, commentaireLabel);
+                avisContainer.getChildren().add(avisCard);
+            }
+
+            // Ajouter le conteneur d'avis à votre interface
+            gridPaneHebergements.add(avisContainer, 0, 1); // Exemple d'ajout dans un GridPane
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
