@@ -33,6 +33,8 @@
             <Button text="Gestion Hébergements" styleClass="nav-button" onAction="#goToHotel"/>
             <Button text="Gestion des Services" styleClass="nav-button" onAction="#goToReservation" />
             <Button text="Gestion des Produits" styleClass="nav-button" onAction="#goToProduit" />
+            <Button text="Statistiques" styleClass="nav-button" onAction="#goToStat" />
+
             <Button text="Gestion des Invités" styleClass="nav-button" />
         </VBox>
     </left>

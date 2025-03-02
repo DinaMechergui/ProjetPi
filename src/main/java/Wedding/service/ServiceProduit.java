@@ -89,26 +89,42 @@ public class ServiceProduit {
         }
     }
 
-    // Récupérer tous les produits
     public List<Produit> afficher() throws SQLException {
         List<Produit> produits = new ArrayList<>();
         String req = "SELECT * FROM produit";
-        Statement statement = this.connection.createStatement();
-        ResultSet rs = statement.executeQuery(req);
 
-        while (rs.next()) {
-            Produit produit = new Produit(
-                    rs.getInt("id"),
-                    rs.getString("nom"),
-                    rs.getString("description"),
-                    rs.getDouble("prix"),
-                    rs.getString("categorie"),
-                    rs.getInt("stock"),
-                    rs.getString("imageUrl") // Ajout de l'URL de l'image
-            );
-            produits.add(produit);
+        System.out.println("Exécution de la requête : " + req);
+
+        try (Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery(req)) {
+
+            System.out.println("Récupération des résultats...");
+
+            while (rs.next()) {
+                Produit produit = new Produit(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("description"),
+                        rs.getDouble("prix"),
+                        rs.getString("categorie"),
+                        rs.getInt("stock"),
+                        rs.getString("imageUrl")
+                );
+                produits.add(produit);
+                System.out.println("Produit récupéré : " + produit.getNom());
+            }
+
+            if (produits.isEmpty()) {
+                System.out.println("Aucun produit trouvé dans la base de données.");
+            } else {
+                System.out.println("Nombre de produits récupérés : " + produits.size());
+            }
+
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur lors de la récupération des produits : " + e.getMessage());
+            throw e;
         }
-        System.out.println("📦 Produits affichés : " + produits);
+
         return produits;
     }
 }

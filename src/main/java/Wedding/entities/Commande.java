@@ -1,6 +1,7 @@
 package Wedding.entities;
 
 import entities.ServiceItem;
+import tn.esprit.tacheuser.models.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,9 +14,10 @@ public class Commande {
     private String statut;
     private List<Reservation> reservations;
     private List<ServiceItem> servicesReserves;
+    private double total;
 
     public Commande(int id, String utilisateur, LocalDateTime dateCommande, String statut,
-                    List<Reservation> reservations, List<ServiceItem> servicesReserves) {
+                    List<Reservation> reservations, List<ServiceItem> servicesReserves , double total) {
         this.id = id;
         this.utilisateur = utilisateur;
         this.dateCommande = dateCommande;
@@ -40,6 +42,14 @@ public class Commande {
         double totalProduits = reservations.stream().mapToDouble(r -> r.getProduit().getPrix() * r.getQuantite()).sum();
         double totalServices = servicesReserves.stream().mapToDouble(ServiceItem::getPrix).sum();
         return totalProduits + totalServices;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
     }
 
     public int getId() { return id; }

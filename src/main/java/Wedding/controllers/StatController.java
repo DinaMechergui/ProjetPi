@@ -6,7 +6,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.PieChart;
@@ -17,6 +20,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -120,6 +124,12 @@ public class StatController {
      * @param productList La liste des produits.
      */
     private void loadPriceDistributionChartData(List<Produit> productList) {
+        // Vérifier si la liste est vide
+        if (productList.isEmpty()) {
+            System.out.println("Aucun produit disponible pour générer la distribution des prix.");
+            return;
+        }
+
         // Extraire les prix des produits
         List<Double> productPrices = productList.stream()
                 .map(Produit::getPrix)
@@ -129,6 +139,22 @@ public class StatController {
         double minPrice = Collections.min(productPrices);
         double maxPrice = Collections.max(productPrices);
         double range = maxPrice - minPrice;
+        if (range == 0) {
+            range = 1;
+            if (range < 1) {  // Si range est trop petit, on force une valeur minimale
+                range = 1;
+            }
+
+        }
+
+
+        // Vérifier si tous les produits ont le même prix
+        if (range == 0) {
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
+            series.getData().add(new XYChart.Data<>(minPrice, productList.size())); // Un seul point pour représenter tous les produits
+            priceDistributionChart.getData().add(series);
+            return;
+        }
 
         // Définir le nombre de tranches (bins) pour la distribution des prix
         int numBins = 10; // Vous pouvez ajuster ce nombre en fonction de vos besoins
@@ -154,11 +180,92 @@ public class StatController {
             double binMidPoint = (binStart + binEnd) / 2.0; // Point médian de la tranche
             series.getData().add(new XYChart.Data<>(binMidPoint, binCounts[i]));
         }
+        System.out.println("Min Price: " + minPrice);
+        System.out.println("Max Price: " + maxPrice);
+        System.out.println("Range: " + range);
+        System.out.println("Bin Width: " + binWidth);
 
         // Appliquer les données à l'AreaChart
         priceDistributionChart.getData().add(series);
     }
+    public void goToReservation(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ServiceAdmin.fxml"));
+            Parent root = loader.load();
 
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+    public void goToHotel(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherHebergement.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+    public void goTStore(ActionEvent actionEvent) {
+    }
+
+    public void goToProduit(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AdminDashboardProduit.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
+
+    public void goToStat(ActionEvent event) {
+        try {
+            // Charger le fichier FXML de la page des produits
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Stat.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page des produits
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des produits.");
+        }
+    }
     /**
      * Gère l'événement du bouton de retour.
      *
