@@ -6,12 +6,14 @@ public class Voiture {
     private String marque ;
 
     private boolean  disponible ;
+    private static String imageUrl;
 
-    public Voiture(int idvoiture, float prix, String marque, boolean disponible) {
+    public Voiture(int idvoiture, float prix, String marque, boolean disponible, String imageUrl) {
         this.idvoiture = idvoiture;
         this.prix = prix;
         this.marque = marque;
         this.disponible = disponible;
+        this.imageUrl = imageUrl;
 
     }
 
@@ -49,5 +51,13 @@ public class Voiture {
 
     public void setDisponible(boolean disponible) {
         this.disponible = disponible;
+    }
+
+    public static String getImageUrl() {
+        return imageUrl;
+    }
+
+    public static void setImageUrl(String imageUrl) {
+        Voiture.imageUrl = imageUrl;
     }
 }

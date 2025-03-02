@@ -316,7 +316,7 @@ public class HebergementControllerClient {
         }
     }
 
-    @FXML
+   /* @FXML
     private WebView webView;
 
     private static final String MAPS_API_KEY = "AIzaSyDqKbNwR-HfCjFwihwZ-TirCMefVDmpDOc";
@@ -347,7 +347,7 @@ public class HebergementControllerClient {
 
         webView.getEngine().loadContent(htmlContent);
     }
-
+*/
 
 
 
