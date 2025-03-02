@@ -10,6 +10,7 @@
 <ScrollPane fitToWidth="true" fitToHeight="true" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Wedding.controllers.HomeController"
             stylesheets="@style.css">
     <AnchorPane prefHeight="1200.0" prefWidth="1200.0">
+        <Label fx:id="welcomeLabel" text="Bienvenue !" />
         <children>
             <!-- Navbar -->
             <HBox styleClass="navbar" layoutX="0" layoutY="0" prefWidth="1200" prefHeight="80">
