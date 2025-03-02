@@ -6,12 +6,14 @@ public class Facture {
     private int id;
     private Commande commande;
     private LocalDateTime dateFacture;
+    private String utilisateur; // ou un objet User
     private double total;
 
-    public Facture(int id, Commande commande, LocalDateTime dateFacture, double total) {
+    public Facture(int id, Commande commande, LocalDateTime dateFacture, String utilisateur, double total) {
         this.id = id;
         this.commande = commande;
         this.dateFacture = dateFacture;
+        this.utilisateur = utilisateur;
         this.total = total;
     }
 
@@ -25,6 +27,14 @@ public class Facture {
 
     public Commande getCommande() {
         return commande;
+    }
+
+    public String getUtilisateur() {
+        return utilisateur;
+    }
+
+    public void setUtilisateur(String utilisateur) {
+        this.utilisateur = utilisateur;
     }
 
     public void setCommande(Commande commande) {
