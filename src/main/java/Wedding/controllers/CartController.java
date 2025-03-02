@@ -27,6 +27,8 @@ import javafx.event.ActionEvent;
 
 import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
+import tn.esprit.tacheuser.models.User;
+import tn.esprit.tacheuser.utils.SessionManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +43,7 @@ import java.util.List;
 public class CartController {
     private final ServiceCommande serviceCommande = new ServiceCommande();
     private Commande currentCommande;  // La commande actuelle
+    private static User currentUser;
 
     @FXML
     private GridPane gridPaneCart;
@@ -49,10 +52,12 @@ public class CartController {
     public void initialize() {
         try {
             initializeCurrentCommande(); // Assure que la commande est bien initialisée
-            loadCart(); // Charge les produits du panier
+            loadCart();
+            // Charge les produits du panier
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
     }
 
     @FXML
@@ -64,22 +69,45 @@ public class CartController {
         stage.setScene(commandScene);
     }
 
-    private void initializeCurrentCommande() throws SQLException {
-        if (currentCommande == null || currentCommande.getId() == -1) {
-            String sql = "SELECT id FROM commande WHERE utilisateur = ? AND statut = 'RESERVE' ORDER BY date DESC LIMIT 1";
-            try (PreparedStatement stmt = MyDatabase.getConnection().prepareStatement(sql)) {
-                stmt.setString(1, "User1"); // Remplacer par l'utilisateur actuel
-                ResultSet rs = stmt.executeQuery();
-                if (rs.next()) {
-                    currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>());
-                    currentCommande.setId(rs.getInt("id"));
-                    System.out.println("Commande trouvée : ID = " + currentCommande.getId());
-                } else {
-                    System.out.println("Aucune commande en attente trouvée.");
-                }
+    public void initializeCurrentCommande() {
+        // Vérifier si un utilisateur est connecté
+        if (!SessionManager.isUserLoggedIn()) {
+            System.err.println("❌ Erreur : Aucun utilisateur connecté.");
+            return; // Arrêter l'exécution pour éviter les erreurs
+        }
+
+        // Récupérer l'utilisateur connecté
+        User currentUser = SessionManager.getUser();
+        System.out.println("✅ Utilisateur connecté : " + currentUser.getNom());
+
+        // Créer une instance du service commande
+        ServiceCommande serviceCommande = new ServiceCommande();
+
+        try {
+            // Récupérer ou créer une commande liée à cet utilisateur
+            Commande commande = serviceCommande.getCommandeByUser(currentUser);
+
+            if (commande == null) {
+                // Créer une nouvelle commande pour l'utilisateur
+                commande = new Commande();
+                // Par exemple, on stocke ici le prénom de l'utilisateur
+                commande.setUtilisateur(currentUser.getPrenom());
+                // Définir d'autres propriétés par défaut
+                commande.setDateCommande(LocalDateTime.now());
+                commande.setStatut("RESERVE");
+                commande.setTotal(0.0);
+                serviceCommande.ajouterCommande(commande);
             }
+
+            // Associer la commande au panier
+            this.currentCommande = commande;
+            System.out.println("🛒 Commande actuelle chargée avec succès.");
+
+        } catch (Exception e) {
+            System.err.println("❌ Erreur lors de l'initialisation de la commande : " + e.getMessage());
         }
     }
+
 
     private void loadCart() throws SQLException {
         if (currentCommande == null || currentCommande.getId() == -1) {
@@ -173,7 +201,8 @@ public class CartController {
 
         // Afficher le total général
         totalPriceLabel.setText("Total: " + String.format("%.2f", total) + " TND");
-    }    private void showAlert(String title, String message, Alert.AlertType type) {
+    }
+    private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -207,11 +236,13 @@ public class CartController {
         }
     }
     @FXML
-    private void handleConfirmOrder(ActionEvent event) { // Ajoutez ActionEvent comme paramètre
+
+    private void handleConfirmOrder(ActionEvent event) {
         try {
-            if (currentCommande != null && currentCommande.getId() != -1) {
-                // Confirmer la commande
-                serviceCommande.confirmerCommande(currentCommande.getId());
+            if (currentCommande != null && currentCommande.getId() != -1 && currentUser != null) {
+                // Confirmer la commande en passant l'ID de la commande et l'utilisateur
+                serviceCommande.confirmerCommande(currentCommande.getId(), currentUser.getPrenom());
+
                 System.out.println("Commande confirmée avec ID : " + currentCommande.getId());
 
                 // Récupérer les produits et leurs quantités réservées
@@ -223,9 +254,8 @@ public class CartController {
 
                 // Créer une facture après la confirmation de la commande
                 ServiceFacture serviceFacture = new ServiceFacture();
-                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), total);
-
-                serviceFacture.ajouterFacture(facture);
+                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total);
+                serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
                 System.out.println("Facture créée pour la commande ID : " + currentCommande.getId());
 
                 showAlert("Commande Confirmée", "Votre commande a été confirmée et une facture a été générée.", Alert.AlertType.INFORMATION);
@@ -237,7 +267,6 @@ public class CartController {
             showAlert("Erreur", "Une erreur est survenue lors de la confirmation ou de la création de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
-
     @FXML
     private void handleCancelOrder() {
         try {
@@ -289,10 +318,12 @@ public class CartController {
 
     @FXML
     private void showInvoice() {
-        if (currentCommande != null) {
+        if (currentCommande != null && currentUser != null) { // Vérifiez que l'utilisateur est disponible
             try {
                 ServiceFacture serviceFacture = new ServiceFacture();
-                Facture facture = serviceFacture.getFactureByCommandeId(currentCommande.getId());
+
+                // Récupérer la facture en passant l'ID de la commande et l'utilisateur
+                Facture facture = serviceFacture.getFactureByCommandeId(currentCommande.getId(), currentUser.getPrenom());
 
                 if (facture != null) {
                     // Ouvrir un FileChooser pour choisir l'emplacement du fichier
@@ -307,15 +338,21 @@ public class CartController {
 
                         // Afficher un message dans la console (optionnel)
                         System.out.println("Facture générée avec succès : " + file.getAbsolutePath());
+
+                        // Afficher un message à l'utilisateur
+                        showAlert("Succès", "La facture a été générée avec succès.", Alert.AlertType.INFORMATION);
                     }
                 } else {
                     System.out.println("Aucune facture trouvée pour cette commande.");
+                    showAlert("Aucune facture", "Aucune facture trouvée pour cette commande.", Alert.AlertType.WARNING);
                 }
             } catch (SQLException | IOException | DocumentException e) {
                 System.err.println("Erreur lors de la génération de la facture : " + e.getMessage());
+                showAlert("Erreur", "Une erreur est survenue lors de la génération de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
             }
         } else {
-            System.out.println("Aucune commande sélectionnée.");
+            System.out.println("Aucune commande sélectionnée ou utilisateur non connecté.");
+            showAlert("Erreur", "Aucune commande sélectionnée ou utilisateur non connecté.", Alert.AlertType.WARNING);
         }
     }
 
@@ -340,5 +377,7 @@ public class CartController {
         }
     }
 
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
 }
-
