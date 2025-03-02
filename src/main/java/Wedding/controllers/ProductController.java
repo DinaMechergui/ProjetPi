@@ -23,6 +23,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import tn.esprit.tacheuser.models.User;
+import tn.esprit.tacheuser.utils.SessionManager;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -36,6 +38,7 @@ public class ProductController {
     private ServiceProduit serviceProduit = new ServiceProduit();
     private ServiceCommande serviceCommande = new ServiceCommande();
     private Commande currentCommande;
+    private User currentUser; // Ajoutez ce champ pour stocker l'utilisateur connecté
 
     @FXML
     private GridPane gridPaneProduits;
@@ -67,6 +70,7 @@ public class ProductController {
             System.out.println("Erreur lors du chargement de la page des produits.");
         }
     }
+
     @FXML
     private void showAlert() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -217,7 +221,7 @@ public class ProductController {
                             }
 
                             if (currentCommande == null) {
-                                currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>());
+                                currentCommande = new Commande(0, currentUser.getNom(), LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>(), 0.0);
                             }
 
                             Reservation reservationExistante = trouverReservationExistante(product);
@@ -228,7 +232,7 @@ public class ProductController {
                                 currentCommande.ajouterReservation(nouvelleReservation);
                             }
 
-                            int commandeId = serviceCommande.ajouterOuMettreAJourReservation("User1", product, selectedQuantity);
+                            int commandeId = serviceCommande.ajouterOuMettreAJourReservation(currentUser.getPrenom(), product, selectedQuantity);
 
                             if (currentCommande.getId() == 0) {
                                 currentCommande.setId(commandeId);
@@ -254,7 +258,9 @@ public class ProductController {
                 row++;
             }
         }
-    }    private void showAlert(String title, String message, Alert.AlertType type) {
+    }
+
+    private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -277,6 +283,12 @@ public class ProductController {
             // Charger la page du panier
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Cart.fxml"));
             Parent root = loader.load();
+
+            // Récupérer le contrôleur de la page du panier
+            CartController cartController = loader.getController();
+
+            // Passer l'utilisateur connecté au contrôleur
+            cartController.setCurrentUser(SessionManager.getUser()); // Assurez-vous que SessionManager.getUser() retourne l'utilisateur connecté
 
             // Récupérer la scène actuelle pour accéder à la fenêtre (Stage)
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -325,6 +337,7 @@ public class ProductController {
             System.out.println("Erreur lors du chargement de la page des produits.");
         }
     }
+
     @FXML
     private void goToDriveAndStay(ActionEvent event) {
         try {
@@ -344,5 +357,7 @@ public class ProductController {
             System.out.println("Erreur lors du chargement de la page des produits.");
         }
     }
-
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
 }
