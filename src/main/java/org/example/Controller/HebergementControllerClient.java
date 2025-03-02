@@ -40,6 +40,8 @@ public class HebergementControllerClient {
     private TextArea commentaireField; // Champ de commentaire
     @FXML
     private Button submitAvisButton; // Bouton pour poster l'avis
+    @FXML
+    private HBox topBar;
 
     private StarRatingInput starRatingInput; // Composant pour la notation
     private Hebergement currentHebergement; // Hébergement actuellement sélectionné
@@ -63,6 +65,8 @@ public class HebergementControllerClient {
     // Méthode d'initialisation pour charger les hébergements à l'ouverture
     public void initialize() {
         try {
+
+
             // Initialiser le composant des étoiles
             starRatingInput = new StarRatingInput();
             starRatingContainer.getChildren().add(starRatingInput);
@@ -224,13 +228,15 @@ public class HebergementControllerClient {
         alert.setContentText(message);
         alert.show();
     }
+    @FXML
+    private VBox avisSection; // Section des avis
 
     // Méthode pour charger les avis d'un hébergement
-    private void loadAvis(int hebergementId) {
+    private void loadAvis(int idheb) {
         try {
-            List<Avis> avisList = avisService.getAvisByHebergement(hebergementId);
+            List<Avis> avisList = avisService.getAvisByHebergement(idheb);
 
-            // Afficher les avis dans un VBox ou un GridPane
+            // Afficher les avis dans un VBox
             VBox avisContainer = new VBox(10);
             for (Avis avis : avisList) {
                 VBox avisCard = new VBox(5);
@@ -243,12 +249,74 @@ public class HebergementControllerClient {
                 avisContainer.getChildren().add(avisCard);
             }
 
-            // Ajouter le conteneur d'avis à votre interface
-            gridPaneHebergements.add(avisContainer, 0, 1); // Exemple d'ajout dans un GridPane
+            // Ajouter le conteneur d'avis à la section des avis
+            avisSection.getChildren().clear(); // Réinitialiser l'affichage
+            avisSection.getChildren().add(avisContainer); // Ajouter les avis
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
     }
+    @FXML
+    private TextField localisationField; // Champ de texte pour la localisation
+    @FXML
+    private Slider prixSlider; // Slider pour le budget
+
+
+
+    // Méthode pour naviguer vers la page des recommandations
+    @FXML
+    private void goToRecommendation() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Recommendation.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Recommandations");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page de recommandation.");
+        }
+    }
+
+    // Méthode pour appliquer les préférences de recherche
+    @FXML
+    private void appliquerPreferences() {
+        String localisation = localisationField.getText();
+        double prixMin = prixSlider.getMin(); // Valeur minimale du slider
+        double prixMax = prixSlider.getValue(); // Valeur actuelle du slider
+
+        try {
+            // Récupérer les recommandations basées sur les préférences
+            List<Hebergement> recommandations = serviceHebergement.recommanderHebergements(localisation, prixMin, prixMax, true);
+
+            if (recommandations.isEmpty()) {
+                afficherAlerte("Information", "Aucun hébergement ne correspond à vos critères.");
+                return;
+            }
+
+            // Charger la vue des recommandations
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Recommendation.fxml"));
+            Parent root = loader.load();
+
+            // Passer les recommandations au contrôleur des recommandations
+            RecommendationController recommendationController = loader.getController();
+            recommendationController.afficherRecommandations(recommandations);
+
+            // Afficher la vue des recommandations
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Recommandations");
+            stage.show();
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+            afficherAlerte("Erreur", "Une erreur s'est produite lors de la recherche des recommandations.");
+        }
+    }
+
+
+
 
     // Méthode pour naviguer vers la page des événements
     @FXML

@@ -107,4 +107,55 @@ public class ServiceHebergement implements IHebergement {
         }
         return hebergements;
     }
+
+    public List<Hebergement> recommanderHebergements(String localisation, double prixMin, double prixMax, boolean disponible) throws SQLException {
+        String query = "SELECT * FROM Hebergement WHERE 1=1";
+
+        if (localisation != null && !localisation.isEmpty()) {
+            query += " AND adresse LIKE '%" + localisation + "%'";
+        }
+        if (prixMin >= 0 && prixMax >= 0) {
+            query += " AND prixParNuit BETWEEN " + prixMin + " AND " + prixMax;
+        }
+        if (disponible) {
+            query += " AND disponible = 1";
+        }
+
+        // Exécuter la requête et retourner les résultats
+        return executeQueryAndMapToHebergements(query);
+
+    }
+    public List<Hebergement> executeQueryAndMapToHebergements(String query) throws SQLException {
+        List<Hebergement> hebergements = new ArrayList<>();
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        try {
+            // Établir la connexion à la base de données
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/weddingplanner", "root", "");
+            statement = connection.createStatement();
+            resultSet = statement.executeQuery(query);
+
+            // Parcourir les résultats et les mapper à des objets Hebergement
+            while (resultSet.next()) {
+                Hebergement hebergement = new Hebergement();
+                hebergement.setIdheb(resultSet.getInt("idheb"));
+                hebergement.setNom(resultSet.getString("nom"));
+                hebergement.setAdresse(resultSet.getString("adresse"));
+                hebergement.setPrixParNuit(resultSet.getDouble("prixParNuit"));
+                hebergement.setDisponible(resultSet.getBoolean("disponible"));
+                hebergement.setImageUrl(resultSet.getString("imageUrl"));
+
+                hebergements.add(hebergement);
+            }
+        } finally {
+            // Fermer les ressources
+            if (resultSet != null) resultSet.close();
+            if (statement != null) statement.close();
+            if (connection != null) connection.close();
+        }
+
+        return hebergements;
+    }
 }
