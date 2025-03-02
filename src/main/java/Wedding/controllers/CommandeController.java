@@ -16,6 +16,7 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 import javafx.geometry.Insets;
 import services.ServiceService;
+import tn.esprit.tacheuser.models.User;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -32,6 +33,8 @@ public class CommandeController {
     private ServiceProduit serviceProduit = new ServiceProduit();
     private ServiceService serviceService = new ServiceService();
     private ServiceFacture serviceFacture = new ServiceFacture();
+    private static User currentUser;
+    private double total;
 
     // Composants de l'interface utilisateur
     @FXML
@@ -118,7 +121,7 @@ public class CommandeController {
                 }
 
                 if (currentCommande == null) {
-                    currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>());
+                    currentCommande = new Commande(0, currentUser.getNom(), LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>(), 0.0);
                 }
 
                 Reservation nouvelleReservation = new Reservation(null, currentCommande, selectedProduct, selectedQuantity);
@@ -168,7 +171,7 @@ public class CommandeController {
             }
 
             if (currentCommande == null) {
-                currentCommande = new Commande(0, "User1", LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>());
+                currentCommande = new Commande(0, currentUser.getNom(), LocalDateTime.now(), "RESERVE", new ArrayList<>(), new ArrayList<>(), 0.0);
             }
 
             try {
@@ -191,10 +194,9 @@ public class CommandeController {
     private void confirmOrder() {
         if (currentCommande != null) {
             try {
-                serviceCommande.confirmerCommande(currentCommande.getId());
-                Facture facture = new Facture(0, currentCommande, LocalDateTime.now(), currentCommande.calculerTotal());
-                serviceFacture.ajouterFacture(facture);
-
+                serviceCommande.confirmerCommande(currentCommande.getId(), currentUser.getPrenom());
+                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total);
+                serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
                 showAlert("Succès", "Commande confirmée avec services et produits.", Alert.AlertType.INFORMATION);
             } catch (SQLException e) {
                 showAlert("Erreur", "Une erreur s'est produite : " + e.getMessage(), Alert.AlertType.ERROR);
