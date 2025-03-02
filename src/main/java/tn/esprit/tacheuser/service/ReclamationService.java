@@ -1,6 +1,6 @@
 package tn.esprit.tacheuser.service;
 
-import tn.esprit.tacheuser.utils.MySQLConnection;
+import Wedding.utils.MyDatabase;
 import tn.esprit.tacheuser.models.Reclamation;
 import tn.esprit.tacheuser.utils.SessionManager;
 
@@ -22,7 +22,7 @@ public class ReclamationService {
         reclamation.setUserId(user.getId()); // Assigner l'ID de l'utilisateur à la réclamation
 
         String query = "INSERT INTO reclamations (user_id, sujet, description, statut) VALUES (?, ?, ?, ?)";
-        try (Connection conn = MySQLConnection.getInstance().getConnection();
+        try (Connection conn = MyDatabase.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, reclamation.getUserId());
             stmt.setString(2, reclamation.getSujet());
@@ -45,7 +45,7 @@ public class ReclamationService {
         List<Reclamation> reclamations = new ArrayList<>();
         String query = "SELECT id, user_id, sujet, description, statut FROM reclamations";
 
-        try (Connection conn = MySQLConnection.getInstance().getConnection();
+        try (Connection conn = MyDatabase.getInstance().getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
             while (rs.next()) {
@@ -66,7 +66,7 @@ public class ReclamationService {
     // Mettre à jour une réclamation
     public boolean updateReclamation(Reclamation reclamation) {
         String query = "UPDATE reclamations SET sujet = ?, description = ?, statut = ? WHERE id = ?";
-        try (Connection conn = MySQLConnection.getInstance().getConnection();
+        try (Connection conn = MyDatabase.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, reclamation.getSujet());
             stmt.setString(2, reclamation.getDescription());
@@ -89,7 +89,7 @@ public class ReclamationService {
     // Supprimer une réclamation par ID
     public boolean deleteReclamation(int id) {
         String query = "DELETE FROM reclamations WHERE id = ?";
-        try (Connection conn = MySQLConnection.getInstance().getConnection();
+        try (Connection conn = MyDatabase.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, id);
 
@@ -111,7 +111,7 @@ public class ReclamationService {
         List<Reclamation> reclamations = new ArrayList<>();
         String query = "SELECT id, user_id, sujet, description, statut FROM reclamations WHERE user_id = ?";
 
-        try (Connection conn = MySQLConnection.getInstance().getConnection();
+        try (Connection conn = MyDatabase.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();

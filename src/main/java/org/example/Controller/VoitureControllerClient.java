@@ -3,9 +3,13 @@ package org.example.Controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -15,27 +19,16 @@ import org.example.services.ServiceVoiture;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 public class VoitureControllerClient {
-    private ServiceVoiture serviceVoiture = new ServiceVoiture();
+    private final ServiceVoiture serviceVoiture = new ServiceVoiture();
 
     @FXML
     private GridPane gridPaneVoitures;
-
     @FXML
-    private void goToStore() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherVoiture.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) gridPaneVoitures.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des voitures.");
-        }
-    }
+    private Button retourButton;
+    @FXML
+    private Button loginButton;
 
     public void initialize() {
         try {
@@ -54,15 +47,19 @@ public class VoitureControllerClient {
             VBox voitureCard = new VBox(10);
             voitureCard.getStyleClass().add("voiture-card");
 
-            Label voitureMarque = new Label("Marque : " + voiture.getMarque());
-            Label voiturePrix = new Label("Prix : " + String.format("%.2f", voiture.getPrix()) + " TND / jour");
-            Label voitureDispo = new Label(voiture.isDisponible() ? "Disponible" : "Non disponible");
-            voitureDispo.setStyle(voiture.isDisponible() ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
+
+            Label voitureMarque = new Label(voiture.getMarque());
+            voitureMarque.getStyleClass().add("voiture-name");
+
+            Label voiturePrix = new Label("Prix/Jour : " + String.format("%.2f", voiture.getPrix()) + " TND");
+            voiturePrix.getStyleClass().add("voiture-price");
 
             Button reserverButton = new Button("Réserver");
+            reserverButton.getStyleClass().add("button");
+            reserverButton.setDisable(!voiture.isDisponible());
             reserverButton.setOnAction(event -> ouvrirPageReservation(voiture));
 
-            voitureCard.getChildren().addAll(voitureMarque, voiturePrix, voitureDispo, reserverButton);
+            voitureCard.getChildren().addAll( voitureMarque, voiturePrix, reserverButton);
             gridPaneVoitures.add(voitureCard, col, row);
 
             col++;
@@ -74,40 +71,80 @@ public class VoitureControllerClient {
     }
 
     private void ouvrirPageReservation(Voiture voiture) {
-        if (!voiture.isDisponible()) {
-            afficherErreur("❌ Cette voiture n'est pas disponible pour la réservation.");
-            return;
-        }
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ajouterReservationVoiture.fxml"));
             Parent root = loader.load();
 
-            // Récupérer le contrôleur de la page de réservation
             AjouterResVoitureController controller = loader.getController();
             if (controller != null) {
-                controller.setVoitureData(voiture); // Passer l'objet voiture au contrôleur
-            } else {
-                afficherErreur("Erreur : Impossible de récupérer le contrôleur de la réservation !");
-                return;
+                controller.setVoitureData(voiture);
             }
 
-            Stage stage = new Stage();
-            stage.setTitle("Ajouter une Réservation");
+            Stage stage = (Stage) loginButton.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            afficherErreur("❌ Erreur lors de l'ouverture de la page de réservation : " + e.getMessage());
         }
     }
 
-
-    private void afficherErreur(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Erreur");
-        alert.setContentText(message);
-        alert.show();
+    @FXML
+    private void goToEvent() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/reservation.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des événements.");
+        }
     }
 
+    // Méthode pour naviguer vers la page des invités
+    @FXML
+    private void goToInvite() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/menuOrganizer.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des invités.");
+        }
+    }
+
+    // Méthode pour revenir à la page des hébergements
+    @FXML
+    private void goToDriveAndStay() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/hebergementclient.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Erreur lors du chargement de la page des hébergements.");
+        }
+    }
+
+    // Méthode pour ouvrir la page du panier
+    @FXML
+    public void goToCart(MouseEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Cart.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

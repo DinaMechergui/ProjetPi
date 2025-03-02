@@ -13,7 +13,10 @@
       <TextField fx:id="nomtf" layoutX="150" layoutY="50" promptText="Nom"/>
       <TextField fx:id="adressetf" layoutX="150" layoutY="100" promptText="Adresse"/>
       <TextField fx:id="prixtf" layoutX="150" layoutY="150" promptText="Prix"/>
+<<<<<<< HEAD
       <TextField fx:id="dispotf" layoutX="150" layoutY="200" promptText="Disponibilité (1 ou 0)"/>
+=======
+>>>>>>> d627a82e60f134c97eb373f12b67f85eff692716
 
       <Button text="Ajouter" layoutX="250" layoutY="250" onAction="#AjouterHebergement"/>
    </children>

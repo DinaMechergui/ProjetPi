@@ -23,7 +23,8 @@
                 <HBox spacing="20" alignment="CENTER_LEFT" styleClass="nav-links">
                     <Button text="Store" styleClass="nav-button" onAction="#goToStore" />
                     <Button text="Event" styleClass="nav-button" onAction="#goToEvent" />
-                    <Button text="Drive and Stay" styleClass="nav-button" onAction="#goToDriveAndStay" />
+                    <Button fx:id="driveAndStayButton" text="Drive and Stay" onMouseClicked="#goToDriveAndStay" />
+
                     <Button text="Invité" styleClass="nav-button" onAction="#goToInvite" />
                 </HBox>
 

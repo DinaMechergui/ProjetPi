@@ -12,7 +12,9 @@ import Wedding.entities.Reservation;
 import Wedding.utils.MyDatabase;
 import entities.ServiceItem;
 import javafx.util.Pair;
+
 import tn.esprit.tacheuser.models.User;
+
 
 public class ServiceCommande implements IServiceCommande {
     private Connection connection = MyDatabase.getInstance().getConnection();
@@ -201,6 +203,7 @@ public class ServiceCommande implements IServiceCommande {
         String sql = "SELECT s.*, sr.date FROM service_reserve sr JOIN service s ON sr.service_id = s.id WHERE sr.commande_id = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, commandeId);
+
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 // Créer un ServiceItem à partir de l'ID
@@ -211,6 +214,8 @@ public class ServiceCommande implements IServiceCommande {
         }
         return servicesReserves;
     }
+
+
 
     public void confirmerCommande(int idCommande, String utilisateur) throws SQLException {
         try {
@@ -264,33 +269,37 @@ public class ServiceCommande implements IServiceCommande {
         } finally {
             connection.setAutoCommit(true); // Réactiver l'auto-commit
         }
-    }    public List<Pair<Produit, Integer>> getProduitsEtQuantitesDansPanier(int commandeId) throws SQLException {
+    }
+
+
+
+    public List<Pair<Produit, Integer>> getProduitsEtQuantitesDansPanier(int commandeId) throws SQLException {
         List<Pair<Produit, Integer>> produitsEtQuantites = new ArrayList<>();
         String query = "SELECT p.id, p.nom, p.description, p.prix, p.categorie, p.stock, p.imageUrl, r.quantite " +
                 "FROM produit p " +
                 "JOIN reservation1 r ON p.id = r.produit_id " +
                 "WHERE r.commande_id = ? AND r.statut = 'RESERVE'";
 
-        try (PreparedStatement statement = connection.prepareStatement(query)) {
-            statement.setInt(1, commandeId);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    Produit produit = new Produit(
-                            resultSet.getInt("id"),
-                            resultSet.getString("nom"),
-                            resultSet.getString("description"),
-                            resultSet.getDouble("prix"),
-                            resultSet.getString("categorie"),
-                            resultSet.getInt("stock"),
-                            resultSet.getString("imageUrl")
-                    );
-                    int quantite = resultSet.getInt("quantite");
-                    produitsEtQuantites.add(new Pair<>(produit, quantite));
-                }
-            }
+        PreparedStatement statement = connection.prepareStatement(query);
+        statement.setInt(1, commandeId);
+        ResultSet resultSet = statement.executeQuery();
+
+        while (resultSet.next()) {
+            Produit produit = new Produit(
+                    resultSet.getInt("id"),
+                    resultSet.getString("nom"),
+                    resultSet.getString("description"),
+                    resultSet.getDouble("prix"),
+                    resultSet.getString("categorie"),
+                    resultSet.getInt("stock"),
+                    resultSet.getString("imageUrl") // Récupérer l'URL de l'image
+            );
+            int quantite = resultSet.getInt("quantite"); // Récupérer la quantité réservée
+            produitsEtQuantites.add(new Pair<>(produit, quantite));
         }
         return produitsEtQuantites;
     }
+
 
     /**
      * Annuler une réservation, en supprimant les produits réservés et la commande correspondante.
@@ -391,6 +400,7 @@ public class ServiceCommande implements IServiceCommande {
             stmt.setDate(3, java.sql.Date.valueOf(dateReservation));
             stmt.executeUpdate();
         }
+
     }
 
     /**
@@ -436,3 +446,4 @@ public class ServiceCommande implements IServiceCommande {
     }
 
 }
+

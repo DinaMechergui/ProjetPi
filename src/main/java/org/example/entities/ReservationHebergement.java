@@ -7,13 +7,13 @@ public class ReservationHebergement {
     private int id;
     private int idheb;
     private String client;
-    private String dateDebut;
-    private String dateFin;
+    private Date dateDebut;
+    private Date dateFin;
     private float prixTotal;
 
     public ReservationHebergement() {}
 
-    public ReservationHebergement(int idheb, String client, String dateDebut, String dateFin, float prixTotal) {
+    public ReservationHebergement(int idheb, String client, Date dateDebut, Date dateFin, float prixTotal) {
         this.idheb = idheb;
         this.client = client;
         this.dateDebut = dateDebut;
@@ -45,19 +45,19 @@ public class ReservationHebergement {
         this.client = client;
     }
 
-    public String getDateDebut() {
+    public Date getDateDebut() {
         return dateDebut;
     }
 
-    public void setDateDebut(String dateDebut) {
+    public void setDateDebut(Date dateDebut) {
         this.dateDebut = dateDebut;
     }
 
-    public String getDateFin() {
+    public Date getDateFin() {
         return dateFin;
     }
 
-    public void setDateFin(String dateFin) {
+    public void setDateFin(Date dateFin) {
         this.dateFin = dateFin;
     }
 
@@ -71,4 +71,3 @@ public class ReservationHebergement {
 
 
 }
-

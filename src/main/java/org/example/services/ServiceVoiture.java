@@ -75,8 +75,8 @@ public class ServiceVoiture implements IService<Voiture> {
         while (rs.next()) {
             voitures.add(new Voiture(0,(float) rs.getDouble("prix"),
                     rs.getString("marque"),  // 🔹 Conversion double → float
-                                rs.getBoolean("disponible")
-                        ));
+                    rs.getBoolean("disponible")
+            ));
 
         }
         return voitures;
@@ -102,9 +102,3 @@ public class ServiceVoiture implements IService<Voiture> {
     }
 
 }
-
-
-
-
-
-

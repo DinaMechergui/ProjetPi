@@ -1,7 +1,7 @@
 package tn.esprit.tacheuser.service;
 
 import tn.esprit.tacheuser.models.Reponse;
-import tn.esprit.tacheuser.utils.MySQLConnection;
+import Wedding.utils.MyDatabase;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,7 +15,7 @@ public class ReponseService {
     private final Connection connection;
 
     public ReponseService() {
-        this.connection = MySQLConnection.getInstance().getConnection();
+        this.connection = MyDatabase.getInstance().getConnection();
     }
 
     public void addReponse(Reponse reponse) {
