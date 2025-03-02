@@ -63,6 +63,7 @@
                 </GridPane>
             </ScrollPane>
         </VBox>
+        <WebView fx:id="webView" prefWidth="600" prefHeight="400"/>
 
         <!-- ===== Section des avis ===== -->
         <VBox fx:id="avisSection" spacing="5" style="-fx-padding: 5;">

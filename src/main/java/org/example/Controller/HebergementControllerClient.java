@@ -14,6 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import org.example.components.StarRatingInput;
 import org.example.entities.Avis;
@@ -313,6 +314,38 @@ public class HebergementControllerClient {
             e.printStackTrace();
             afficherAlerte("Erreur", "Une erreur s'est produite lors de la recherche des recommandations.");
         }
+    }
+
+    @FXML
+    private WebView webView;
+
+    private static final String MAPS_API_KEY = "AIzaSyDqKbNwR-HfCjFwihwZ-TirCMefVDmpDOc";
+
+
+
+    private void loadGoogleMaps() {
+        String htmlContent = "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "    <title>Google Maps</title>\n" +
+                "    <script src=\"https://maps.googleapis.com/maps/api/js?key=" + MAPS_API_KEY + "\"></script>\n" +
+                "    <script>\n" +
+                "        function initialize() {\n" +
+                "            var mapOptions = {\n" +
+                "                center: new google.maps.LatLng(36.8065, 10.1815), // Coordonnées de Tunis\n" +
+                "                zoom: 12\n" +
+                "            };\n" +
+                "            var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);\n" +
+                "        }\n" +
+                "        google.maps.event.addDomListener(window, 'load', initialize);\n" +
+                "    </script>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "    <div id=\"map-canvas\" style=\"width: 100%; height: 100%;\"></div>\n" +
+                "</body>\n" +
+                "</html>";
+
+        webView.getEngine().loadContent(htmlContent);
     }
 
 
