@@ -20,6 +20,9 @@ public class AjouterHebergementController {
     @FXML
     private TextField prixtf;
 
+    @FXML
+    private TextField dispotf;
+
     private final ServiceHebergement serviceHebergement = new ServiceHebergement();
     private HebergementController hebergementController; // Référence du contrôleur principal
 
@@ -50,10 +53,20 @@ public class AjouterHebergementController {
                 throw new IllegalArgumentException("⚠ Le prix doit être un nombre positif !");
             }
 
-            // La disponibilité est toujours vraie (1)
-            boolean disponible = true;
 
-            Hebergement hebergement = new Hebergement(0 , nom, adresse, prix, disponible,"https://media.istockphoto.com/id/119926339/photo/resort-swimming-pool.jpg?s=612x612&w=0&k=20&c=9QtwJC2boq3GFHaeDsKytF4-CavYKQuy1jBD2IRfYKc=");
+            String dispoText = dispotf.getText().trim();
+            if (!dispoText.equals("0") && !dispoText.equals("1")) {
+                throw new IllegalArgumentException("⚠ La disponibilité doit être 1 (Oui) ou 0 (Non) !");
+            }
+            boolean disponible = dispoText.equals("1");
+            String imageUrl = "defaultImage.jpg"; // Valeur par défaut si aucune image n'est fournie
+
+            Hebergement hebergement = new Hebergement(0, nom, adresse, prix, disponible ,imageUrl );
+
+            // La disponibilité est toujours vraie (1)
+
+          //  Hebergement hebergement = new Hebergement(0 , nom, adresse, prix, disponible,"https://media.istockphoto.com/id/119926339/photo/resort-swimming-pool.jpg?s=612x612&w=0&k=20&c=9QtwJC2boq3GFHaeDsKytF4-CavYKQuy1jBD2IRfYKc=");
+
             serviceHebergement.ajouter(hebergement);
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);

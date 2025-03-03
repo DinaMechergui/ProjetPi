@@ -14,7 +14,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebView;
+
 import javafx.stage.Stage;
 import org.example.components.StarRatingInput;
 import org.example.entities.Avis;

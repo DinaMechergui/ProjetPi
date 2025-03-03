@@ -3,7 +3,7 @@ package org.example.services;
 
 import org.example.entities.ReservationHebergement;
 import org.example.entities.ReservationHebergementDetail;
-import org.example.utils.MyDatabase;
+import org.Wedding.utils.MyDatabase;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -179,5 +179,3 @@ public class ServiceResHebergement implements IResHebergement<ReservationHeberge
     }
 
 }
-
-

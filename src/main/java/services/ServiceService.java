@@ -3,7 +3,8 @@ package services;
 
 // Importe les classes nécessaires
 import entities.ServiceItem; // Entité représentant un service
-import org.Wedding.utils.MyDatabase; // Classe utilitaire pour la connexion DB
+import Wedding.utils.MyDatabase;
+
 import java.sql.*; // API JDBC pour les opérations SQL
 import java.util.ArrayList; // Liste dynamique
 import java.util.List; // Interface pour les listes

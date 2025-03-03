@@ -2,7 +2,7 @@ package org.example.services;
 
 import javafx.scene.image.Image;
 import org.example.entities.Hebergement;
-import Wedding.utils.MyDatabase;
+import org.Wedding.utils.MyDatabase;
 
 import java.io.ByteArrayInputStream;
 import java.sql.*;

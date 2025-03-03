@@ -1,7 +1,7 @@
 package org.example.services;
 
 import org.example.entities.Voiture;
-import org.example.utils.MyDatabase;
+import org.Wedding.utils.MyDatabase;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

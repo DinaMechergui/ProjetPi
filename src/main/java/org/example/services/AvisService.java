@@ -1,7 +1,7 @@
 package org.example.services;
 
 import org.example.entities.Avis;
-import org.example.utils.MyDatabase;
+import Wedding.utils.MyDatabase;
 
 import java.sql.*;
 import java.util.ArrayList;

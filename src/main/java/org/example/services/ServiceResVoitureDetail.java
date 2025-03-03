@@ -1,7 +1,7 @@
 package org.example.services;
 
 import org.example.entities.ReservationVoitureDetail;
-import org.example.utils.MyDatabase;
+import Wedding.utils.MyDatabase;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

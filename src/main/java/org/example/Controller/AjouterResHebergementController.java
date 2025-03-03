@@ -6,7 +6,7 @@ import javafx.scene.control.*;
 import org.example.entities.Hebergement;
 import org.example.entities.ReservationHebergement;
 import org.example.services.ServiceResHebergement;
-
+import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
@@ -39,60 +39,61 @@ public class AjouterResHebergementController {
         prixttf.setText(String.valueOf(hebergement.getPrixParNuit())); // Pré-remplir le prix
     }
 
-    @FXML
-    public void ajouterResHebergement() {
-        try {
-            // Récupérer les valeurs du formulaire
-            String client = nompretf.getText();
-            LocalDate dateDebut = ddtf.getValue();
-            LocalDate dateFin = dftf.getValue();
-            float prixTotal = Float.parseFloat(prixttf.getText());
 
-            // Vérification des champs
-            if (client.isEmpty() || dateDebut == null || dateFin == null) {
-                afficherErreur("⚠️ Veuillez remplir tous les champs !");
-                return;
+        @FXML
+        public void ajouterResHebergement() {
+            try {
+                // Récupérer les valeurs du formulaire
+                String client = nompretf.getText();
+                LocalDate dateDebut = ddtf.getValue();
+                LocalDate dateFin = dftf.getValue();
+                float prixTotal = Float.parseFloat(prixttf.getText());
+
+                // Vérification des champs
+                if (client.isEmpty() || dateDebut == null || dateFin == null) {
+                    afficherErreur("⚠️ Veuillez remplir tous les champs !");
+                    return;
+                }
+
+                if (dateDebut.isBefore(LocalDate.now())) {
+                    afficherErreur("❌ La date de début ne peut pas être dans le passé !");
+                    return;
+                }
+
+                if (dateFin.isBefore(dateDebut)) {
+                    afficherErreur("❌ La date de fin doit être après la date de début !");
+                    return;
+                }
+
+                if (prixTotal <= 0) {
+                    afficherErreur("❌ Prix total invalide !");
+                    return;
+                }
+
+                // Vérifier si l'hébergement est déjà réservé
+                if (serviceReservationHebergement.estReserve(hebergement.getIdheb(), dateDebut, dateFin)) {
+                    afficherErreur("❌ Cet hébergement est déjà réservé à ces dates !");
+                    return;
+                }
+
+                // Créer et enregistrer la réservation
+                ReservationHebergement reservation = new ReservationHebergement(
+                        hebergement.getIdheb(), client,
+                        java.sql.Date.valueOf(dateDebut),
+                        java.sql.Date.valueOf(dateFin),
+                        prixTotal
+                );
+
+                serviceReservationHebergement.ajouter(reservation);
+
+                afficherMessage("✅ Réservation effectuée avec succès !");
+            } catch (NumberFormatException e) {
+                afficherErreur("❌ Erreur : Prix total invalide !");
+            } catch (SQLException e) {
+                afficherErreur("❌ Erreur avec la base de données : " + e.getMessage());
+                e.printStackTrace();
             }
-
-            if (dateDebut.isBefore(LocalDate.now())) {
-                afficherErreur("❌ La date de début ne peut pas être dans le passé !");
-                return;
-            }
-
-            if (dateFin.isBefore(dateDebut)) {
-                afficherErreur("❌ La date de fin doit être après la date de début !");
-                return;
-            }
-
-            if (prixTotal <= 0) {
-                afficherErreur("❌ Prix total invalide !");
-                return;
-            }
-
-            // Vérifier si l'hébergement est déjà réservé
-            if (serviceReservationHebergement.estReserve(hebergement.getIdheb(), dateDebut, dateFin)) {
-                afficherErreur("❌ Cet hébergement est déjà réservé à ces dates !");
-                return;
-            }
-
-            // Créer et enregistrer la réservation
-            ReservationHebergement reservation = new ReservationHebergement(
-                    hebergement.getIdheb(), client,
-                    java.sql.Date.valueOf(dateDebut),
-                    java.sql.Date.valueOf(dateFin),
-                    prixTotal
-            );
-
-            serviceReservationHebergement.ajouter(reservation);
-
-            afficherMessage("✅ Réservation effectuée avec succès !");
-        } catch (NumberFormatException e) {
-            afficherErreur("❌ Erreur : Prix total invalide !");
-        } catch (SQLException e) {
-            afficherErreur("❌ Erreur avec la base de données : " + e.getMessage());
-            e.printStackTrace();
         }
-    }
 
     private void afficherErreur(String message) {
         errorLabel.setText(message);
