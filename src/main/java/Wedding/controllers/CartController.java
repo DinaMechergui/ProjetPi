@@ -1,9 +1,6 @@
 package Wedding.controllers;
 
-import Wedding.entities.Commande;
-import Wedding.entities.Facture;
-import Wedding.entities.PdfGenerator;
-import Wedding.entities.Produit;
+import Wedding.entities.*;
 import Wedding.service.ServiceCommande;
 import Wedding.service.ServiceFacture;
 import Wedding.utils.MyDatabase;
@@ -33,17 +30,20 @@ import tn.esprit.tacheuser.utils.SessionManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CartController {
     private final ServiceCommande serviceCommande = new ServiceCommande();
     private Commande currentCommande;  // La commande actuelle
     private static User currentUser;
+
 
     @FXML
     private GridPane gridPaneCart;
@@ -235,8 +235,9 @@ public class CartController {
             e.printStackTrace();
         }
     }
-    @FXML
 
+
+    @FXML
     private void handleConfirmOrder(ActionEvent event) {
         try {
             if (currentCommande != null && currentCommande.getId() != -1 && currentUser != null) {
@@ -250,19 +251,28 @@ public class CartController {
 
                 // Calculer le total en fonction de la quantité réservée
                 double total = calculateTotal(produitsEtQuantites);
-                openPaymentWindow(event, total); // Utilisez le total calculé
 
                 // Créer une facture après la confirmation de la commande
                 ServiceFacture serviceFacture = new ServiceFacture();
-                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total);
-                serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
+                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total);                serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
                 System.out.println("Facture créée pour la commande ID : " + currentCommande.getId());
 
+                // Générer la facture HTML
+                List<Produit> produits = produitsEtQuantites.stream()
+                        .map(Pair::getKey)
+                        .collect(Collectors.toList());
+                String outputPath = "facture_commande_" + currentCommande.getId() + ".html";
+                InvoiceGenerator.generateInvoice(currentUser, facture, produits, outputPath);
+
+                // Afficher un message de succès
                 showAlert("Commande Confirmée", "Votre commande a été confirmée et une facture a été générée.", Alert.AlertType.INFORMATION);
+
+                // Ouvrir la fenêtre de paiement avec le montant total
+                openPaymentWindow(event, total);
             } else {
                 showAlert("Aucune commande", "Il n'y a aucune commande à confirmer.", Alert.AlertType.WARNING);
             }
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             e.printStackTrace();
             showAlert("Erreur", "Une erreur est survenue lors de la confirmation ou de la création de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
         }
@@ -333,8 +343,8 @@ public class CartController {
                     File file = fileChooser.showSaveDialog(null);
 
                     if (file != null) {
-                        // Générer le PDF à l'emplacement choisi
-                        PdfGenerator.generateInvoicePdf(facture, file.getAbsolutePath());
+                        // Générer le PDF à l'emplacement choisi, en passant l'utilisateur (currentUser)
+                        PdfGenerator.generateInvoicePdf(facture, currentUser, file.getAbsolutePath());
 
                         // Afficher un message dans la console (optionnel)
                         System.out.println("Facture générée avec succès : " + file.getAbsolutePath());
@@ -346,7 +356,7 @@ public class CartController {
                     System.out.println("Aucune facture trouvée pour cette commande.");
                     showAlert("Aucune facture", "Aucune facture trouvée pour cette commande.", Alert.AlertType.WARNING);
                 }
-            } catch (SQLException | IOException | DocumentException e) {
+            } catch (SQLException | IOException | DocumentException | com.lowagie.text.DocumentException e) {
                 System.err.println("Erreur lors de la génération de la facture : " + e.getMessage());
                 showAlert("Erreur", "Une erreur est survenue lors de la génération de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
             }
