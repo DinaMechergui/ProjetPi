@@ -1,21 +1,21 @@
 package org.example.entities;
 
-
 import java.util.Date;
 
 public class ReservationHebergement {
     private int id;
     private int idheb;
-    private String client;
+    private String utilisateur; // Changement de "client" à "utilisateur"
     private Date dateDebut;
     private Date dateFin;
     private float prixTotal;
 
     public ReservationHebergement() {}
 
-    public ReservationHebergement(int idheb, String client, Date dateDebut, Date dateFin, float prixTotal) {
+    // Constructeur mis à jour pour utiliser "utilisateur" au lieu de "client"
+    public ReservationHebergement(int idheb, String utilisateur, Date dateDebut, Date dateFin, float prixTotal) {
         this.idheb = idheb;
-        this.client = client;
+        this.utilisateur = utilisateur;
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
         this.prixTotal = prixTotal;
@@ -37,12 +37,13 @@ public class ReservationHebergement {
         this.idheb = idheb;
     }
 
-    public String getClient() {
-        return client;
+    // Getter et Setter mis à jour pour "utilisateur"
+    public String getUtilisateur() {
+        return utilisateur;
     }
 
-    public void setClient(String client) {
-        this.client = client;
+    public void setUtilisateur(String utilisateur) {
+        this.utilisateur = utilisateur;
     }
 
     public Date getDateDebut() {
@@ -68,6 +69,4 @@ public class ReservationHebergement {
     public void setPrixTotal(float prixTotal) {
         this.prixTotal = prixTotal;
     }
-
-
 }

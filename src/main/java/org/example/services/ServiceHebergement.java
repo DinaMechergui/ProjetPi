@@ -80,7 +80,10 @@ public class ServiceHebergement implements IHebergement {
                     rs.getString("adresse"),
                     rs.getDouble("prixParNuit"),
                     rs.getBoolean("disponible"),
-                    rs.getString("imageUrl") // Récupération de l'URL de l'image
+                    rs.getString("imageUrl"), // Récupération de l'URL de l'image
+                    rs.getDouble("latitude"),
+                    rs.getDouble("longitude")
+
             );
             hebergements.add(hebergement);
         }
@@ -90,7 +93,7 @@ public class ServiceHebergement implements IHebergement {
 
     public List<Hebergement> getAllHebergements() throws SQLException {
         List<Hebergement> hebergements = new ArrayList<>();
-        String query = "SELECT idheb, nom, adresse, prixParNuit, disponible, imageUrl FROM hebergement"; // Ajout de imageUrl
+        String query = "SELECT idheb, nom, adresse, prixParNuit, disponible, imageUrl,latitude,longitude FROM hebergement"; // Ajout de imageUrl
 
         Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(query);
@@ -102,7 +105,9 @@ public class ServiceHebergement implements IHebergement {
                     rs.getString("adresse"),
                     rs.getDouble("prixParNuit"),
                     rs.getBoolean("disponible"),
-                    rs.getString("imageUrl") // Ajout de l'URL de l'image
+                    rs.getString("imageUrl"), // Ajout de l'URL de l'image
+                    rs.getDouble("latitude"),
+                    rs.getDouble("longitude")
             ));
         }
         return hebergements;
@@ -146,6 +151,8 @@ public class ServiceHebergement implements IHebergement {
                 hebergement.setPrixParNuit(resultSet.getDouble("prixParNuit"));
                 hebergement.setDisponible(resultSet.getBoolean("disponible"));
                 hebergement.setImageUrl(resultSet.getString("imageUrl"));
+                hebergement.setLatitude(resultSet.getDouble("latitude"));
+                hebergement.setLongitude(resultSet.getDouble("longitude"));
 
                 hebergements.add(hebergement);
             }
@@ -154,6 +161,33 @@ public class ServiceHebergement implements IHebergement {
             if (resultSet != null) resultSet.close();
             if (statement != null) statement.close();
             if (connection != null) connection.close();
+        }
+
+        return hebergements;
+    }
+
+    public List<Hebergement> getHebergementsWithValidCoordinates() throws SQLException {
+        List<Hebergement> hebergements = new ArrayList<>();
+        String query = "SELECT idheb, nom, adresse, prixParNuit, disponible, imageUrl, latitude, longitude " +
+                "FROM hebergement WHERE latitude != 0 AND longitude != 0";
+
+        try (Connection connection = MyDatabase.getInstance().getConnection();
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                Hebergement hebergement = new Hebergement();
+                hebergement.setIdheb(resultSet.getInt("idheb"));
+                hebergement.setNom(resultSet.getString("nom"));
+                hebergement.setAdresse(resultSet.getString("adresse"));
+                hebergement.setPrixParNuit(resultSet.getDouble("prixParNuit"));
+                hebergement.setDisponible(resultSet.getBoolean("disponible"));
+                hebergement.setImageUrl(resultSet.getString("imageUrl"));
+                hebergement.setLatitude(resultSet.getDouble("latitude"));
+                hebergement.setLongitude(resultSet.getDouble("longitude"));
+
+                hebergements.add(hebergement);
+            }
         }
 
         return hebergements;

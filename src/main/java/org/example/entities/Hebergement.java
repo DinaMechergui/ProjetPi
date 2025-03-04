@@ -6,19 +6,27 @@ public class Hebergement {
     private String adresse;
     private double prixParNuit;
     private boolean disponible;
-    private static String imageUrl; // URL de l'image
+    private String imageUrl;
+    private double latitude; // Ajout de l'attribut latitude
+    private double longitude; // Ajout de l'attribut longitude
 
-    public Hebergement() {}
-
-    public Hebergement(int idheb, String nom, String adresse, double prixParNuit, boolean disponible, String imageUrl) {
+    // Constructeur
+    public Hebergement(int idheb, String nom, String adresse, double prixParNuit, boolean disponible, String imageUrl, double latitude, double longitude) {
         this.idheb = idheb;
         this.nom = nom;
         this.adresse = adresse;
         this.prixParNuit = prixParNuit;
         this.disponible = disponible;
-        this.imageUrl = imageUrl; // Initialisation de l'URL de l'image
+        this.imageUrl = imageUrl;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
+    public Hebergement() {
+
+    }
+
+    // Getters et Setters
     public int getIdheb() {
         return idheb;
     }
@@ -59,11 +67,28 @@ public class Hebergement {
         this.disponible = disponible;
     }
 
-    public static String getImageUrl() {
-        return imageUrl; // Retourner l'URL de l'image
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl; // Définir l'URL de l'image
+        this.imageUrl = imageUrl;
+    }
+
+    // Ajout des getters pour latitude et longitude
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

@@ -4,30 +4,59 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.AjouterResHebergementController">
       <children>
             <!-- Titre -->
-            <Label layoutX="220.0" layoutY="30.0" text="Réservation Hébergement" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+            <Label layoutX="200.0" layoutY="30.0" text="Réservation Hébergement" style="-fx-font-size: 18px; -fx-font-weight: bold;">
+                  <font>
+                        <Font name="Arial" size="18.0" />
+                  </font>
+            </Label>
 
-            <!-- Champs de saisie -->
-            <Label layoutX="46.0" layoutY="80.0" text="Nom et prénom" />
-            <TextField fx:id="nompretf" layoutX="200.0" layoutY="76.0" prefWidth="250.0" />
+            <!-- Champ Nom et Prénom -->
+            <Label layoutX="46.0" layoutY="80.0" text="Nom et prénom" style="-fx-font-size: 14px;" />
+            <TextField fx:id="nompretf" layoutX="200.0" layoutY="76.0" prefWidth="250.0" prefHeight="30.0" style="-fx-font-size: 14px;">
+                  <tooltip>
+                        <Tooltip text="Entrez votre nom et prénom" />
+                  </tooltip>
+            </TextField>
 
-            <Label layoutX="46.0" layoutY="120.0" text="Date Début" />
-            <DatePicker fx:id="ddtf" layoutX="200.0" layoutY="116.0" prefWidth="250.0" />
+            <!-- Champ Date Début -->
+            <Label layoutX="46.0" layoutY="120.0" text="Date Début" style="-fx-font-size: 14px;" />
+            <DatePicker fx:id="ddtf" layoutX="200.0" layoutY="116.0" prefWidth="250.0" prefHeight="30.0" style="-fx-font-size: 14px;">
+                  <tooltip>
+                        <Tooltip text="Sélectionnez la date de début" />
+                  </tooltip>
+            </DatePicker>
 
-            <Label layoutX="46.0" layoutY="160.0" text="Date Fin" />
-            <DatePicker fx:id="dftf" layoutX="200.0" layoutY="156.0" prefWidth="250.0" />
+            <!-- Champ Date Fin -->
+            <Label layoutX="46.0" layoutY="160.0" text="Date Fin" style="-fx-font-size: 14px;" />
+            <DatePicker fx:id="dftf" layoutX="200.0" layoutY="156.0" prefWidth="250.0" prefHeight="30.0" style="-fx-font-size: 14px;">
+                  <tooltip>
+                        <Tooltip text="Sélectionnez la date de fin" />
+                  </tooltip>
+            </DatePicker>
 
-            <Label layoutX="46.0" layoutY="200.0" text="Prix Total" />
-            <TextField fx:id="prixttf" layoutX="200.0" layoutY="196.0" prefWidth="250.0" />
+            <!-- Champ Prix Total -->
+            <Label layoutX="46.0" layoutY="200.0" text="Prix Total" style="-fx-font-size: 14px;" />
+            <TextField fx:id="prixttf" layoutX="200.0" layoutY="196.0" prefWidth="250.0" prefHeight="30.0" style="-fx-font-size: 14px;">
+                  <tooltip>
+                        <Tooltip text="Entrez le prix total" />
+                  </tooltip>
+            </TextField>
 
-            <Label fx:id="errorLabel" layoutX="200.0" layoutY="220.0" textFill="red"/>
-
+            <!-- Label pour les messages d'erreur ou de succès -->
+            <Label fx:id="errorLabel" layoutX="200.0" layoutY="230.0" prefWidth="250.0" wrapText="true" style="-fx-font-size: 14px;" />
 
             <!-- Bouton Réserver -->
-            <Button layoutX="230.0" layoutY="260.0" mnemonicParsing="false" onAction="#ajouterResHebergement" text="Réserver" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;" />
+            <Button layoutX="230.0" layoutY="260.0" mnemonicParsing="false" onAction="#ajouterResHebergement" text="Réserver" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;">
+                  <tooltip>
+                        <Tooltip text="Cliquez pour réserver" />
+                  </tooltip>
+            </Button>
       </children>
 </AnchorPane>

@@ -21,9 +21,9 @@ public class ServiceResHebergement implements IResHebergement<ReservationHeberge
 
     @Override
     public void ajouter(ReservationHebergement reservation) throws SQLException {
-        String req = "INSERT INTO reservation_hebergement (idheb, client, datedebut, datefin, prixtotal) VALUES ('"
+        String req = "INSERT INTO reservation_hebergement (idheb, utilisateur, datedebut, datefin, prixtotal) VALUES ('"
                 + reservation.getIdheb() + "', '"
-                + reservation.getClient() + "', '"
+                + reservation.getUtilisateur() + "', '"
                 + reservation.getDateDebut() + "', '"
                 + reservation.getDateFin() + "', "
                 + reservation.getPrixTotal() + ")";
@@ -124,7 +124,7 @@ public class ServiceResHebergement implements IResHebergement<ReservationHeberge
     public List<ReservationHebergementDetail> getReservationsAvecHebergement() throws SQLException {
         List<ReservationHebergementDetail> reservations = new ArrayList<>();
 
-        String req = "SELECT rh.id AS res_id, rh.client, rh.datedebut, rh.datefin, rh.prixtotal, " +
+        String req = "SELECT rh.id AS res_id, rh.utilisateur, rh.datedebut, rh.datefin, rh.prixtotal, " +
                 "h.idheb AS hebergement_id, h.nom, h.adresse, h.prixParNuit, h.disponible " +
                 "FROM reservation_hebergement rh " +
                 "JOIN hebergement h ON rh.idheb = h.idheb";
@@ -135,7 +135,7 @@ public class ServiceResHebergement implements IResHebergement<ReservationHeberge
             while (rs.next()) {
                 ReservationHebergementDetail reservation = new ReservationHebergementDetail(
                         rs.getInt("res_id"),
-                        rs.getString("client"),
+                        rs.getString("utilisateur"),
                         rs.getString("datedebut"),
                         rs.getString("datefin"),
                         rs.getDouble("prixtotal"),

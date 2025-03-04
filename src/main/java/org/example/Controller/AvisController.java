@@ -22,11 +22,18 @@ public class AvisController {
 
     // Ajouter un avis
     @PostMapping("/add")
-    public Avis addAvis(@RequestBody Avis avis) throws SQLException {
+    public Avis addAvis(@RequestBody Avis avis, @RequestParam int iduser) throws SQLException {
         // Valider que la note est entre 1 et 5
         if (avis.getNote() < 1 || avis.getNote() > 5) {
             throw new IllegalArgumentException("La note doit être entre 1 et 5.");
         }
+
+        // Définir l'iduser dans l'objet Avis
+        avis.setIduser(iduser);
+
+        // Ajouter la date de création automatiquement
+        avis.setDateCreation(new java.util.Date());
+
         return avisService.ajouterAvis(avis);
     }
 
@@ -34,5 +41,11 @@ public class AvisController {
     @DeleteMapping("/delete/{id}")
     public void deleteAvis(@PathVariable int id) throws SQLException {
         avisService.supprimerAvis(id);
+    }
+
+    // Récupérer la note moyenne d'un hébergement
+    @GetMapping("/average/{idheb}")
+    public double getAverageRating(@PathVariable int idheb) throws SQLException {
+        return avisService.getAverageRating(idheb);
     }
 }

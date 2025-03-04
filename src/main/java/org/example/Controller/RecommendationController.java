@@ -16,8 +16,12 @@ public class RecommendationController {
 
     // Méthode pour afficher les recommandations
     public void afficherRecommandations(List<Hebergement> recommandations) {
+        System.out.println("Nombre de recommandations reçues : " + (recommandations != null ? recommandations.size() : "null"));
+
         if (recommandations == null || recommandations.isEmpty()) {
             System.out.println("Aucune recommandation à afficher.");
+            Label messageLabel = new Label("Aucune recommandation disponible.");
+            gridPaneRecommandations.add(messageLabel, 0, 0);
             return;
         }
 
@@ -26,8 +30,13 @@ public class RecommendationController {
         int col = 0;
 
         for (Hebergement hebergement : recommandations) {
-            VBox hebergementCard = createHebergementCard(hebergement); // Créer une carte pour l'hébergement
-            gridPaneRecommandations.add(hebergementCard, col, row); // Ajouter la carte à la grille
+            System.out.println("Création de la carte pour : " + hebergement.getNom());
+
+            VBox hebergementCard = createHebergementCard(hebergement);
+            gridPaneRecommandations.add(hebergementCard, col, row);
+
+            System.out.println("Ajout de la carte à la position : row=" + row + ", col=" + col);
+
             col++;
             if (col > 2) { // 3 colonnes par ligne
                 col = 0;
@@ -36,7 +45,6 @@ public class RecommendationController {
         }
     }
 
-    // Méthode pour créer une carte d'hébergement
     private VBox createHebergementCard(Hebergement hebergement) {
         VBox card = new VBox(10);
         card.getStyleClass().add("hebergement-card");

@@ -1,16 +1,18 @@
 package org.example.Controller;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import org.example.entities.Hebergement;
 import org.example.entities.ReservationHebergement;
 import org.example.services.ServiceResHebergement;
+import tn.esprit.tacheuser.models.User;
+
 import java.sql.Date;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
 public class AjouterResHebergementController {
+    private User currentUser;
 
     @FXML
     private TextField nompretf;
@@ -34,72 +36,79 @@ public class AjouterResHebergementController {
 
     private final ServiceResHebergement serviceReservationHebergement = new ServiceResHebergement();
 
+    // Méthode pour définir l'utilisateur courant
+    public void setCurrentUser(User currentUser) {
+        this.currentUser = currentUser;
+    }
+
+    // Méthode pour définir les données de l'hébergement
     public void setHebergementData(Hebergement hebergement) {
         this.hebergement = hebergement;
         prixttf.setText(String.valueOf(hebergement.getPrixParNuit())); // Pré-remplir le prix
     }
 
+    @FXML
+    public void ajouterResHebergement() {
+        try {
+            // Récupérer les valeurs du formulaire
+            String utilisateur = nompretf.getText(); // Utiliser "utilisateur" au lieu de "client"
+            LocalDate dateDebut = ddtf.getValue();
+            LocalDate dateFin = dftf.getValue();
+            float prixTotal = Float.parseFloat(prixttf.getText());
 
-        @FXML
-        public void ajouterResHebergement() {
-            try {
-                // Récupérer les valeurs du formulaire
-                String client = nompretf.getText();
-                LocalDate dateDebut = ddtf.getValue();
-                LocalDate dateFin = dftf.getValue();
-                float prixTotal = Float.parseFloat(prixttf.getText());
-
-                // Vérification des champs
-                if (client.isEmpty() || dateDebut == null || dateFin == null) {
-                    afficherErreur("⚠️ Veuillez remplir tous les champs !");
-                    return;
-                }
-
-                if (dateDebut.isBefore(LocalDate.now())) {
-                    afficherErreur("❌ La date de début ne peut pas être dans le passé !");
-                    return;
-                }
-
-                if (dateFin.isBefore(dateDebut)) {
-                    afficherErreur("❌ La date de fin doit être après la date de début !");
-                    return;
-                }
-
-                if (prixTotal <= 0) {
-                    afficherErreur("❌ Prix total invalide !");
-                    return;
-                }
-
-                // Vérifier si l'hébergement est déjà réservé
-                if (serviceReservationHebergement.estReserve(hebergement.getIdheb(), dateDebut, dateFin)) {
-                    afficherErreur("❌ Cet hébergement est déjà réservé à ces dates !");
-                    return;
-                }
-
-                // Créer et enregistrer la réservation
-                ReservationHebergement reservation = new ReservationHebergement(
-                        hebergement.getIdheb(), client,
-                        java.sql.Date.valueOf(dateDebut),
-                        java.sql.Date.valueOf(dateFin),
-                        prixTotal
-                );
-
-                serviceReservationHebergement.ajouter(reservation);
-
-                afficherMessage("✅ Réservation effectuée avec succès !");
-            } catch (NumberFormatException e) {
-                afficherErreur("❌ Erreur : Prix total invalide !");
-            } catch (SQLException e) {
-                afficherErreur("❌ Erreur avec la base de données : " + e.getMessage());
-                e.printStackTrace();
+            // Vérification des champs
+            if (utilisateur.isEmpty() || dateDebut == null || dateFin == null) {
+                afficherErreur("⚠️ Veuillez remplir tous les champs !");
+                return;
             }
-        }
 
+            if (dateDebut.isBefore(LocalDate.now())) {
+                afficherErreur("❌ La date de début ne peut pas être dans le passé !");
+                return;
+            }
+
+            if (dateFin.isBefore(dateDebut)) {
+                afficherErreur("❌ La date de fin doit être après la date de début !");
+                return;
+            }
+
+            if (prixTotal <= 0) {
+                afficherErreur("❌ Prix total invalide !");
+                return;
+            }
+
+            // Vérifier si l'hébergement est déjà réservé
+            if (serviceReservationHebergement.estReserve(hebergement.getIdheb(), dateDebut, dateFin)) {
+                afficherErreur("❌ Cet hébergement est déjà réservé à ces dates !");
+                return;
+            }
+
+            // Créer et enregistrer la réservation
+            ReservationHebergement reservation = new ReservationHebergement(
+                    hebergement.getIdheb(), utilisateur, // Utiliser "utilisateur" au lieu de "client"
+                    Date.valueOf(dateDebut),
+                    Date.valueOf(dateFin),
+                    prixTotal
+            );
+
+            serviceReservationHebergement.ajouter(reservation);
+
+            afficherMessage("✅ Réservation effectuée avec succès !");
+        } catch (NumberFormatException e) {
+            afficherErreur("❌ Erreur : Prix total invalide !");
+        } catch (SQLException e) {
+            afficherErreur("❌ Erreur avec la base de données : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Méthode pour afficher un message d'erreur
     private void afficherErreur(String message) {
         errorLabel.setText(message);
         errorLabel.setStyle("-fx-text-fill: red;");
     }
 
+    // Méthode pour afficher un message de succès
     private void afficherMessage(String message) {
         errorLabel.setText(message);
         errorLabel.setStyle("-fx-text-fill: green;");
@@ -107,6 +116,11 @@ public class AjouterResHebergementController {
 
     @FXML
     public void initialize() {
+        // Pré-remplir le champ nompretf avec le nom et prénom de l'utilisateur courant
+        if (currentUser != null) {
+            nompretf.setText(currentUser.getNom() + " " + currentUser.getPrenom());
+        }
+
         // Désactiver les dates passées pour ddtf (Date Début)
         ddtf.setDayCellFactory(picker -> new DateCell() {
             @Override
@@ -146,6 +160,4 @@ public class AjouterResHebergementController {
             });
         });
     }
-
-
 }

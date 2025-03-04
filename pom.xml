@@ -141,6 +141,12 @@
             <artifactId>jakarta.persistence-api</artifactId>
             <version>3.1.0</version>
         </dependency>
+        <!-- JavaFX MapView dependency -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>21.0.2</version> <!-- Ajoutez cette ligne pour WebView -->
+        </dependency>
     </dependencies>
 
     <build>

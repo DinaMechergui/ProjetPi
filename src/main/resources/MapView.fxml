@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.web.WebView?>
+<?import javafx.scene.control.Button?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.Controller.MapViewController"
+            prefHeight="600.0" prefWidth="800.0">
+
+    <!-- WebView pour afficher la carte -->
+    <WebView fx:id="mapView" prefWidth="800" prefHeight="550" AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="50" />
+
+    <!-- Bouton pour retourner à la page précédente -->
+    <Button text="Retour" onAction="#goBack" layoutX="10" layoutY="560" style="-fx-font-size: 14; -fx-padding: 5 10;" />
+
+</AnchorPane>
