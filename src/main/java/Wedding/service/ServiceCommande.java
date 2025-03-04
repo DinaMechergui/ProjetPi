@@ -17,7 +17,7 @@ import tn.esprit.tacheuser.models.User;
 
 
 public class ServiceCommande implements IServiceCommande {
-    private Connection connection = MyDatabase.getInstance().getConnection();
+    private static Connection connection = MyDatabase.getInstance().getConnection();
 
     public ServiceCommande() {
         System.out.println("Connexion à la base de données : " + this.connection);
@@ -193,6 +193,29 @@ public class ServiceCommande implements IServiceCommande {
 
 
 
+    public static Commande getCommandeById(int commandeId) throws SQLException {
+        String query = "SELECT * FROM commande WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, commandeId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Commande commande = new Commande();
+                    commande.setId(rs.getInt("id"));
+                    commande.setUtilisateur(rs.getString("utilisateur"));
+                    commande.setDateCommande(rs.getTimestamp("date").toLocalDateTime());
+                    commande.setStatut(rs.getString("statut"));
+                    commande.setTotal(rs.getDouble("total"));
+                    return commande;
+                } else {
+                    System.out.println("Aucune commande trouvée pour l'ID : " + commandeId);
+                    return null;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Erreur lors de la récupération de la commande : " + e.getMessage());
+            throw e;
+        }
+    }
 
     /**
      * Confirmer une commande, en réduisant le stock des produits réservés et en changeant le statut de la commande.
@@ -273,7 +296,7 @@ public class ServiceCommande implements IServiceCommande {
 
 
 
-    public List<Pair<Produit, Integer>> getProduitsEtQuantitesDansPanier(int commandeId) throws SQLException {
+    public static List<Pair<Produit, Integer>> getProduitsEtQuantitesDansPanier(int commandeId) throws SQLException {
         List<Pair<Produit, Integer>> produitsEtQuantites = new ArrayList<>();
         String query = "SELECT p.id, p.nom, p.description, p.prix, p.categorie, p.stock, p.imageUrl, r.quantite " +
                 "FROM produit p " +
@@ -446,4 +469,3 @@ public class ServiceCommande implements IServiceCommande {
     }
 
 }
-
