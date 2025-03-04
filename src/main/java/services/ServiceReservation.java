@@ -8,6 +8,9 @@ import Wedding.utils.MyDatabase;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class ServiceReservation {
     private Connection connection;
@@ -63,23 +66,27 @@ public class ServiceReservation {
     }
 
     public void removeServiceFromCart(String utilisateur, int serviceId) throws SQLException {
+        System.out.println("🗑️ Tentative de suppression du service " + serviceId + " pour l'utilisateur " + utilisateur);
+
+        // 🔍 Vérifier et rouvrir la connexion si nécessaire
+        connection = MyDatabase.getInstance().getConnection();
+
         String query = "DELETE FROM reservation WHERE utilisateur = ? AND service_id = ?";
         try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setString(1, utilisateur.toLowerCase());  // Enforce consistent casing
+            ps.setString(1, utilisateur.toLowerCase());
             ps.setInt(2, serviceId);
             int rowsAffected = ps.executeUpdate();
+
             if (rowsAffected == 0) {
-                throw new SQLException("No reservation was deleted. User: " + utilisateur + ", Service ID: " + serviceId);
+                System.out.println("⚠️ Aucun service supprimé. Vérifie si l'utilisateur et le service existent.");
+            } else {
+                System.out.println("✅ Service supprimé avec succès : Service ID " + serviceId + " pour l'utilisateur " + utilisateur);
             }
         } catch (SQLException e) {
-            // Log securely (avoid exposing sensitive data in production)
-            System.err.println("SQL Error: " + e.getMessage());
-            throw e;  // Rethrow to propagate the error
+            System.err.println("❌ Erreur SQL lors de la suppression : " + e.getMessage());
+            throw e;
         }
-    }
-
-    // ✅ Récupérer toutes les réservations d'un utilisateur (par nom)
-    public List<reserve> getReservedServicesByUser(String utilisateur) throws SQLException {
+    }    public List<reserve> getReservedServicesByUser(String utilisateur) throws SQLException {
         List<reserve> reservations = new ArrayList<>();
         String req = "SELECT r.*, s.nom AS service_nom, s.description AS service_description, s.prix AS service_prix, s.image_url AS service_image " +
                 "FROM reservation r JOIN service s ON r.service_id = s.id WHERE r.utilisateur = ?";

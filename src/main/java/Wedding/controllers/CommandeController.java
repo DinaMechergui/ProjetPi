@@ -180,7 +180,7 @@ public class CommandeController {
                 serviceCommande.ajouterServiceReserve(currentCommande.getId(), selectedService, selectedDate);
 
                 // ✅ Update the total price in the database
-                serviceCommande.updateTotalPrice(currentCommande.getId());
+                serviceCommande.updateTotalPrice(String.valueOf(currentCommande.getId()));
 
                 showAlert("Succès", "Service réservé avec succès.", Alert.AlertType.INFORMATION);
 

@@ -17,7 +17,7 @@ import tn.esprit.tacheuser.models.User;
 
 
 public class ServiceCommande implements IServiceCommande {
-    private Connection connection = MyDatabase.getInstance().getConnection();
+    private static Connection connection = MyDatabase.getInstance().getConnection();
 
     public ServiceCommande() {
         System.out.println("Connexion à la base de données : " + this.connection);
@@ -274,28 +274,34 @@ public class ServiceCommande implements IServiceCommande {
 
     public List<Pair<Produit, Integer>> getProduitsEtQuantitesDansPanier(int commandeId) throws SQLException {
         List<Pair<Produit, Integer>> produitsEtQuantites = new ArrayList<>();
+
+        // 🔍 Vérifier et rouvrir la connexion si nécessaire
+        connection = MyDatabase.getInstance().getConnection();
+
         String query = "SELECT p.id, p.nom, p.description, p.prix, p.categorie, p.stock, p.imageUrl, r.quantite " +
                 "FROM produit p " +
                 "JOIN reservation1 r ON p.id = r.produit_id " +
                 "WHERE r.commande_id = ? AND r.statut = 'RESERVE'";
 
-        PreparedStatement statement = connection.prepareStatement(query);
-        statement.setInt(1, commandeId);
-        ResultSet resultSet = statement.executeQuery();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, commandeId);
+            ResultSet resultSet = statement.executeQuery();
 
-        while (resultSet.next()) {
-            Produit produit = new Produit(
-                    resultSet.getInt("id"),
-                    resultSet.getString("nom"),
-                    resultSet.getString("description"),
-                    resultSet.getDouble("prix"),
-                    resultSet.getString("categorie"),
-                    resultSet.getInt("stock"),
-                    resultSet.getString("imageUrl") // Récupérer l'URL de l'image
-            );
-            int quantite = resultSet.getInt("quantite"); // Récupérer la quantité réservée
-            produitsEtQuantites.add(new Pair<>(produit, quantite));
+            while (resultSet.next()) {
+                Produit produit = new Produit(
+                        resultSet.getInt("id"),
+                        resultSet.getString("nom"),
+                        resultSet.getString("description"),
+                        resultSet.getDouble("prix"),
+                        resultSet.getString("categorie"),
+                        resultSet.getInt("stock"),
+                        resultSet.getString("imageUrl")
+                );
+                int quantite = resultSet.getInt("quantite");
+                produitsEtQuantites.add(new Pair<>(produit, quantite));
+            }
         }
+
         return produitsEtQuantites;
     }
 
@@ -443,7 +449,7 @@ public class ServiceCommande implements IServiceCommande {
             stmt.setInt(2, service.getId());
             stmt.setDate(3, java.sql.Date.valueOf(dateReservation));
             stmt.executeUpdate();
-            ServiceCommande.updateTotalPrice(commandeId);
+            ServiceCommande.updateTotalPrice(String.valueOf(commandeId));
 
         }
     }
@@ -465,65 +471,79 @@ public class ServiceCommande implements IServiceCommande {
 
       */
     // ✅ Update the total price of a Commande
-    public static void updateTotalPrice(int commandeId) throws SQLException {
-        double total = calculateTotalForCommande(commandeId);
+    public static void updateTotalPrice(String utilisateur) throws SQLException {
+        double total = calculateTotalForCommande(utilisateur);
 
-        String query = "UPDATE commande SET total = ? WHERE id = ?";
+        // 🔹 Trouver l'ID de la commande RESERVE de cet utilisateur
+        String findCommandeQuery = "SELECT id FROM commande WHERE utilisateur = ? AND statut = 'RESERVE'";
 
-        try (Connection connection = MyDatabase.getInstance().getConnection();
-             PreparedStatement stmt = connection.prepareStatement(query)) {
+        try (PreparedStatement stmtFind = connection.prepareStatement(findCommandeQuery)) {
+            stmtFind.setString(1, utilisateur);
+            ResultSet rs = stmtFind.executeQuery();
+            if (rs.next()) {
+                int commandeId = rs.getInt("id");
 
-            stmt.setDouble(1, total);
-            stmt.setInt(2, commandeId);
+                // 🔹 Mettre à jour le total de cette commande
+                String updateQuery = "UPDATE commande SET total = ? WHERE id = ?";
+                try (PreparedStatement stmtUpdate = connection.prepareStatement(updateQuery)) {
+                    stmtUpdate.setDouble(1, total);
+                    stmtUpdate.setInt(2, commandeId);
 
-            int rowsUpdated = stmt.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("✅ Total successfully updated in the database.");
+                    int rowsUpdated = stmtUpdate.executeUpdate();
+                    if (rowsUpdated > 0) {
+                        System.out.println("✅ Total mis à jour pour la commande ID : " + commandeId + " | Nouveau total: " + total);
+                    } else {
+                        System.out.println("⚠️ Erreur : Total non mis à jour.");
+                    }
+                }
             } else {
-                System.out.println("⚠️ Warning: No rows updated. Check if commandeId exists.");
+                System.out.println("⚠️ Aucun panier trouvé pour l'utilisateur : " + utilisateur);
             }
         }
     }
 
 
 
-    public static double calculateTotalForCommande(int commandeId) throws SQLException {
+    public static double calculateTotalForCommande(String utilisateur) throws SQLException {
         double totalProduits = 0.0;
         double totalServices = 0.0;
 
-        String query = """
-        SELECT 
-            COALESCE(SUM(p.prix * r1.quantite), 0) AS totalProduits,
-            COALESCE(SUM(r2.prix_total), 0) AS totalServices
-        FROM commande c
-        LEFT JOIN reservation1 r1 ON c.id = r1.commande_id
-        LEFT JOIN produit p ON r1.produit_id = p.id
-        LEFT JOIN reservation r2 ON c.id = r2.event_id
-        WHERE c.id = ?
-        GROUP BY c.id
+        // 🔹 Requête pour récupérer le total des produits réservés dans reservation1
+        String queryProduits = """
+        SELECT COALESCE(SUM(p.prix * r1.quantite), 0) 
+        FROM reservation1 r1 
+        JOIN produit p ON r1.produit_id = p.id 
+        JOIN commande c ON r1.commande_id = c.id
+        WHERE c.utilisateur = ? AND c.statut = 'RESERVE'
     """;
 
-        try (Connection connection = MyDatabase.getInstance().getConnection();
-             PreparedStatement stmt = connection.prepareStatement(query)) {
+        // 🔹 Requête pour récupérer le total des services réservés dans reservation
+        String queryServices = """
+        SELECT COALESCE(SUM(prix_total), 0) 
+        FROM reservation 
+        WHERE utilisateur = ?
+    """;
 
-            stmt.setInt(1, commandeId);
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement stmtProduits = connection.prepareStatement(queryProduits);
+             PreparedStatement stmtServices = connection.prepareStatement(queryServices)) {
 
-            if (rs.next()) {
-                totalProduits = rs.getDouble("totalProduits");
-                totalServices = rs.getDouble("totalServices");
-
-                // 🛑 Debugging: Print the values to check if they are correct
-                System.out.println("🛒 Debug - Total Produits: " + totalProduits);
-                System.out.println("🛒 Debug - Total Services: " + totalServices);
-                System.out.println("💰 Total Final: " + (totalProduits + totalServices));
-
-                return totalProduits + totalServices;
-            } else {
-                System.out.println("⚠️ No data found for commandeId: " + commandeId);
+            stmtProduits.setString(1, utilisateur);
+            ResultSet rsProduits = stmtProduits.executeQuery();
+            if (rsProduits.next()) {
+                totalProduits = rsProduits.getDouble(1);
             }
+
+            stmtServices.setString(1, utilisateur);
+            ResultSet rsServices = stmtServices.executeQuery();
+            if (rsServices.next()) {
+                totalServices = rsServices.getDouble(1);
+            }
+
+            double totalFinal = totalProduits + totalServices;
+
+            System.out.println("🛒 Total Produits: " + totalProduits + " | 🛎️ Total Services: " + totalServices + " | 💰 Total Final: " + totalFinal);
+            return totalFinal;
         }
-        return 0.0;
     }
 
 }

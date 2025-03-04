@@ -1,7 +1,6 @@
 package Wedding.entities;
 
 import entities.ServiceItem;
-import tn.esprit.tacheuser.models.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

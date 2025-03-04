@@ -123,7 +123,7 @@ public class CartController {
         totalPriceLabel.setText("Total: " + String.format("%.2f", total) + " TND");
 
         // ✅ Mettre à jour le total dans la base de données
-        serviceCommande.updateTotalPrice(currentCommande.getId());
+        ServiceCommande.updateTotalPrice(String.valueOf(currentCommande.getId()));
     }
 
     private double displayProductInCart(Produit produit, int quantity, int row) {
@@ -141,8 +141,9 @@ public class CartController {
     private double displayServiceInCart(ServiceItem service, int row) {
         return addCartRow(service.getNom(), service.getPrix(), 1, service.getImageUrl(), () -> {
             try {
+                System.out.println("🗑️ Suppression du service ID " + service.getId() + " pour l'utilisateur " + currentUser.getPrenom());
                 serviceReservation.removeServiceFromCart(currentUser.getPrenom(), service.getId());
-                loadCart();
+                loadCart();  // Recharger le panier après suppression
             } catch (SQLException e) {
                 e.printStackTrace();
                 showAlert("Erreur", "Une erreur est survenue lors de la suppression du service.", Alert.AlertType.ERROR);
@@ -208,23 +209,14 @@ public class CartController {
         try {
             if (currentCommande != null && currentCommande.getId() != -1 && currentUser != null) {
                 // ✅ Recalculate total before confirmation
-                double total = serviceCommande.calculateTotalForCommande(currentCommande.getId());
-                System.out.println("🛒 Total calculé : " + total);
-
-                // ✅ Update total in database
-                serviceCommande.updateTotalPrice(currentCommande.getId());
+                System.out.println("🔄 Recalcul du total...");
+                serviceCommande.updateTotalPrice(currentUser.getPrenom());
+                System.out.println("✅ Total mis à jour !");
 
                 // ✅ Confirm the order
                 serviceCommande.confirmerCommande(currentCommande.getId(), currentUser.getPrenom());
 
                 System.out.println("✅ Commande confirmée avec ID : " + currentCommande.getId());
-
-                // ✅ Save the invoice with the correct total
-                ServiceFacture serviceFacture = new ServiceFacture();
-                Facture facture = new Facture(0, currentCommande, LocalDateTime.now(), currentUser.getPrenom(), total);
-                serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
-
-                System.out.println("🧾 Facture créée pour la commande ID : " + currentCommande.getId());
 
                 showAlert("Commande Confirmée", "Votre commande a été confirmée et une facture a été générée.", Alert.AlertType.INFORMATION);
             } else {
@@ -235,6 +227,7 @@ public class CartController {
             showAlert("Erreur", "Une erreur est survenue lors de la confirmation.", Alert.AlertType.ERROR);
         }
     }
+
 
 
 
