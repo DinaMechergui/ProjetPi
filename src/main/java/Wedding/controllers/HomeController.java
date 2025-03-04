@@ -171,4 +171,10 @@ public class HomeController {
             e.printStackTrace();
             System.out.println("Erreur lors du chargement de la page des produits.");
         }
-    }}
+    }
+
+
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
+}
