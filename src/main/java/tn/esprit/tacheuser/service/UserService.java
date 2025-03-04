@@ -1,7 +1,7 @@
 package tn.esprit.tacheuser.service;
 
 import tn.esprit.tacheuser.models.User;
-import tn.esprit.tacheuser.utils.MySQLConnection;
+import Wedding.utils.MyDatabase;
 import tn.esprit.tacheuser.utils.SessionManager;
 
 import java.sql.Connection;
@@ -16,7 +16,7 @@ public class UserService {
     private Connection conn;
 
     public UserService() {
-        conn = MySQLConnection.getInstance().getConnection();
+        conn = MyDatabase.getInstance().getConnection();
     }
 
     // Method to check and reconnect if connection is closed
@@ -24,7 +24,7 @@ public class UserService {
         try {
             if (conn == null || conn.isClosed()) {
                 System.out.println("🔴 Connexion fermée ! Reconnexion en cours...");
-                conn = MySQLConnection.getInstance().getConnection(); // Reconnect if necessary
+                conn = MyDatabase.getInstance().getConnection(); // Reconnect if necessary
             }
         } catch (SQLException e) {
             System.out.println("❌ Erreur de connexion : " + e.getMessage());

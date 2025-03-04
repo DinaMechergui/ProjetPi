@@ -6,6 +6,7 @@ import entities.ServiceItem;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -175,20 +176,26 @@ public class CommandeController {
             }
 
             try {
-                // Enregistrer le service réservé dans la base de données
+                // ✅ Add the service reservation
                 serviceCommande.ajouterServiceReserve(currentCommande.getId(), selectedService, selectedDate);
+
+                // ✅ Update the total price in the database
+                serviceCommande.updateTotalPrice(currentCommande.getId());
+
                 showAlert("Succès", "Service réservé avec succès.", Alert.AlertType.INFORMATION);
 
-                // Rediriger vers la page du panier
+                // ✅ Refresh cart view
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/Cart.fxml"));
                 Parent root = loader.load();
                 Stage stage = (Stage) reserveButton1.getScene().getWindow();
                 stage.setScene(new Scene(root));
+
             } catch (SQLException | IOException e) {
                 showAlert("Erreur", "Une erreur s'est produite : " + e.getMessage(), Alert.AlertType.ERROR);
             }
         });
     }
+
 
     @FXML
     private void confirmOrder() {
@@ -214,5 +221,12 @@ public class CommandeController {
             alert.setContentText(message);
             alert.showAndWait();
         });
+    }
+
+
+    public void showInvoice(ActionEvent actionEvent) {
+    }
+
+    public void cancelReservation(ActionEvent actionEvent) {
     }
 }

@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -17,12 +18,29 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class HomeController {
     private User currentUser; // Ajoutez ce champ
 
     @FXML
     private Label welcomeLabel;
+    @FXML
+    private DatePicker dateMariage;
+    @FXML
+    private Button btnVerifierMeteo;
+    @FXML
+    private Label labelMeteoMariage;
+    @FXML
+    private Label labelRecommandations;
+
     @FXML
     private Button loginButton;
 
@@ -31,7 +49,6 @@ public class HomeController {
 
     @FXML
     private ImageView cartIcon;
-
 
 
     @FXML
@@ -51,12 +68,16 @@ public class HomeController {
     }
 
     public void initialize(URL location, ResourceBundle resources) {
-        // Récupérer l'utilisateur actuel depuis SessionManager
         currentUser = SessionManager.getUser();
         if (currentUser != null) {
             System.out.println("Utilisateur connecté dans HomeController : " + currentUser.getNom());
         } else {
             System.out.println("Aucun utilisateur connecté dans HomeController.");
+        }
+
+        // ✅ Check if loginButton is null before using it
+        if (loginButton == null) {
+            System.err.println("❌ Erreur: loginButton n'est pas initialisé. Vérifiez l'fx:id dans le fichier FXML.");
         }
     }
     @FXML

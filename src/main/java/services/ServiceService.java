@@ -1,95 +1,146 @@
-// Déclare le package où se trouve la classe
 package services;
 
-// Importe les classes nécessaires
-import entities.ServiceItem; // Entité représentant un service
+import entities.ServiceItem;
 import Wedding.utils.MyDatabase;
 
-import java.sql.*; // API JDBC pour les opérations SQL
-import java.util.ArrayList; // Liste dynamique
-import java.util.List; // Interface pour les listes
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
-// Implémente l'interface générique IService pour le type ServiceItem
 public class ServiceService implements IService<ServiceItem> {
-    private Connection connection; // Objet de connexion à la base
+    private Connection connection;
 
-    // Constructeur qui initialise la connexion à la base
     public ServiceService() {
         this.connection = MyDatabase.getInstance().getConnection();
     }
 
-    // Méthode pour ajouter un ServiceItem à la base
+    // Method to add a new service with a user reference
     @Override
-    public int ajouter(ServiceItem ServiceItem) throws SQLException {
-        // Requête SQL paramétrée avec RETURN_GENERATED_KEYS pour récupérer l'ID généré
-        String req = "INSERT INTO service (nom, description, prix, image_url) VALUES (?, ?, ?, ?)";
+    public int ajouter(ServiceItem serviceItem) throws SQLException {
+        String req = "INSERT INTO service (nom, description, prix, image_url, utilisateur) VALUES (?, ?, ?, ?, ?)";
 
-        // Try-with-resources pour fermer automatiquement le PreparedStatement
         try (PreparedStatement ps = connection.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
-            // Remplissage des paramètres
-            ps.setString(1, ServiceItem.getNom());
-            ps.setString(2, ServiceItem.getDescription());
-            ps.setDouble(3, ServiceItem.getPrix());
-            ps.setString(4, ServiceItem.getImageUrl());
+            ps.setString(1, serviceItem.getNom());
+            ps.setString(2, serviceItem.getDescription());
+            ps.setDouble(3, serviceItem.getPrix());
+            ps.setString(4, serviceItem.getImageUrl());
+            ps.setString(5, serviceItem.getUtilisateur()); // Store the user who added the service
 
-            ps.executeUpdate(); // Exécute l'insertion
+            ps.executeUpdate();
 
-            // Récupère l'ID auto-généré après l'insertion
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1); // Retourne l'ID
+                    return generatedKeys.getInt(1);
                 }
             }
-            return -1; // Retourne -1 si échec
+            return -1;
         }
     }
 
-    // Méthode pour mettre à jour un ServiceItem
+    // Update a service
     @Override
-    public void modifier(ServiceItem ServiceItem) throws SQLException {
-        String req = "UPDATE service SET nom=?, description=?, prix=?, image_url=? WHERE id=?";
+    public void modifier(ServiceItem serviceItem) throws SQLException {
+        String req = "UPDATE service SET nom=?, description=?, prix=?, image_url=?, utilisateur=? WHERE id=?";
         try (PreparedStatement ps = connection.prepareStatement(req)) {
-            // Paramètres de la requête
-            ps.setString(1, ServiceItem.getNom());
-            ps.setString(2, ServiceItem.getDescription());
-            ps.setDouble(3, ServiceItem.getPrix());
-            ps.setString(4, ServiceItem.getImageUrl());
-            ps.setInt(5, ServiceItem.getId()); // ID pour la clause WHERE
+            ps.setString(1, serviceItem.getNom());
+            ps.setString(2, serviceItem.getDescription());
+            ps.setDouble(3, serviceItem.getPrix());
+            ps.setString(4, serviceItem.getImageUrl());
+            ps.setString(5, serviceItem.getUtilisateur()); // Ensure the user info is updated
+            ps.setInt(6, serviceItem.getId());
 
-            ps.executeUpdate(); // Exécute la mise à jour
+            ps.executeUpdate();
         }
     }
 
-    // Méthode pour supprimer un ServiceItem par son ID
+    // Delete a service
     @Override
     public void supprimer(int id) throws SQLException {
         String req = "DELETE FROM service WHERE id=?";
         try (PreparedStatement ps = connection.prepareStatement(req)) {
-            ps.setInt(1, id); // Paramètre ID
-            ps.executeUpdate(); // Exécute la suppression
+            ps.setInt(1, id);
+            ps.executeUpdate();
         }
     }
+    public List<ServiceItem> getServicesByEventId(int eventId) throws SQLException {
+        List<ServiceItem> services = new ArrayList<>();
+        String query = "SELECT * FROM service WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, eventId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                services.add(new ServiceItem(rs.getInt("id"), rs.getString("nom"), rs.getString("description"),
+                        rs.getDouble("prix"), rs.getString("image_url"), rs.getString("utilisateur")));
+            }
+        }
+        return services;
+    }
 
-    // Méthode pour récupérer tous les ServiceItems de la base
+
+    // Retrieve all services
     public List<ServiceItem> afficher() throws SQLException {
         List<ServiceItem> services = new ArrayList<>();
         String req = "SELECT * FROM service";
 
         try (PreparedStatement ps = connection.prepareStatement(req)) {
-            ResultSet rs = ps.executeQuery(); // Exécute la requête
+            ResultSet rs = ps.executeQuery();
 
-            // Parcourt les résultats
             while (rs.next()) {
-                // Crée un objet ServiceItem à partir des données de la base
                 services.add(new ServiceItem(
-                        rs.getInt("id"), // Récupère l'ID
-                        rs.getString("nom"), // Nom
-                        rs.getString("description"), // Description
-                        rs.getDouble("prix"), // Prix
-                        rs.getString("image_url") // URL de l'image
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("description"),
+                        rs.getDouble("prix"),
+                        rs.getString("image_url"),
+                        rs.getString("utilisateur") // Get the user who added the service
                 ));
             }
         }
-        return services; // Retourne la liste complète
+        return services;
+    }
+
+    // Retrieve services added by a specific user
+    public List<ServiceItem> getServicesByUser(String utilisateur) throws SQLException {
+        List<ServiceItem> services = new ArrayList<>();
+        String req = "SELECT * FROM service WHERE utilisateur=?";
+
+        try (PreparedStatement ps = connection.prepareStatement(req)) {
+            ps.setString(1, utilisateur);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                services.add(new ServiceItem(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("description"),
+                        rs.getDouble("prix"),
+                        rs.getString("image_url"),
+                        rs.getString("utilisateur")
+                ));
+            }
+        }
+        return services;
+    }
+
+    // ✅ Get Services for a specific Event
+    public List<ServiceItem> getServicesForEvent(int eventId) throws SQLException {
+        List<ServiceItem> services = new ArrayList<>();
+        String query = "SELECT * FROM service WHERE utilisateur = (SELECT utilisateur FROM event WHERE id = ?)";
+
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setInt(1, eventId);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                services.add(new ServiceItem(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("description"),
+                        rs.getDouble("prix"),
+                        rs.getString("image_url"),
+                        rs.getString("utilisateur")
+                ));
+            }
+        }
+        return services;
     }
 }

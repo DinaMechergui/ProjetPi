@@ -1,3 +1,4 @@
+
 package entities;
 
 import java.sql.*;
@@ -84,7 +85,8 @@ public class Event {
                         rs.getString("nom"),
                         rs.getString("description"),
                         rs.getDouble("prix"),
-                        rs.getString("image_url")
+                        rs.getString("image_url"),
+                        rs.getString("utilisateur")
                 ));
             }
         }

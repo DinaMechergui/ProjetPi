@@ -4,7 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import Wedding.entities.Produit;
-import Wedding.utils.MyDatabase;
+import org.Wedding.utils.MyDatabase;
 
 public class ServiceProduit {
     Connection connection = MyDatabase.getInstance().getConnection();

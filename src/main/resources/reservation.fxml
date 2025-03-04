@@ -2,73 +2,93 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.*?>
-<?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="controller.ReservationController" stylesheets="@style.css">
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="controller.ReservationController"
+      spacing="20"
+      style="-fx-background-color: #f5f5f5; -fx-font-family: 'Arial';">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
 
     <!-- Navbar -->
-    <HBox styleClass="navbar" spacing="20" alignment="CENTER_LEFT" prefHeight="60">
-        <!-- Logo -->
+    <HBox spacing="20" alignment="CENTER_LEFT"
+          style="-fx-background-color: #4CAF50; -fx-padding: 15px; -fx-border-radius: 10px; -fx-border-color: #388E3C;">
+
         <ImageView fx:id="logo" fitHeight="50" fitWidth="50" pickOnBounds="true" preserveRatio="true">
-            <Image url="@/images/logo.jpg"/> <!-- Remplacez par le chemin de votre logo -->
+            <Image url="@/images/logo.jpg"/>
         </ImageView>
 
-        <!-- Liens de la navbar -->
-        <HBox spacing="20" alignment="CENTER_LEFT" styleClass="nav-links">
-            <Button text="Store" styleClass="nav-button" onAction="#goToStore" />
-            <Button text="Event" styleClass="nav-button" onAction="#goToEvent" />
-            <Button text="Drive and Stay" styleClass="nav-button" onAction="#goToDriveAndStay" />
-            <Button text="Invité" styleClass="nav-button" onAction="#goToInvite" />
+        <HBox spacing="15">
+            <Button text="Store" onAction="#goToStore"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Button text="Event" onAction="#goToEvent"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Button text="Drive and Stay" onAction="#goToDriveAndStay"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            <Button text="Invité" onAction="#goToInvite"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
         </HBox>
 
-        <!-- Boutons de login/logout -->
-        <HBox spacing="10" alignment="CENTER_RIGHT" styleClass="auth-buttons">
-            <Button fx:id="loginButton" text="Login" styleClass="auth-button" />
-            <Button fx:id="logoutButton" text="Logout" styleClass="auth-button" visible="false" />
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Button fx:id="loginButton" text="Login"
+                    style="-fx-background-color: #FFC107; -fx-text-fill: black; -fx-padding: 8px 15px; -fx-border-radius: 5px;"/>
+            <Button fx:id="logoutButton" text="Logout" visible="false"
+                    style="-fx-background-color: #F44336; -fx-text-fill: white; -fx-padding: 8px 15px; -fx-border-radius: 5px;"/>
         </HBox>
     </HBox>
-    <ImageView fx:id="cartIcon" layoutX="900" layoutY="20" fitHeight="50" fitWidth="50" onMouseClicked="#goToCart">
+
+    <!-- Icône du panier -->
+    <ImageView fx:id="cartIcon" fitHeight="40" fitWidth="40" onMouseClicked="#goToPreviousPage">
         <Image url="@/images/cart-icon.png"/>
     </ImageView>
-    <!-- GridPane principal -->
-    <GridPane fx:id="serviceGrid" hgap="10" vgap="10" alignment="CENTER">
 
-        <!-- Combobox pour choisir un événement -->
-        <Label text="Événement:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-        <ComboBox fx:id="eventCombo" styleClass="product-card" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+    <!-- Section météo -->
+    <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 15px; -fx-border-radius: 10px; -fx-border-color: #ddd;">
+        <Label text="🌦 Prévisions pour le jour du mariage :" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        <HBox spacing="10">
+            <DatePicker fx:id="dateMariage" promptText="Sélectionnez une date"
+                        style="-fx-font-size: 14px;"/>
+            <Button fx:id="btnVerifierMeteo" text="Vérifier la météo" onAction="#verifierMeteoMariage"
+                    style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8px 15px; -fx-border-radius: 5px;"/>
+        </HBox>
+        <Label fx:id="labelMeteoMariage" text="🌡 Température: --" style="-fx-font-size: 16px;"/>
+        <Label fx:id="labelRecommandations" text="📌 Condition: --" style="-fx-font-size: 16px;"/>
+    </VBox>
 
-        <!-- Combobox pour choisir un service -->
-        <Label text="Service:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-        <ComboBox fx:id="serviceCombo" styleClass="product-card" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    <!-- Section réservation -->
+    <GridPane hgap="15" vgap="15" alignment="CENTER"
+              style="-fx-background-color: white; -fx-padding: 20px; -fx-border-radius: 10px; -fx-border-color: #ddd;">
 
-        <!-- DatePicker pour choisir une date -->
-        <Label text="Date de réservation:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-        <DatePicker fx:id="datePicker" styleClass="product-card" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        <Label text="🎉 Réserver votre service :" style="-fx-font-size: 18px; -fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2"/>
 
-        <!-- Champ de texte pour afficher le prix -->
-        <Label text="Prix (TND):" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
-        <TextField fx:id="priceField" styleClass="product-card" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+        <Label text="Événement:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <ComboBox fx:id="eventCombo" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
-        <!-- Bouton pour ajouter au panier -->
-        <Button text="Ajouter au panier" styleClass="button" onAction="#addToCart" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+        <Label text="Service:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <ComboBox fx:id="serviceCombo" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
 
-        <!-- GridPane pour afficher les articles du panier -->
-        <Label text="Panier:" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2"/>
-        <GridPane fx:id="cartGrid" styleClass="product-card" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2" hgap="10" vgap="10"/>
+        <Label text="Date de réservation:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <DatePicker fx:id="datePicker" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
 
-        <!-- Label pour afficher le prix total -->
-        <Label fx:id="totalPriceLabel" styleClass="product-name" GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2" alignment="CENTER"/>
+        <Label text="Prix (TND):" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <TextField fx:id="priceField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
-        <!-- Bouton pour confirmer la réservation -->
-        <Button text="Confirmer la réservation" styleClass="button" onAction="#confirmReservation" GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2"/>
+        <Button text="Ajouter au panier" onAction="#addToCart"
+                style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8px 15px; -fx-border-radius: 5px;"
+                GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2"/>
 
-        <!-- Label pour afficher le statut -->
-        <Label fx:id="statutLabel" text="Statut:" GridPane.columnIndex="0" GridPane.rowIndex="9" GridPane.columnSpan="2" alignment="CENTER"/>
+        <Label fx:id="totalPriceLabel" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2" alignment="CENTER" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
 
-        <!-- ImageView pour afficher l'image du service sélectionné -->
-        <ImageView fx:id="serviceImage" GridPane.columnIndex="1" GridPane.rowIndex="5" fitWidth="200" fitHeight="200"/>
+        <Button text="Confirmer la réservation" onAction="#confirmReservation"
+                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-radius: 5px;"
+                GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2"/>
 
+        <!-- Image du service -->
+        <ImageView fx:id="serviceImage" GridPane.columnIndex="1" GridPane.rowIndex="8" fitWidth="200" fitHeight="200"/>
     </GridPane>
+
 
 </VBox>
