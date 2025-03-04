@@ -8,13 +8,16 @@ public class Facture {
     private LocalDateTime dateFacture;
     private String utilisateur; // ou un objet User
     private double total;
+    private String codePromo;
 
-    public Facture(int id, Commande commande, LocalDateTime dateFacture, String utilisateur, double total) {
+
+    public Facture(int id, Commande commande, LocalDateTime dateFacture, String utilisateur, double total ,String codePromo) {
         this.id = id;
         this.commande = commande;
         this.dateFacture = dateFacture;
         this.utilisateur = utilisateur;
         this.total = total;
+        this.codePromo = codePromo;
     }
 
     public int getId() {
@@ -35,6 +38,14 @@ public class Facture {
 
     public void setUtilisateur(String utilisateur) {
         this.utilisateur = utilisateur;
+    }
+
+    public String getCodePromo() {
+        return codePromo;
+    }
+
+    public void setCodePromo(String codePromo) {
+        this.codePromo = codePromo;
     }
 
     public void setCommande(Commande commande) {

@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 public class CommandeController {
 
@@ -192,12 +193,28 @@ public class CommandeController {
 
     @FXML
     private void confirmOrder() {
-        if (currentCommande != null) {
+        if (currentCommande != null && currentUser != null) {
             try {
+                // Confirmer la commande
                 serviceCommande.confirmerCommande(currentCommande.getId(), currentUser.getPrenom());
-                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total);
+
+                // Calculer le total
+                double total = calculateTotal(serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId()));
+
+                // Vérifier si un code promo doit être appliqué
+                String codePromo = (total > 10000) ? generatePromoCode() : null;
+
+                // Créer la facture avec ou sans code promo
+                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total, codePromo);
                 serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
-                showAlert("Succès", "Commande confirmée avec services et produits.", Alert.AlertType.INFORMATION);
+
+                // Message de succès
+                String message = "Commande confirmée avec services et produits.";
+                if (codePromo != null) {
+                    message += "\nFélicitations ! Vous avez reçu un code promo : " + codePromo;
+                }
+                showAlert("Succès", message, Alert.AlertType.INFORMATION);
+
             } catch (SQLException e) {
                 showAlert("Erreur", "Une erreur s'est produite : " + e.getMessage(), Alert.AlertType.ERROR);
             }
@@ -205,6 +222,25 @@ public class CommandeController {
             showAlert("Erreur", "Aucune commande à confirmer.", Alert.AlertType.WARNING);
         }
     }
+    private String generatePromoCode() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder code = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 8; i++) {
+            code.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return code.toString();
+    }
+    private double calculateTotal(List<Pair<Produit, Integer>> cartProductsWithQuantity) {
+        double total = 0.0;
+        for (Pair<Produit, Integer> pair : cartProductsWithQuantity) {
+            Produit produit = pair.getKey();
+            int quantite = pair.getValue();
+            total += produit.getPrix() * quantite;
+        }
+        return total;
+    }
+
 
     private void showAlert(String title, String message, Alert.AlertType type) {
         Platform.runLater(() -> {

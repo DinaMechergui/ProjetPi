@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
@@ -37,18 +38,24 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CartController {
     private final ServiceCommande serviceCommande = new ServiceCommande();
     private Commande currentCommande;  // La commande actuelle
     private static User currentUser;
+    private double total; // Variable pour stocker le total du panier
 
+    @FXML
+    private TextField promoCodeField;
 
     @FXML
     private GridPane gridPaneCart;
     @FXML
     private Label totalPriceLabel;
+
     public void initialize() {
         try {
             initializeCurrentCommande(); // Assure que la commande est bien initialisée
@@ -202,6 +209,7 @@ public class CartController {
         // Afficher le total général
         totalPriceLabel.setText("Total: " + String.format("%.2f", total) + " TND");
     }
+
     private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
@@ -209,6 +217,7 @@ public class CartController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     public void openPaymentWindow(ActionEvent event, double totalAmount) {
         try {
             // Vérifiez que le fichier FXML existe
@@ -238,23 +247,32 @@ public class CartController {
 
 
     @FXML
+
     private void handleConfirmOrder(ActionEvent event) {
         try {
             if (currentCommande != null && currentCommande.getId() != -1 && currentUser != null) {
-                // Confirmer la commande en passant l'ID de la commande et l'utilisateur
+                // Confirmer la commande
                 serviceCommande.confirmerCommande(currentCommande.getId(), currentUser.getPrenom());
-
                 System.out.println("Commande confirmée avec ID : " + currentCommande.getId());
 
                 // Récupérer les produits et leurs quantités réservées
                 List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
 
-                // Calculer le total en fonction de la quantité réservée
+                // Calculer le total
                 double total = calculateTotal(produitsEtQuantites);
 
-                // Créer une facture après la confirmation de la commande
+                // Générer un code promo si le total dépasse 10 000 TND
+                String codePromo = null;
+                if (total > 10000) {
+                    codePromo = generatePromoCode();
+                    showAlert("Félicitations !", "Vous avez dépensé plus de 10 000 TND. Voici un code promo : " + codePromo, Alert.AlertType.INFORMATION);
+                }
+
+                // Créer la facture avec le code promo
                 ServiceFacture serviceFacture = new ServiceFacture();
-                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total);                serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
+                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total, codePromo);
+                serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
+
                 System.out.println("Facture créée pour la commande ID : " + currentCommande.getId());
 
                 // Générer la facture HTML
@@ -274,9 +292,21 @@ public class CartController {
             }
         } catch (SQLException | IOException e) {
             e.printStackTrace();
-            showAlert("Erreur", "Une erreur est survenue lors de la confirmation ou de la création de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
+            showAlert("Erreur", "Une erreur est survenue : " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
+
+
+    private String generatePromoCode() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder code = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 8; i++) {
+            code.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return code.toString();
+    }
+
     @FXML
     private void handleCancelOrder() {
         try {
@@ -293,6 +323,7 @@ public class CartController {
             showAlert("Erreur", "Une erreur est survenue lors de l'annulation.", Alert.AlertType.ERROR);
         }
     }
+
     private double calculateTotal(List<Pair<Produit, Integer>> cartProductsWithQuantity) {
         double total = 0.0;
         for (Pair<Produit, Integer> pair : cartProductsWithQuantity) {
@@ -390,4 +421,70 @@ public class CartController {
     public void setCurrentUser(User user) {
         this.currentUser = user;
     }
+
+    @FXML
+    private void applyPromoCode(ActionEvent event) {
+        String promoCode = promoCodeField.getText();
+        if (isValidPromoCode(promoCode)) {
+            double reduction = 0.1; // 10% de réduction par exemple
+            total = total * (1 - reduction);
+            totalPriceLabel.setText("Total: " + String.format("%.2f", total) + " TND");
+            showAlert("Code promo appliqué", "Une réduction de 10% a été appliquée.", Alert.AlertType.INFORMATION);
+        } else {
+            showAlert("Code promo invalide", "Le code promo entré n'est pas valide.", Alert.AlertType.ERROR);
+        }
+    }
+
+
+    private boolean isValidPromoCode(String promoCode) {
+        try {
+            // Interrogez la base de données pour vérifier si le code promo existe
+            String query = "SELECT COUNT(*) FROM facture WHERE code_promo = ?";
+            PreparedStatement stmt = MyDatabase.getConnection().prepareStatement(query);
+            stmt.setString(1, promoCode);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                int count = rs.getInt(1);
+                return count > 0; // Si le code promo existe dans la base de données, il est valide
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false; // Si une erreur se produit ou si le code promo n'existe pas, retournez false
+    }
+
+    @FXML
+    private void handleLogoClick(MouseEvent event) {
+        try {
+            // Charger le fichier FXML de la page d'accueil
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Home.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer le contrôleur de la page d'accueil
+            HomeController homeController = loader.getController();
+
+            // Passer l'utilisateur connecté au contrôleur de la page d'accueil
+            homeController.setCurrentUser(SessionManager.getUser()); // Assurez-vous que SessionManager.getUser() retourne l'utilisateur connecté
+
+            // Récupérer la scène actuelle
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // Changer la scène pour afficher la page d'accueil
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Une erreur est survenue lors du chargement de la page d'accueil.", Alert.AlertType.ERROR);
+        }
+    }
+
+
+
+    // Méthode pour recevoir l'utilisateur actuel
+
+
+
 }

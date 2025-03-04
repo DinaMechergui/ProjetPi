@@ -468,4 +468,13 @@ public class ServiceCommande implements IServiceCommande {
         }
     }
 
+    public void updateCommande(Commande commande) throws SQLException {
+        String query = "UPDATE commande SET total = ?, statut = ? WHERE id = ?";
+        try (PreparedStatement ps = connection.prepareStatement(query)) {
+            ps.setDouble(1, commande.getTotal());
+            ps.setString(2, commande.getStatut());
+            ps.setInt(3, commande.getId());
+            ps.executeUpdate();
+        }
+    }
 }

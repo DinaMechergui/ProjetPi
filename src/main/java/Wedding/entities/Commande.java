@@ -51,7 +51,17 @@ public class Commande {
     public void setTotal(double total) {
         this.total = total;
     }
+    public List<Produit> getProduits() {
+        List<Produit> produits = new ArrayList<>();
+        System.out.println("Nombre de réservations : " + reservations.size());
 
+        for (Reservation reservation : reservations) {
+            produits.add(reservation.getProduit());
+            System.out.println("Réservation : " + reservation.getProduit().getNom() + ", Quantité : " + reservation.getQuantite());
+
+        }
+        return produits;
+    }
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public String getUtilisateur() { return utilisateur; }
