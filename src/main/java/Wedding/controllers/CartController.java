@@ -246,20 +246,17 @@ public class CartController {
     }
 
 
-    @FXML
 
+
+    @FXML
     private void handleConfirmOrder(ActionEvent event) {
         try {
             if (currentCommande != null && currentCommande.getId() != -1 && currentUser != null) {
                 // Confirmer la commande
                 serviceCommande.confirmerCommande(currentCommande.getId(), currentUser.getPrenom());
-                System.out.println("Commande confirmée avec ID : " + currentCommande.getId());
 
-                // Récupérer les produits et leurs quantités réservées
-                List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
-
-                // Calculer le total
-                double total = calculateTotal(produitsEtQuantites);
+                // Utiliser le total de la commande (qui inclut la réduction si appliquée)
+                double total = currentCommande.getTotal();
 
                 // Générer un code promo si le total dépasse 10 000 TND
                 String codePromo = null;
@@ -268,14 +265,15 @@ public class CartController {
                     showAlert("Félicitations !", "Vous avez dépensé plus de 10 000 TND. Voici un code promo : " + codePromo, Alert.AlertType.INFORMATION);
                 }
 
-                // Créer la facture avec le code promo
+                // Créer la facture avec le total de la commande et le code promo
                 ServiceFacture serviceFacture = new ServiceFacture();
-                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total, codePromo);
+                Facture facture = new Facture(0, currentCommande, LocalDateTime.now(), currentUser.getPrenom(), total, codePromo);
                 serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
 
                 System.out.println("Facture créée pour la commande ID : " + currentCommande.getId());
 
                 // Générer la facture HTML
+                List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
                 List<Produit> produits = produitsEtQuantites.stream()
                         .map(Pair::getKey)
                         .collect(Collectors.toList());
@@ -295,7 +293,6 @@ public class CartController {
             showAlert("Erreur", "Une erreur est survenue : " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
-
 
     private String generatePromoCode() {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -423,12 +420,25 @@ public class CartController {
     }
 
     @FXML
-    private void applyPromoCode(ActionEvent event) {
+    private void applyPromoCode(ActionEvent event) throws SQLException {
         String promoCode = promoCodeField.getText();
         if (isValidPromoCode(promoCode)) {
-            double reduction = 0.1; // 10% de réduction par exemple
-            total = total * (1 - reduction);
-            totalPriceLabel.setText("Total: " + String.format("%.2f", total) + " TND");
+            // Récupérer le total actuel de la commande
+            double total = currentCommande.getTotal();
+
+            // Appliquer la réduction de 10%
+            double reduction = 0.1; // 10% de réduction
+            double totalApresReduction = total * (1 - reduction);
+
+            // Mettre à jour le total dans la commande
+            currentCommande.setTotal(totalApresReduction);
+
+            // Mettre à jour le total dans la base de données
+            serviceCommande.updateCommande(currentCommande);
+
+            // Mettre à jour l'affichage
+            totalPriceLabel.setText("Total après réduction: " + String.format("%.2f", totalApresReduction) + " TND");
+
             showAlert("Code promo appliqué", "Une réduction de 10% a été appliquée.", Alert.AlertType.INFORMATION);
         } else {
             showAlert("Code promo invalide", "Le code promo entré n'est pas valide.", Alert.AlertType.ERROR);
@@ -438,20 +448,19 @@ public class CartController {
 
     private boolean isValidPromoCode(String promoCode) {
         try {
-            // Interrogez la base de données pour vérifier si le code promo existe
-            String query = "SELECT COUNT(*) FROM facture WHERE code_promo = ?";
+            String query = "SELECT COUNT(*) FROM facture WHERE code_promo = ? ";
             PreparedStatement stmt = MyDatabase.getConnection().prepareStatement(query);
             stmt.setString(1, promoCode);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 int count = rs.getInt(1);
-                return count > 0; // Si le code promo existe dans la base de données, il est valide
+                return count > 0;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return false; // Si une erreur se produit ou si le code promo n'existe pas, retournez false
+        return false;
     }
 
     @FXML
