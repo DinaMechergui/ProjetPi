@@ -201,3 +201,5 @@
     -fx-fit-height: 150px;
     -fx-preserve-ratio: true;
 }
+.imageView {
+    -fx-smooth: false;}

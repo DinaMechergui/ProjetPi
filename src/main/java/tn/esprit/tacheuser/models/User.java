@@ -1,10 +1,5 @@
 package tn.esprit.tacheuser.models;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.time.LocalDate;
-
 public class User {
     private int id;
     private String nom;
@@ -18,7 +13,7 @@ public class User {
     private String status = "inactive";
     private String role = "USER";
 
-    public User() {
+    public User(int userId) {
     }
     public User(int id, String nom, String prenom, String mail, String tel, String gender, String age, String password) {
         this.id = id;
@@ -73,6 +68,10 @@ public class User {
         this.gender = gender;
         this.password = password;
         this.age = age;
+    }
+
+    public User() {
+
     }
 
     public int getId() {
