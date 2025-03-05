@@ -4,6 +4,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.geometry.Insets?>
 
+<?import javafx.scene.web.WebView?>
 <VBox xmlns:fx="http://javafx.com/fxml"
       fx:controller="controller.ReservationController"
       spacing="20"
@@ -31,6 +32,7 @@
             <Button text="Invité" onAction="#goToInvite"
                     style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
         </HBox>
+
 
         <HBox spacing="10" alignment="CENTER_RIGHT">
             <Button fx:id="loginButton" text="Login"
@@ -89,6 +91,6 @@
         <!-- Image du service -->
         <ImageView fx:id="serviceImage" GridPane.columnIndex="1" GridPane.rowIndex="8" fitWidth="200" fitHeight="200"/>
     </GridPane>
-
+    <WebView fx:id="calendarWebView" prefHeight="500" prefWidth="800"/>
 
 </VBox>

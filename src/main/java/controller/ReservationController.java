@@ -1,6 +1,7 @@
 package controller;
 
 import Wedding.controllers.CartController;
+import com.google.api.services.calendar.Calendar;
 import entities.Event;
 import entities.ServiceItem;
 import entities.ReservationCartItem;
@@ -18,9 +19,12 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import services.GoogleCalendarService;
 import services.ServiceEvent;
 import services.ServiceReservation;
 import services.ServiceService;
@@ -51,6 +55,7 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 
 
+
 public class ReservationController {
 
     @FXML private ComboBox<Event> eventCombo;
@@ -69,6 +74,8 @@ public class ReservationController {
     private Label labelMeteoMariage;
     @FXML
     private Label labelRecommandations;
+    @FXML
+    private WebView calendarWebView;
 
 
 
@@ -202,6 +209,13 @@ public class ReservationController {
                 priceField.setText(String.valueOf(newVal.getPrix()));
             }
         });
+        currentUser = SessionManager.getUser();
+        loadGoogleCalendar();
+    }
+    private void loadGoogleCalendar() {
+        String calendarUrl = "https://calendar.google.com/calendar/u/0/r";
+        WebEngine webEngine = calendarWebView.getEngine();
+        webEngine.load(calendarUrl);
     }
 
     private void updateCartGrid() {
@@ -340,28 +354,50 @@ public class ReservationController {
     private void confirmReservation() {
         try {
             Event selectedEvent = eventCombo.getValue();
-            if (selectedEvent == null) {
-                showAlert("Erreur", "Événement non sélectionné", "Veuillez sélectionner un événement.");
+            ServiceItem selectedService = serviceCombo.getValue();
+            LocalDate selectedDate = datePicker.getValue();
+
+            if (selectedEvent == null || selectedService == null || selectedDate == null) {
+                showAlert("Erreur", "Champs manquants", "Veuillez remplir tous les champs.");
                 return;
             }
 
-            for (ReservationCartItem item : cartItems) {
-                reserve reservation = new reserve();
-                reservation.setEvent(selectedEvent);
-                reservation.setService(new ServiceItem(item.getServiceId()));
-                reservation.setDateReservation(item.getDate());
-                reservation.setPrixTotal(item.getPrice());
-                reservation.setUtilisateur(currentUser.getPrenom());
+            // ✅ Convertir LocalDate en Date pour Google Calendar
+            Date startDate = Date.from(selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date endDate = new Date(startDate.getTime() + (2 * 60 * 60 * 1000)); // 2 heures après
 
-                serviceReservation.ajouter(reservation);
-            }
+            // ✅ Ajouter l'événement à Google Calendar
+            addEventToGoogleCalendar(selectedEvent.getNom(), selectedService.getNom(), startDate, endDate);
 
-            cartItems.clear();
-            updateCartGrid();
-            showAlert("Réservation", "Réservation réussie", "Votre réservation a été confirmée.");
-        } catch (SQLException e) {
-            showAlert("Erreur", "Erreur lors de la réservation", e.getMessage());
+            showAlert("Succès", "Réservation ajoutée avec succès!", "Votre réservation a été ajoutée à Google Calendar.");
+        } catch (Exception e) {
             e.printStackTrace();
+            showAlert("Erreur", "Impossible d'ajouter l'événement", e.getMessage());
         }
     }
+
+    // Fonction pour ajouter un événement dans Google Calendar
+    private void addEventToGoogleCalendar(String eventName, String serviceName, Date startDate, Date endDate) throws Exception {
+        Calendar service = GoogleCalendarService.getCalendarService();
+
+        com.google.api.services.calendar.model.Event event = new com.google.api.services.calendar.model.Event()
+                .setSummary("🎉 " + eventName + " - " + serviceName)
+                .setDescription("Réservation confirmée pour l'événement " + eventName);
+
+        // Définir l'heure de début et fin
+        com.google.api.services.calendar.model.EventDateTime start = new com.google.api.services.calendar.model.EventDateTime()
+                .setDateTime(new com.google.api.client.util.DateTime(startDate))
+                .setTimeZone("Europe/Paris");
+        event.setStart(start);
+
+        com.google.api.services.calendar.model.EventDateTime end = new com.google.api.services.calendar.model.EventDateTime()
+                .setDateTime(new com.google.api.client.util.DateTime(endDate))
+                .setTimeZone("Europe/Paris");
+        event.setEnd(end);
+
+        // Ajouter à Google Calendar
+        event = service.events().insert("primary", event).execute();
+        System.out.println("✅ Événement ajouté : " + event.getHtmlLink());
+    }
+
 }
