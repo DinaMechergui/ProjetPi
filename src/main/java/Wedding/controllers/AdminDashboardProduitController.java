@@ -32,7 +32,10 @@ public class AdminDashboardProduitController implements Initializable {
     private Button addProductButton; // Bouton "Ajouter Produit"
     @FXML
     private Button loginButton;
-    private ServiceProduit serviceProduit = new ServiceProduit();
+    private final ServiceProduit serviceProduit = new ServiceProduit();
+
+    public AdminDashboardProduitController() throws SQLException {
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
