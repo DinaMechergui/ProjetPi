@@ -13,7 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class ServiceReservation {
-    private Connection connection;
+    private static Connection connection;
 
     public ServiceReservation() {
         this.connection = MyDatabase.getInstance().getConnection();
@@ -66,7 +66,7 @@ public class ServiceReservation {
     }
 
 
-    public void removeServiceFromCart(String utilisateur, int serviceId) throws SQLException {
+    public static void removeServiceFromCart(String utilisateur, int serviceId) throws SQLException {
         System.out.println("🗑️ Tentative de suppression du service " + serviceId + " pour l'utilisateur " + utilisateur);
 
         // 🔍 Vérifier et rouvrir la connexion si nécessaire

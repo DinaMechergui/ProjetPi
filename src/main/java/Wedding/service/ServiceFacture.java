@@ -2,72 +2,84 @@ package Wedding.service;
 
 import Wedding.entities.Commande;
 import Wedding.entities.Facture;
-import org.Wedding.utils.MyDatabase;
-
+import Wedding.utils.MyDatabase;
 
 import java.sql.*;
 
-public class ServiceFacture {
-    private Connection connection;
+import static Wedding.service.ServiceCommande.getCommandeById;
 
-    public ServiceFacture()
-    {
+public class ServiceFacture {
+    private static Connection connection;
+
+    public ServiceFacture() {
         connection = MyDatabase.getInstance().getConnection();
     }
 
-    public void ajouterFacture(Facture facture, String utilisateur) throws SQLException {
-        System.out.println("Tentative d'ajout de la facture pour la commande ID : " + facture.getCommande().getId());
-        String query = "INSERT INTO facture (commande_id, date_facture, total, utilisateur) VALUES (?, ?, ?, ?)";
+    public static void ajouterFacture(Facture facture, String utilisateur) throws SQLException {
+        String query = "INSERT INTO facture (commande_id, date_facture, total, utilisateur, code_promo) VALUES (?, ?, ?, ?, ?)";
+
         try (PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, facture.getCommande().getId());
             ps.setTimestamp(2, Timestamp.valueOf(facture.getDateFacture()));
             ps.setDouble(3, facture.getTotal());
             ps.setString(4, utilisateur);
+            ps.setString(5, facture.getCodePromo()); // Ajout du code promo
 
             int rowsInserted = ps.executeUpdate();
-            System.out.println("Facture insérée ? " + (rowsInserted > 0));
 
-            // Récupérer l'ID généré
-            try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    facture.setId(generatedKeys.getInt(1));
-                    System.out.println("Facture créée avec ID : " + facture.getId());
-                } else {
-                    System.out.println("Aucun ID généré pour la facture.");
+            if (rowsInserted > 0) {
+                System.out.println("Facture insérée avec succès.");
+                try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        facture.setId(generatedKeys.getInt(1));
+                        System.out.println("Facture créée avec ID : " + facture.getId());
+                    } else {
+                        System.out.println("Erreur : aucun ID généré pour la facture.");
+                    }
                 }
+            } else {
+                System.out.println("Échec de l'insertion de la facture.");
             }
         } catch (SQLException e) {
             System.err.println("Erreur lors de l'insertion de la facture : " + e.getMessage());
-            throw e; // Relancer l'exception pour la gérer ailleurs
+            throw e;
         }
     }
+
     public Facture getFactureByCommandeId(int commandeId, String utilisateur) throws SQLException {
         String query = "SELECT * FROM facture WHERE commande_id = ? AND utilisateur = ?";
-        try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setInt(1, commandeId);
-            ps.setString(2, utilisateur);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    System.out.println("Facture trouvée pour la commande ID : " + commandeId);
+        Facture facture = null;
 
-                    // Récupérer la commande associée (si nécessaire)
-                    Commande commande = null; // Vous pouvez récupérer la commande ici si nécessaire
+        try {
+            Connection connection = MyDatabase.getInstance().getConnection();
+            if (connection == null || connection.isClosed()) {
+                System.err.println("La connexion à la base de données est fermée ou invalide lors de la tentative d'accès.");
+                return null; // ou gérer autrement
+            }
 
-                    // Créer l'objet Facture avec tous les paramètres requis
-                    return new Facture(
-                            rs.getInt("id"),
-                            commande,  // Passer la commande (ou null si non disponible)
-                            rs.getTimestamp("date_facture").toLocalDateTime(),
-                            rs.getString("utilisateur"),  // Passer l'utilisateur
-                            rs.getDouble("total")
-                    );
-                } else {
-                    System.out.println("Aucune facture trouvée pour la commande ID : " + commandeId);
-                    return null;
+            try (PreparedStatement ps = connection.prepareStatement(query)) {
+                ps.setInt(1, commandeId);
+                ps.setString(2, utilisateur);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        Commande commande = getCommandeById(commandeId); // Récupérer la commande associée
+                        facture = new Facture(
+                                rs.getInt("id"),
+                                commande,
+                                rs.getTimestamp("date_facture").toLocalDateTime(),
+                                rs.getString("utilisateur"),
+                                rs.getDouble("total"),
+                                rs.getString("code_promo")
+                        );
+                    }
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Erreur lors de la récupération de la facture : " + e.getMessage());
-            throw e; // Relancer l'exception pour la gérer ailleurs
+            System.err.println("❌ Erreur lors de la récupération de la facture : " + e.getMessage());
+            throw e; // Propager l'exception pour une gestion appropriée
         }
-    }}
+
+        return facture;
+    }
+}

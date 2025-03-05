@@ -21,12 +21,13 @@ public class ServiceItem {
         this.prix = prix;
         this.imageUrl = imageUrl;
     }
-
     public ServiceItem(int id, Connection connection) throws SQLException {
         String req = "SELECT * FROM service WHERE id=?";
-        try (PreparedStatement ps = connection.prepareStatement(req)) {
+        try (PreparedStatement ps = connection.prepareStatement(req);
+             ResultSet rs = ps.executeQuery()) {
+
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
+
             if (rs.next()) {
                 this.id = id;
                 this.nom = rs.getString("nom");
@@ -34,7 +35,7 @@ public class ServiceItem {
                 this.prix = rs.getDouble("prix");
                 this.imageUrl = rs.getString("image_url");
             } else {
-                throw new SQLException("Service not found with ID: " + id);
+                throw new SQLException("❌ Service non trouvé avec ID : " + id);
             }
         }
     }

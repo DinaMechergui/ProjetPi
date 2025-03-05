@@ -2,11 +2,11 @@ package Wedding.controllers;
 
 import Wedding.entities.*;
 import Wedding.service.*;
+import Wedding.utils.MyDatabase;
 import entities.ServiceItem;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 public class CommandeController {
 
@@ -51,6 +52,9 @@ public class CommandeController {
     private ObservableList<Produit> productList;
     private ObservableList<ServiceItem> serviceList;
     private Commande currentCommande;
+
+    public CommandeController() throws SQLException {
+    }
 
     public void initialize() {
         try {
@@ -176,42 +180,92 @@ public class CommandeController {
             }
 
             try {
-                // ✅ Add the service reservation
+                // Enregistrer le service réservé dans la base de données
                 serviceCommande.ajouterServiceReserve(currentCommande.getId(), selectedService, selectedDate);
-
-                // ✅ Update the total price in the database
-                serviceCommande.updateTotalPrice(String.valueOf(currentCommande.getId()));
-
                 showAlert("Succès", "Service réservé avec succès.", Alert.AlertType.INFORMATION);
 
-                // ✅ Refresh cart view
+                // Rediriger vers la page du panier
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/Cart.fxml"));
                 Parent root = loader.load();
                 Stage stage = (Stage) reserveButton1.getScene().getWindow();
                 stage.setScene(new Scene(root));
-
             } catch (SQLException | IOException e) {
                 showAlert("Erreur", "Une erreur s'est produite : " + e.getMessage(), Alert.AlertType.ERROR);
             }
         });
     }
 
-
     @FXML
+
     private void confirmOrder() {
-        if (currentCommande != null) {
+        if (currentCommande != null && currentUser != null) {
             try {
+                // ✅ Vérifier et rouvrir une connexion active
+                MyDatabase.getInstance().getConnection();
+
+                // ✅ Confirmer la commande
                 serviceCommande.confirmerCommande(currentCommande.getId(), currentUser.getPrenom());
-                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total);
+
+                // ✅ Récupérer les produits réservés
+                List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
+
+                // ✅ Récupérer les services réservés
+                //   List<Pair<ServiceItem, Double>> servicesReserves = serviceCommande.getServicesReservesDansPanier(currentCommande.getId());
+
+                // ✅ Calculer le total (Produits + Services)
+                //    double total = calculateTotal(produitsEtQuantites, servicesReserves);
+
+                // ✅ Vérifier si un code promo doit être appliqué
+                String codePromo = (total > 10000) ? generatePromoCode() : null;
+
+                // ✅ Créer et enregistrer la facture
+                Facture facture = new Facture(0, currentCommande, LocalDateTime.now(), currentUser.getPrenom(), total, codePromo);
                 serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
-                showAlert("Succès", "Commande confirmée avec services et produits.", Alert.AlertType.INFORMATION);
+
+                // ✅ Afficher un message de succès
+                String message = "Commande confirmée avec succès !\nTotal : " + total + " TND";
+                if (codePromo != null) {
+                    message += "\n🎉 Félicitations ! Code promo obtenu : " + codePromo;
+                }
+                showAlert("Succès", message, Alert.AlertType.INFORMATION);
+
             } catch (SQLException e) {
-                showAlert("Erreur", "Une erreur s'est produite : " + e.getMessage(), Alert.AlertType.ERROR);
+                e.printStackTrace();
+                showAlert("Erreur", "Une erreur est survenue lors de la confirmation : " + e.getMessage(), Alert.AlertType.ERROR);
             }
         } else {
             showAlert("Erreur", "Aucune commande à confirmer.", Alert.AlertType.WARNING);
         }
     }
+    private String generatePromoCode() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder code = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < 8; i++) {
+            code.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return code.toString();
+    }
+    private double calculateTotal(List<Pair<Produit, Integer>> produitsEtQuantites, List<Pair<ServiceItem, Double>> servicesReserves) {
+        double total = 0.0;
+
+        // ✅ Ajouter les produits
+        if (produitsEtQuantites != null) {
+            for (Pair<Produit, Integer> pair : produitsEtQuantites) {
+                total += pair.getKey().getPrix() * pair.getValue();
+            }
+        }
+
+        // ✅ Ajouter les services
+        if (servicesReserves != null) {
+            for (Pair<ServiceItem, Double> pair : servicesReserves) {
+                total += pair.getValue();  // pair.getValue() contient déjà le prix total du service
+            }
+        }
+
+        return total;
+    }
+
 
     private void showAlert(String title, String message, Alert.AlertType type) {
         Platform.runLater(() -> {
@@ -222,11 +276,5 @@ public class CommandeController {
             alert.showAndWait();
         });
     }
-
-
-    public void showInvoice(ActionEvent actionEvent) {
-    }
-
-    public void cancelReservation(ActionEvent actionEvent) {
-    }
 }
+
