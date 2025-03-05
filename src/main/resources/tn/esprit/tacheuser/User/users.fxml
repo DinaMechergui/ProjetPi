@@ -31,10 +31,10 @@
     </HBox>
 
     <!-- Bouton vers les réclamations -->
-    <Button layoutX="300.0" layoutY="354.0" onAction="#goToReclamations" style="-fx-background-color: #6888a8; -fx-text-fill: white; -fx-border-radius: 5;" text="Réclamations" />
+    <Button layoutX="300.0" layoutY="354.0" onAction="#goToReclamations" prefHeight="26.0" prefWidth="87.0" style="-fx-background-color: #6888a8; -fx-text-fill: white; -fx-border-radius: 5;" text="avis" />
 
     <!-- Nouveau bouton vers l'interface Admin Responsable -->
-    <Button layoutX="450.0" layoutY="354.0" onAction="#goToAdminResponsable" style="-fx-background-color: #5a9c79; -fx-text-fill: white; -fx-border-radius: 5;" text="Responsables" />
+    <Button layoutX="450.0" layoutY="354.0" onAction="#goToAdminResponsable" prefHeight="25.0" prefWidth="87.0" style="-fx-background-color: #5a9c79; -fx-text-fill: white; -fx-border-radius: 5;" text="responsable" />
 
     <ImageView fitHeight="49.0" fitWidth="55.0" layoutX="625.0" layoutY="230.0" onMouseClicked="#handleImageClick" pickOnBounds="true" preserveRatio="true">
         <image>

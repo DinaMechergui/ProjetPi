@@ -130,4 +130,42 @@ public class ReclamationService {
         }
         return reclamations;
     }
+    public void handleAddMotInterdit(String motInterdit) {
+        if (motInterdit != null && !motInterdit.trim().isEmpty()) {
+            String query = "INSERT INTO mots_interdits (mot) VALUES (?)";
+            try (Connection conn = MySQLConnection.getInstance().getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, motInterdit);
+                stmt.executeUpdate();
+                System.out.println("✅ Mot interdit ajouté à la base de données.");
+            } catch (SQLException e) {
+                System.err.println("❌ Erreur lors de l'ajout du mot interdit : " + e.getMessage());
+            }
+        } else {
+            System.err.println("❌ Le mot interdit ne peut pas être vide !");
+        }
+    }
+
+    public class MotsInterditsService {
+
+        // Méthode pour récupérer tous les mots interdits
+        public List<String> getMotsInterdits() {
+            List<String> motsInterdits = new ArrayList<>();
+            String query = "SELECT mot FROM mots_interdits";
+
+            try (Connection conn = MySQLConnection.getInstance().getConnection();
+                 Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(query)) {
+
+                while (rs.next()) {
+                    motsInterdits.add(rs.getString("mot"));
+                }
+
+            } catch (SQLException e) {
+                System.err.println("❌ Erreur lors de la récupération des mots interdits : " + e.getMessage());
+            }
+
+            return motsInterdits;
+        }
+    }
 }

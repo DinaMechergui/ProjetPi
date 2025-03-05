@@ -11,10 +11,15 @@ module tn.esprit.tacheuser {
     requires kernel;
     requires layout;
     requires itextpdf;
-
+    requires jakarta.mail;
     requires javafx.graphics;
+    requires twilio;
+    requires org.bytedeco.opencv;
+    requires java.desktop;
+    requires org.json;
     opens tn.esprit.tacheuser to javafx.fxml;
     exports tn.esprit.tacheuser;
+    exports tn.esprit.tacheuser.utils;
     exports tn.esprit.tacheuser.contoller;
     opens tn.esprit.tacheuser.contoller to javafx.fxml;
 }

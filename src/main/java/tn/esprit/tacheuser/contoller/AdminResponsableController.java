@@ -11,12 +11,22 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import tn.esprit.tacheuser.models.Responsable;
 import tn.esprit.tacheuser.utils.MySQLConnection;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
 
 import java.sql.*;
 import java.io.IOException;
 
 public class AdminResponsableController {
+    public static final String ACCOUNT_SID = "";
+    public static final String AUTH_TOKEN = "";
 
+    // Numéro Twilio WhatsApp (doit commencer par "whatsapp:+")
+    public static final String TWILIO_WHATSAPP_NUMBER = "whatsapp:+14155238886";
+    public AdminResponsableController() {
+        Twilio.init(ACCOUNT_SID, AUTH_TOKEN);
+    }
     @FXML
     private GridPane responsableGrid;
 
@@ -118,6 +128,9 @@ public class AdminResponsableController {
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated > 0) {
                 System.out.println("Identifiant attribué avec succès !");
+
+                // ✅ Envoi du message WhatsApp après mise à jour
+                sendWhatsappMessage(responsable.getTel(), newId);
             } else {
                 System.out.println("Échec de l'attribution de l'identifiant.");
             }
@@ -125,4 +138,32 @@ public class AdminResponsableController {
             e.printStackTrace();
         }
     }
+    private void sendWhatsappMessage(String phoneNumber, String newId) {
+        try {
+            // Vérifier et formater le numéro
+            if (!phoneNumber.startsWith("+")) {
+                phoneNumber = "+216" + phoneNumber;
+            }
+            String formattedPhoneNumber = "whatsapp:" + phoneNumber;
+
+            if (!formattedPhoneNumber.startsWith("whatsapp:+")) {
+                System.out.println("❌ Numéro invalide pour WhatsApp : " + formattedPhoneNumber);
+                return;
+            }
+
+            // Envoyer le message via Twilio API
+            Message message = Message.creator(
+                            new PhoneNumber(formattedPhoneNumber),  // Destinataire
+                            new PhoneNumber(TWILIO_WHATSAPP_NUMBER),  // Expéditeur Twilio
+                            "Bonjour, votre nouvel identifiant est : " + newId)
+                    .create();
+
+            System.out.println("📩 Message WhatsApp envoyé à " + formattedPhoneNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("❌ Erreur lors de l'envoi du message WhatsApp.");
+        }
+    }
+
+
 }

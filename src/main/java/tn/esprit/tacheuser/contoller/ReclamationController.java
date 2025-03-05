@@ -1,5 +1,6 @@
 package tn.esprit.tacheuser.contoller;
 
+import tn.esprit.tacheuser.utils.MySQLConnection;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Font;
@@ -16,7 +17,10 @@ import tn.esprit.tacheuser.service.ReclamationService;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.io.FileOutputStream;
 import java.util.List;
 import java.io.IOException;
@@ -32,6 +36,11 @@ public class ReclamationController {
     private TextArea descriptionField;
     @FXML
     private TextField statutField;
+    @FXML
+    private TextField motInterditField;
+    @FXML
+    private ListView<String> motsInterditsListView;
+
 
     private final ReclamationService reclamationService = new ReclamationService();
     private ObservableList<Reclamation> reclamationsList;
@@ -41,13 +50,14 @@ public class ReclamationController {
         System.out.println("🔄 Initialisation du contrôleur !");
         loadReclamations();
         setupListView();
+        loadMotsInterdits();  // Charge les mots interdits depuis la base de données
     }
 
     private void loadReclamations() {
         List<Reclamation> reclamations = reclamationService.getAllReclamations();
         reclamationsList = FXCollections.observableArrayList(reclamations);
         reclamationsListView.setItems(reclamationsList);
-        System.out.println("📢 Réclamations chargées : " + reclamationsList.size());
+        System.out.println("📢 avis chargées : " + reclamationsList.size());
     }
 
     private void setupListView() {
@@ -85,11 +95,11 @@ public class ReclamationController {
         boolean success = reclamationService.addReclamation(newReclamation);
 
         if (success) {
-            System.out.println("✅ Réclamation ajoutée avec succès !");
+            System.out.println("✅ avis ajoutée avec succès !");
             loadReclamations();
             clearFields();
         } else {
-            showAlert("Erreur", "Échec de l'ajout de la réclamation.");
+            showAlert("Erreur", "Échec de l'ajout de l avis.");
         }
     }
 
@@ -103,13 +113,13 @@ public class ReclamationController {
             boolean success = reclamationService.updateReclamation(selected);
 
             if (success) {
-                System.out.println("✅ Réclamation mise à jour avec succès !");
+                System.out.println("✅ avis mise à jour avec succès !");
                 loadReclamations();
             } else {
-                showAlert("Erreur", "Échec de la mise à jour de la réclamation.");
+                showAlert("Erreur", "Échec de la mise à jour de la avis.");
             }
         } else {
-            showAlert("Sélection requise", "Veuillez sélectionner une réclamation à modifier.");
+            showAlert("Sélection requise", "Veuillez sélectionner une avis à modifier.");
         }
     }
 
@@ -124,7 +134,6 @@ public class ReclamationController {
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            //showAlert("Erreur", "Erreur lors du chargement de la page des utilisateurs.", Alert.AlertType.ERROR);
         }
     }
 
@@ -133,12 +142,12 @@ public class ReclamationController {
         Reclamation selected = reclamationsListView.getSelectionModel().getSelectedItem();
 
         if (selected == null) {
-            showAlert("Sélection requise", "Veuillez sélectionner une réclamation à supprimer.");
+            showAlert("Sélection requise", "Veuillez sélectionner un avis à supprimer.");
             return;
         }
 
         if (selected.getId() == 0) {
-            showAlert("Erreur", "ID invalide pour la réclamation sélectionnée.");
+            showAlert("Erreur", "ID invalide pour l avis sélectionnée.");
             return;
         }
 
@@ -160,6 +169,7 @@ public class ReclamationController {
         descriptionField.clear();
         statutField.clear();
     }
+
     @FXML
     private void handleCloseStatus() {
         Reclamation selected = reclamationsListView.getSelectionModel().getSelectedItem();
@@ -168,40 +178,29 @@ public class ReclamationController {
             boolean success = reclamationService.updateReclamation(selected);
 
             if (success) {
-                System.out.println("✅ Réclamation fermée avec succès !");
+                System.out.println("✅ avis fermée avec succès !");
                 loadReclamations();
             } else {
                 showAlert("Erreur", "Échec de la mise à jour du statut.");
             }
         } else {
-            showAlert("Sélection requise", "Veuillez sélectionner une réclamation à fermer.");
+            showAlert("Sélection requise", "Veuillez sélectionner un avis à fermer.");
         }
     }
+
     @FXML
     public void handleexportpdf(MouseEvent event) throws IOException {
         Document document = new Document();
         try {
-            // Spécifier le fichier de sortie pour le PDF
-            PdfWriter.getInstance(document, new FileOutputStream("reclamation_liste.pdf"));
-
-            // Ouvrir le document pour écrire
+            PdfWriter.getInstance(document, new FileOutputStream("avis_liste.pdf"));
             document.open();
-
-            // Titre du document
             Font titleFont = new Font(Font.FontFamily.TIMES_ROMAN, 18, Font.BOLD);
-            Paragraph title = new Paragraph("Liste des Réclamations", titleFont);
+            Paragraph title = new Paragraph("Liste avis", titleFont);
             document.add(title);
-
-            // Espacement avant la liste
             document.add(new Paragraph("\n"));
 
-            // Obtenir la liste des réclamations
             List<Reclamation> reclamations = reclamationService.getAllReclamations();
-
-            // Style de texte pour les informations des réclamations
             Font reclamationFont = new Font(Font.FontFamily.TIMES_ROMAN, 12);
-
-            // Ajouter chaque réclamation dans le PDF
             for (Reclamation reclamation : reclamations) {
                 String reclamationDetails = "Sujet: " + reclamation.getSujet() + "\n" +
                         "Description: " + reclamation.getDescription() + "\n" +
@@ -209,17 +208,52 @@ public class ReclamationController {
                 document.add(new Paragraph(reclamationDetails, reclamationFont));
                 document.add(new Paragraph("\n"));
             }
-
-            // Fermer le document
             document.close();
-
-            // Afficher un message de confirmation
-            showAlert("Succès", "Le PDF des réclamations a été exporté avec succès!");
+            showAlert("Succès", "Le PDF des avis a été exporté avec succès!");
         } catch (DocumentException | IOException e) {
             e.printStackTrace();
             showAlert("Erreur", "Erreur lors de l'exportation du PDF.");
         }
     }
 
+    // Méthode pour charger les mots interdits depuis la base de données
+    private void loadMotsInterdits() {
+        try (Connection conn = MySQLConnection.getInstance().getConnection()) {
+            String sql = "SELECT mot FROM mots_interdits";
+            try (PreparedStatement stmt = conn.prepareStatement(sql);
+                 ResultSet rs = stmt.executeQuery()) {
 
+                ObservableList<String> motsInterditsList = FXCollections.observableArrayList();
+                while (rs.next()) {
+                    motsInterditsList.add(rs.getString("mot"));
+                }
+                motsInterditsListView.setItems(motsInterditsList); // Met à jour la ListView
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Erreur", "Erreur lors du chargement des mots interdits.");
+        }
+    }
+
+    // Méthode pour ajouter un mot interdit à la base de données
+    @FXML
+    private void handleAddMotInterdit() {
+        String motInterdit = motInterditField.getText();
+        if (motInterdit != null && !motInterdit.isEmpty()) {
+            try (Connection conn = MySQLConnection.getInstance().getConnection()) {
+                String sql = "INSERT INTO mots_interdits (mot) VALUES (?)";
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, motInterdit);
+                    stmt.executeUpdate();
+
+                    // Recharger les mots interdits après l'ajout
+                    loadMotsInterdits();
+                    motInterditField.clear(); // Effacer le champ de texte
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showAlert("Erreur", "Erreur lors de l'ajout du mot interdit à la base de données.");
+            }
+        }
+    }
 }

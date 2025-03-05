@@ -3,7 +3,7 @@ package tn.esprit.tacheuser.service;
 import tn.esprit.tacheuser.models.User;
 import tn.esprit.tacheuser.utils.MySQLConnection;
 import tn.esprit.tacheuser.utils.SessionManager;
-
+import tn.esprit.tacheuser.utils.EmailSender;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class UserService {
     private Connection conn;
@@ -248,4 +250,66 @@ public class UserService {
         }
         return null;
     }
+    public boolean updatePassword(String email, String newPassword) {
+        String query = "UPDATE user SET password = ? WHERE mail = ?";
+
+        try (PreparedStatement statement = conn.prepareStatement(query)) {
+            statement.setString(1, newPassword);  // Remplace l'ancien mot de passe
+            statement.setString(2, email);  // Identifie l'utilisateur
+            int rowsUpdated = statement.executeUpdate();
+            return rowsUpdated > 0;  // Retourne vrai si la mise à jour a réussi
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private String hashPassword(String password) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hashedBytes = md.digest(password.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : hashedBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return password;  // Return plain password if hashing fails (not recommended)
+        }
+    }
+    public boolean sendVerificationCode(String email) {
+        String verificationCode = EmailSender.generateVerificationCode(); // Générer un code
+        EmailSender.sendEmail(email, verificationCode); // Envoyer l'email
+        SessionManager.setVerificationCode(verificationCode); // Stocker le code pour la vérification
+        SessionManager.setResetEmail(email); // Stocker l'email temporairement
+
+        System.out.println("✅ Code envoyé à : " + email);
+        return true;
+    }
+    public User getUserByEmail(String email) {
+        try {
+            String query = "SELECT * FROM user WHERE mail = ?";
+            PreparedStatement pst = conn.prepareStatement(query);
+            pst.setString(1, email);
+            ResultSet rs = pst.executeQuery();
+
+            if (rs.next()) {
+                return new User(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("prenom"),
+                        rs.getString("mail"),
+                        rs.getString("tel"),
+                        rs.getString("gender"),
+                        rs.getString("password"),
+                        rs.getString("age")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

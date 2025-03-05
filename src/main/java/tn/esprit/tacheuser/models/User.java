@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
-
+import java.sql.Blob;
 public class User {
     private int id;
     private String nom;
@@ -17,6 +17,7 @@ public class User {
     private String confirmpassword;
     private String status = "inactive";
     private String role = "USER";
+    private Blob profileImage;
 
     public User() {
     }
@@ -161,7 +162,13 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
+    public Blob getProfileImage() {
+        return profileImage;
+    }
 
+    public void setProfileImage(Blob profileImage) {
+        this.profileImage = profileImage;
+    }
     @Override
     public String toString() {
         return "ID: " + id + ", Nom: " + nom + ", Prénom: " + prenom + ", Email: " + mail +

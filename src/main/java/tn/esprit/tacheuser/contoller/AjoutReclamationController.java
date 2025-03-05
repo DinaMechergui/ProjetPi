@@ -11,10 +11,13 @@ import javafx.stage.Stage;
 import tn.esprit.tacheuser.models.Reclamation;
 import tn.esprit.tacheuser.models.User;
 import tn.esprit.tacheuser.service.ReclamationService;
-
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import java.io.IOException;
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
-
+import javafx.application.Platform;
 public class AjoutReclamationController {
 
     @FXML
@@ -27,17 +30,19 @@ public class AjoutReclamationController {
     private ListView<Reclamation> historyListView;
 
     private static User currentUser;
+    private List<String> motsInterdits; // Liste des mots interdits
 
     // Méthode pour définir l'utilisateur connecté
     public static void setCurrentUser(User user) {
         currentUser = user;
     }
 
-    // Méthode d'initialisation pour charger l'historique des réclamations
+    // Méthode d'initialisation pour charger l'historique des réclamations et les mots interdits
     @FXML
     private void initialize() {
         if (currentUser != null) {
             loadUserReclamations();
+            loadMotsInterdits(); // Charger les mots interdits
         } else {
             System.out.println("❌ L'utilisateur n'est pas connecté.");
         }
@@ -64,6 +69,31 @@ public class AjoutReclamationController {
         });
     }
 
+    private void loadMotsInterdits() {
+        motsInterdits = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/tache user", "root", "")) {
+            String sql = "SELECT mot FROM mots_interdits";
+            try (PreparedStatement stmt = conn.prepareStatement(sql);
+                 ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    motsInterdits.add(rs.getString("mot"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("❌ Erreur lors du chargement des mots interdits.");
+
+            // Exécution de l'alerte sur le thread JavaFX UI
+            Platform.runLater(() -> {
+                Alert alert = new Alert(AlertType.ERROR);
+                alert.setTitle("Erreur de chargement");
+                alert.setHeaderText("Impossible de charger les mots interdits");
+                alert.setContentText("Une erreur s'est produite lors du chargement des mots interdits depuis la base de données.");
+                alert.showAndWait();
+            });
+        }
+    }
     // Soumettre une nouvelle réclamation
     @FXML
     private void handleSubmitReclamation() {
@@ -80,6 +110,12 @@ public class AjoutReclamationController {
             return;
         }
 
+        // Vérifier si le titre ou la description contient des mots interdits
+        if (containsMotsInterdits(title) || containsMotsInterdits(description)) {
+            System.out.println("❌ L avis contient des mots interdits !");
+            return;
+        }
+
         // Créer un objet réclamation avec les données saisies
         Reclamation reclamation = new Reclamation();
         reclamation.setSujet(title);
@@ -90,12 +126,22 @@ public class AjoutReclamationController {
         // Appeler la méthode addReclamation pour l'insertion dans la base de données
         ReclamationService reclamationService = new ReclamationService();
         if (reclamationService.addReclamation(reclamation)) {
-            System.out.println("✅ Réclamation soumise avec succès !");
+            System.out.println("✅ avis soumise avec succès !");
             clearForm();
             loadUserReclamations();  // Recharger l'historique des réclamations après soumission
         } else {
-            System.out.println("❌ Erreur lors de l'ajout de la réclamation.");
+            System.out.println("❌ Erreur lors de l'ajout de la avis.");
         }
+    }
+
+    // Vérifier si le texte contient des mots interdits
+    private boolean containsMotsInterdits(String text) {
+        for (String mot : motsInterdits) {
+            if (text != null && text.toLowerCase().contains(mot.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Réinitialiser le formulaire après soumission
