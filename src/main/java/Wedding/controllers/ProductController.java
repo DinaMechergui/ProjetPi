@@ -98,6 +98,16 @@ public class ProductController {
 
 
     public void initialize() {
+        // 🔥 Ensure currentUser is set from the session
+        this.currentUser = SessionManager.getUser();
+
+        if (this.currentUser == null) {
+            System.err.println("❌ Erreur : Aucun utilisateur connecté.");
+            return;
+        }
+
+        System.out.println("✅ Utilisateur connecté : " + currentUser.getNom());
+
         try {
             loadProducts();
         } catch (SQLException e) {
