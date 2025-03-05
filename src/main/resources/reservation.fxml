@@ -3,58 +3,55 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.geometry.Insets?>
-
 <?import javafx.scene.web.WebView?>
+
 <VBox xmlns:fx="http://javafx.com/fxml"
       fx:controller="controller.ReservationController"
       spacing="20"
-      style="-fx-background-color: #f5f5f5; -fx-font-family: 'Arial';">
+      style="-fx-background-color: #e9ddd7; -fx-font-family: 'Arial'; -fx-padding: 20px;">
 
-    <padding>
-        <Insets top="20" right="20" bottom="20" left="20"/>
-    </padding>
-
-    <!-- Navbar -->
+    <!-- Barre de navigation -->
     <HBox spacing="20" alignment="CENTER_LEFT"
-          style="-fx-background-color: #4CAF50; -fx-padding: 15px; -fx-border-radius: 10px; -fx-border-color: #388E3C;">
+          style="-fx-background-color: #6d8c7a; /* Couleur principale */
+    -fx-padding: 10;
+    -fx-spacing: 20;
+    -fx-alignment: center-left;">
 
         <ImageView fx:id="logo" fitHeight="50" fitWidth="50" pickOnBounds="true" preserveRatio="true">
             <Image url="@/images/logo.jpg"/>
         </ImageView>
-
-        <HBox spacing="15">
-            <Button text="Store" onAction="#goToStore"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
-            <Button text="Event" onAction="#goToEvent"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
-            <Button text="Drive and Stay" onAction="#goToDriveAndStay"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
-            <Button text="Invité" onAction="#goToInvite"
-                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-font-weight: bold;"/>
-        </HBox>
-
-
-        <HBox spacing="10" alignment="CENTER_RIGHT">
-            <Button fx:id="loginButton" text="Login"
-                    style="-fx-background-color: #FFC107; -fx-text-fill: black; -fx-padding: 8px 15px; -fx-border-radius: 5px;"/>
-            <Button fx:id="logoutButton" text="Logout" visible="false"
-                    style="-fx-background-color: #F44336; -fx-text-fill: white; -fx-padding: 8px 15px; -fx-border-radius: 5px;"/>
+         <!-- Liens de la navbar -->
+        <HBox spacing="20" alignment="CENTER_LEFT" styleClass="nav-links">
+            <Button text="Store" styleClass="nav-button" style="-fx-background-color: transparent; /* Fond transparent */
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;" onAction="#goToStore" />
+            <Button text="Event" styleClass="nav-button" style="-fx-background-color: transparent; /* Fond transparent */
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;" onAction="#goToEvent" />
+            <Button text="Drive and Stay" styleClass="nav-button" style="-fx-background-color: transparent; /* Fond transparent */
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;" onAction="#goToDriveAndStay" />
+            <Button text="Invité" styleClass="nav-button" style="-fx-background-color: transparent; /* Fond transparent */
+    -fx-text-fill: white; /* Texte blanc */
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;" onAction="#goToInvite" />
         </HBox>
     </HBox>
-
-    <!-- Icône du panier -->
-    <ImageView fx:id="cartIcon" fitHeight="40" fitWidth="40" onMouseClicked="#goToPreviousPage">
-        <Image url="@/images/cart-icon.png"/>
-    </ImageView>
-
     <!-- Section météo -->
-    <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 15px; -fx-border-radius: 10px; -fx-border-color: #ddd;">
+    <VBox spacing="10" style="-fx-background-color: white; -fx-padding: 10px; -fx-border-radius: 10px; -fx-border-color: #ddd;">
         <Label text="🌦 Prévisions pour le jour du mariage :" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
         <HBox spacing="10">
             <DatePicker fx:id="dateMariage" promptText="Sélectionnez une date"
                         style="-fx-font-size: 14px;"/>
             <Button fx:id="btnVerifierMeteo" text="Vérifier la météo" onAction="#verifierMeteoMariage"
-                    style="-fx-background-color: #2196F3; -fx-text-fill: white; -fx-padding: 8px 15px; -fx-border-radius: 5px;"/>
+                    style="-fx-background-color: #e4c2b8; -fx-text-fill: white; -fx-padding: 8px 15px; -fx-border-radius: 5px;"/>
         </HBox>
         <Label fx:id="labelMeteoMariage" text="🌡 Température: --" style="-fx-font-size: 16px;"/>
         <Label fx:id="labelRecommandations" text="📌 Condition: --" style="-fx-font-size: 16px;"/>
@@ -62,9 +59,10 @@
 
     <!-- Section réservation -->
     <GridPane hgap="15" vgap="15" alignment="CENTER"
-              style="-fx-background-color: white; -fx-padding: 20px; -fx-border-radius: 10px; -fx-border-color: #ddd;">
+              style="-fx-background-color: white; -fx-padding: 20px; -fx-border-radius: 10px; -fx-border-color: #ddd; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
 
-        <Label text="🎉 Réserver votre service :" style="-fx-font-size: 18px; -fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2"/>
+        <Label text="🎉 Réservez votre service :" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"
+               GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2"/>
 
         <Label text="Événement:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
         <ComboBox fx:id="eventCombo" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
@@ -79,18 +77,29 @@
         <TextField fx:id="priceField" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
 
         <Button text="Ajouter au panier" onAction="#addToCart"
-                style="-fx-background-color: #FF9800; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8px 15px; -fx-border-radius: 5px;"
+                style="-fx-background-color: #92a69b; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-radius: 5px;"
                 GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.columnSpan="2"/>
 
-        <Label fx:id="totalPriceLabel" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2" alignment="CENTER" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <Label fx:id="totalPriceLabel" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2"
+               alignment="CENTER" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
 
         <Button text="Confirmer la réservation" onAction="#confirmReservation"
-                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-radius: 5px;"
+                style="-fx-background-color: #e4c2b9; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 10px; -fx-border-radius: 5px;"
                 GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2"/>
-
-        <!-- Image du service -->
-        <ImageView fx:id="serviceImage" GridPane.columnIndex="1" GridPane.rowIndex="8" fitWidth="200" fitHeight="200"/>
     </GridPane>
-    <WebView fx:id="calendarWebView" prefHeight="500" prefWidth="800"/>
 
+    <!-- Affichage des services en grille -->
+    <FlowPane hgap="15" vgap="15" alignment="CENTER"
+              style="-fx-background-color: #f5f5f5; -fx-padding: 20px; -fx-border-radius: 10px; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 5);">
+        <Label text="📸 Services disponibles :" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+
+        <HBox spacing="15">
+            <VBox spacing="10">
+                <ImageView fx:id="serviceImage" fitWidth="150" fitHeight="150"/>
+            </VBox>
+        </HBox>
+    </FlowPane>
+
+    <!-- Affichage du calendrier -->
+    <WebView fx:id="calendarWebView" prefHeight="500" prefWidth="800"/>
 </VBox>
