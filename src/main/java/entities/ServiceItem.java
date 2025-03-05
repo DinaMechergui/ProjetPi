@@ -11,33 +11,31 @@ public class ServiceItem {
     private String description;
     private double prix;
     private String imageUrl;
-    private String utilisateur;
 
     public ServiceItem() {}
 
-    public ServiceItem(int id, String nom, String description, double prix, String imageUrl,String utilisateur) {
+    public ServiceItem(int id, String nom, String description, double prix, String imageUrl) {
         this.id = id;
         this.nom = nom;
         this.description = description;
         this.prix = prix;
         this.imageUrl = imageUrl;
-        this.utilisateur = utilisateur;
     }
-
     public ServiceItem(int id, Connection connection) throws SQLException {
         String req = "SELECT * FROM service WHERE id=?";
-        try (PreparedStatement ps = connection.prepareStatement(req)) {
+        try (PreparedStatement ps = connection.prepareStatement(req);
+             ResultSet rs = ps.executeQuery()) {
+
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
+
             if (rs.next()) {
                 this.id = id;
                 this.nom = rs.getString("nom");
                 this.description = rs.getString("description");
                 this.prix = rs.getDouble("prix");
                 this.imageUrl = rs.getString("image_url");
-                this.utilisateur = rs.getString("utilisateur");
             } else {
-                throw new SQLException("Service not found with ID: " + id);
+                throw new SQLException("❌ Service non trouvé avec ID : " + id);
             }
         }
     }
@@ -83,7 +81,7 @@ public class ServiceItem {
     public String toString() {
         return this.nom;  // Retourne seulement le nom du service
     }
-    public String getUtilisateur() { return utilisateur; }
-    public void setUtilisateur(String utilisateur) { this.utilisateur = utilisateur; }
+
 
 }
+

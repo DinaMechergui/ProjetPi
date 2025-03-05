@@ -6,6 +6,8 @@ import Wedding.utils.MyDatabase;
 
 import java.sql.*;
 
+import static Wedding.service.ServiceCommande.getCommandeById;
+
 public class ServiceFacture {
     private static Connection connection;
 
@@ -44,30 +46,41 @@ public class ServiceFacture {
         }
     }
 
-    public static Facture getFactureByCommandeId(int commandeId, String utilisateur) throws SQLException {
+    public Facture getFactureByCommandeId(int commandeId, String utilisateur) throws SQLException {
         String query = "SELECT * FROM facture WHERE commande_id = ? AND utilisateur = ?";
+        Facture facture = null;
 
-        try (PreparedStatement ps = connection.prepareStatement(query)) {
-            ps.setInt(1, commandeId);
-            ps.setString(2, utilisateur);
+        try {
+            Connection connection = MyDatabase.getInstance().getConnection();
+            if (connection == null || connection.isClosed()) {
+                System.err.println("La connexion à la base de données est fermée ou invalide lors de la tentative d'accès.");
+                return null; // ou gérer autrement
+            }
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Commande commande = ServiceCommande.getCommandeById(commandeId);
-                    return new Facture(
-                            rs.getInt("id"),
-                            commande,
-                            rs.getTimestamp("date_facture").toLocalDateTime(),
-                            rs.getString("utilisateur"),
-                            rs.getDouble("total"),
-                            rs.getString("code_promo") // Récupération du code promo
-                    );
+            try (PreparedStatement ps = connection.prepareStatement(query)) {
+                ps.setInt(1, commandeId);
+                ps.setString(2, utilisateur);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        Commande commande = getCommandeById(commandeId); // Récupérer la commande associée
+                        facture = new Facture(
+                                rs.getInt("id"),
+                                commande,
+                                rs.getTimestamp("date_facture").toLocalDateTime(),
+                                rs.getString("utilisateur"),
+                                rs.getDouble("total"),
+                                rs.getString("code_promo")
+                        );
+                    }
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Erreur lors de la récupération de la facture : " + e.getMessage());
-            throw e;
+            System.err.println("❌ Erreur lors de la récupération de la facture : " + e.getMessage());
+            throw e; // Propager l'exception pour une gestion appropriée
         }
-        return null; // Retourne null si aucune facture n'est trouvée
+
+        return facture;
     }
 }
+

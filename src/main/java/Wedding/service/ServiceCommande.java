@@ -23,6 +23,35 @@ public class ServiceCommande implements IServiceCommande {
         System.out.println("Connexion à la base de données : " + this.connection);
     }
 
+    public static List<Pair<ServiceItem, LocalDate>> getServicesReserves(String utilisateur) throws SQLException {
+        List<Pair<ServiceItem, LocalDate>> servicesReserves = new ArrayList<>();
+        String sql = "SELECT s.*, r.date_reservation, r.utilisateur " +
+                "FROM reservation r " +
+                "JOIN service s ON r.service_id = s.id " +
+                "WHERE r.utilisateur = ?"; // ✅ Vérifie bien que l'utilisateur est pris en compte
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, utilisateur);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                // Vérifier si l'utilisateur correspond bien
+                System.out.println("✅ Service trouvé pour utilisateur : " + rs.getString("utilisateur"));
+
+                ServiceItem service = new ServiceItem(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("description"),
+                        rs.getDouble("prix"),
+                        rs.getString("image_url")
+                );
+                LocalDate dateReservation = rs.getDate("date_reservation").toLocalDate();
+                servicesReserves.add(new Pair<>(service, dateReservation));
+            }
+        }
+        System.out.println("🔍 Nombre de services trouvés : " + servicesReserves.size());
+        return servicesReserves;
+    }
+
     @Override
     public void removeProductFromCart(int commandeId, int produitId) throws SQLException {
         String sqlDelete = "DELETE FROM reservation1 WHERE commande_id = ? AND produit_id = ? AND statut = 'RESERVE'";
@@ -202,83 +231,92 @@ public class ServiceCommande implements IServiceCommande {
         return null;
     }
 
-    @Override
-    public List<Pair<ServiceItem, LocalDate>> getServicesReserves(int commandeId) throws SQLException {
-        List<Pair<ServiceItem, LocalDate>> servicesReserves = new ArrayList<>();
-        String sql = "SELECT s.*, sr.date FROM service_reserve sr JOIN service s ON sr.service_id = s.id WHERE sr.commande_id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, commandeId);
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                ServiceItem service = new ServiceItem(rs.getInt("id"), connection);
-                LocalDate date = rs.getDate("date").toLocalDate();
-                servicesReserves.add(new Pair<>(service, date));
-            }
-        }
-        return servicesReserves;
-    }
+
+
+
 
     @Override
+
     public void confirmerCommande(int idCommande, String utilisateur) throws SQLException {
         try {
             connection.setAutoCommit(false);
 
-            // Retrieve reserved products in the command
-            String sqlGetProduits = "SELECT produit_id, quantite FROM reservation1 WHERE commande_id = ?";
-            try (PreparedStatement stmt = connection.prepareStatement(sqlGetProduits)) {
-                stmt.setInt(1, idCommande);
+            // Vérifier et récupérer les services liés à cet utilisateur
+            String sqlSelectServices = "SELECT id FROM reservation WHERE utilisateur = ?";
+            try (PreparedStatement stmt = connection.prepareStatement(sqlSelectServices)) {
+                stmt.setString(1, utilisateur);
                 ResultSet rs = stmt.executeQuery();
-
                 while (rs.next()) {
-                    int idProduit = rs.getInt("produit_id");
-                    int quantite = rs.getInt("quantite");
-
-                    // Check if stock is sufficient
-                    String sqlCheckStock = "SELECT stock FROM produit WHERE id = ?";
-                    try (PreparedStatement checkStmt = connection.prepareStatement(sqlCheckStock)) {
-                        checkStmt.setInt(1, idProduit);
-                        ResultSet stockRs = checkStmt.executeQuery();
-                        if (stockRs.next()) {
-                            int stock = stockRs.getInt("stock");
-                            if (stock < quantite) {
-                                throw new SQLException("Stock insuffisant pour le produit ID : " + idProduit);
-                            }
-                        }
-                    }
-
-                    // Reduce product stock
-                    String sqlUpdateStock = "UPDATE produit SET stock = stock - ? WHERE id = ?";
-                    try (PreparedStatement updateStmt = connection.prepareStatement(sqlUpdateStock)) {
-                        updateStmt.setInt(1, quantite);
-                        updateStmt.setInt(2, idProduit);
-                        updateStmt.executeUpdate();
-                    }
+                    System.out.println("🔎 Service réservé trouvé avec ID: " + rs.getInt("id"));
                 }
             }
 
-            // Update command status to "confirmée"
-            String sqlUpdateCommande = "UPDATE commande SET statut = 'confirmée' WHERE id = ? AND utilisateur = ?";
+            // 🔄 Mettre à jour les produits réservés en "CONFIRME"
+            String sqlUpdateProduits = "UPDATE reservation1 SET statut = 'CONFIRME' WHERE commande_id = ?";
+            try (PreparedStatement stmt = connection.prepareStatement(sqlUpdateProduits)) {
+                stmt.setInt(1, idCommande);
+                stmt.executeUpdate();
+            }
+
+            // 🔄 Mettre à jour la commande comme "CONFIRMÉE"
+            String sqlUpdateCommande = "UPDATE commande SET statut = 'CONFIRMEE' WHERE id = ? AND utilisateur = ?";
             try (PreparedStatement stmt = connection.prepareStatement(sqlUpdateCommande)) {
                 stmt.setInt(1, idCommande);
                 stmt.setString(2, utilisateur);
                 stmt.executeUpdate();
             }
 
-            connection.commit(); // Commit the transaction
+            connection.commit();
+            System.out.println("✅ Commande confirmée avec succès pour l'utilisateur : " + utilisateur);
         } catch (SQLException e) {
-            connection.rollback(); // Rollback in case of error
+            connection.rollback();
+            System.err.println("❌ Erreur lors de la confirmation de la commande : " + e.getMessage());
             throw e;
         } finally {
-            connection.setAutoCommit(true); // Re-enable auto-commit
+            connection.setAutoCommit(true);
         }
+    }
+    public static List<Pair<ServiceItem, Integer>> getServicesEtQuantitesDansPanier(int commandeId) throws SQLException {
+        List<Pair<ServiceItem, Integer>> servicesEtQuantites = new ArrayList<>();
+        String query = "SELECT s.*" +
+                "FROM service s " +
+                "JOIN reservation r ON s.id = r.service_id " +
+                "WHERE r.event_id = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, commandeId);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                // Création de l'objet ServiceItem
+                ServiceItem service = new ServiceItem(
+                        resultSet.getInt("id"),
+                        resultSet.getString("nom"),
+                        resultSet.getString("description"),
+                        resultSet.getDouble("prix"),
+                        resultSet.getString("image_url")
+                );
+
+                // Récupération de la quantité réservée du service
+                int quantiteReservee = resultSet.getInt("quantite");
+
+                // Ajout du service et de la quantité à la liste
+                servicesEtQuantites.add(new Pair<>(service, quantiteReservee));
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur lors de la récupération des services réservés : " + e.getMessage());
+            throw e;
+        }
+
+        return servicesEtQuantites;
     }
 
     public static List<Pair<Produit, Integer>> getProduitsEtQuantitesDansPanier(int commandeId) throws SQLException {
         List<Pair<Produit, Integer>> produitsEtQuantites = new ArrayList<>();
-        String query = "SELECT p.id, p.nom, p.description, p.prix, p.categorie, p.stock, p.imageUrl, r.quantite " +
-                "FROM produit p " +
+        String query = "SELECT p.*, r.quantite FROM produit p " +
                 "JOIN reservation1 r ON p.id = r.produit_id " +
-                "WHERE r.commande_id = ? AND r.statut = 'RESERVE'";
+                "WHERE r.commande_id = ?";
+        ;
 
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setInt(1, commandeId);
@@ -439,3 +477,4 @@ public class ServiceCommande implements IServiceCommande {
         }
     }
 }
+

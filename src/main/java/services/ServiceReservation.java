@@ -37,7 +37,8 @@ public class ServiceReservation {
 
     // ✅ Ajouter une réservation avec l'utilisateur (nom)
     public int ajouter(reserve reservation) throws SQLException {
-        String req = "INSERT INTO reservation (event_id, service_id, date_reservation,  prix_total, utilisateur) VALUES (?, ?, ?, ?, ?)";
+        String req = "INSERT INTO reservation (event_id, service_id, date_reservation, prix_total, utilisateur) " +
+                "VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, reservation.getEvent().getId());
@@ -46,22 +47,26 @@ public class ServiceReservation {
             ps.setDouble(4, reservation.getPrixTotal());
             ps.setString(5, reservation.getUtilisateur());
 
-            System.out.println("🔍 Trying to insert into reservation:");
+            System.out.println("🟢 Tentative d'insertion dans reservation:");
             System.out.println("Event ID: " + reservation.getEvent().getId());
             System.out.println("Service ID: " + reservation.getService().getId());
             System.out.println("Date: " + reservation.getDateReservation());
-            System.out.println("Total Price: " + reservation.getPrixTotal());
-            System.out.println("User: " + reservation.getUtilisateur());
+            System.out.println("Prix total: " + reservation.getPrixTotal());
+            System.out.println("Utilisateur: " + reservation.getUtilisateur());
 
             int rowsInserted = ps.executeUpdate();
 
             try (ResultSet generatedKeys = ps.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    System.out.println("✅ Reservation added successfully with ID: " + generatedKeys.getInt(1));
-                    return generatedKeys.getInt(1);
+                    int insertedId = generatedKeys.getInt(1);
+                    System.out.println("✅ Réservation ajoutée avec succès ! ID: " + insertedId);
+                    return insertedId;
                 }
             }
             return -1;
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur lors de l'insertion dans reservation: " + e.getMessage());
+            throw e;
         }
     }
 
@@ -109,8 +114,7 @@ public class ServiceReservation {
                         rs.getString("nom"),
                         rs.getString("description"),
                         rs.getDouble("prix"),
-                        rs.getString("image_url"),
-                        utilisateur
+                        rs.getString("image_url")
                 ));
                 res.setDateReservation(rs.getDate("date_reservation"));
                 res.setPrixTotal(rs.getDouble("prix_total"));
