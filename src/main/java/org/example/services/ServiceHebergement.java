@@ -114,82 +114,96 @@ public class ServiceHebergement implements IHebergement {
     }
 
     public List<Hebergement> recommanderHebergements(String localisation, double prixMin, double prixMax, boolean disponible) throws SQLException {
-        String query = "SELECT * FROM Hebergement WHERE 1=1";
+        // Construction dynamique de la requête
+        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM Hebergement WHERE 1=1");
+        List<Object> parameters = new ArrayList<>();
 
+        // Filtre par localisation
         if (localisation != null && !localisation.isEmpty()) {
-            query += " AND adresse LIKE '%" + localisation + "%'";
+            queryBuilder.append(" AND adresse LIKE ?");
+            parameters.add("%" + localisation + "%");
         }
+
+        // Filtre par prix
         if (prixMin >= 0 && prixMax >= 0) {
-            query += " AND prixParNuit BETWEEN " + prixMin + " AND " + prixMax;
+            if (prixMin > prixMax) {
+                throw new IllegalArgumentException("Le prix minimum ne peut pas être supérieur au prix maximum.");
+            }
+            queryBuilder.append(" AND prixParNuit BETWEEN ? AND ?");
+            parameters.add(prixMin);
+            parameters.add(prixMax);
         }
+
+        // Filtre par disponibilité
         if (disponible) {
-            query += " AND disponible = 1";
+            queryBuilder.append(" AND disponible = ?");
+            parameters.add(1);
         }
 
-        // Exécuter la requête et retourner les résultats
-        return executeQueryAndMapToHebergements(query);
-
-    }
-    public List<Hebergement> executeQueryAndMapToHebergements(String query) throws SQLException {
-        List<Hebergement> hebergements = new ArrayList<>();
-        Connection connection = null;
-        Statement statement = null;
-        ResultSet resultSet = null;
-
-        try {
-            // Établir la connexion à la base de données
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/weddingplanner", "root", "");
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(query);
-
-            // Parcourir les résultats et les mapper à des objets Hebergement
-            while (resultSet.next()) {
-                Hebergement hebergement = new Hebergement();
-                hebergement.setIdheb(resultSet.getInt("idheb"));
-                hebergement.setNom(resultSet.getString("nom"));
-                hebergement.setAdresse(resultSet.getString("adresse"));
-                hebergement.setPrixParNuit(resultSet.getDouble("prixParNuit"));
-                hebergement.setDisponible(resultSet.getBoolean("disponible"));
-                hebergement.setImageUrl(resultSet.getString("imageUrl"));
-                hebergement.setLatitude(resultSet.getDouble("latitude"));
-                hebergement.setLongitude(resultSet.getDouble("longitude"));
-
-                hebergements.add(hebergement);
-            }
-        } finally {
-            // Fermer les ressources
-            if (resultSet != null) resultSet.close();
-            if (statement != null) statement.close();
-            if (connection != null) connection.close();
-        }
-
-        return hebergements;
+        // Exécuter la requête avec les paramètres
+        return executeQueryAndMapToHebergements(queryBuilder.toString(), parameters);
     }
 
-    public List<Hebergement> getHebergementsWithValidCoordinates() throws SQLException {
+    private List<Hebergement> executeQueryAndMapToHebergements(String query, List<Object> parameters) throws SQLException {
         List<Hebergement> hebergements = new ArrayList<>();
-        String query = "SELECT idheb, nom, adresse, prixParNuit, disponible, imageUrl, latitude, longitude " +
-                "FROM hebergement WHERE latitude != 0 AND longitude != 0";
 
-        try (Connection connection = MyDatabase.getInstance().getConnection();
-             Statement statement = connection.createStatement();
-             ResultSet resultSet = statement.executeQuery(query)) {
+        try (
+             PreparedStatement stmt = connection.prepareStatement(query)) {
 
-            while (resultSet.next()) {
-                Hebergement hebergement = new Hebergement();
-                hebergement.setIdheb(resultSet.getInt("idheb"));
-                hebergement.setNom(resultSet.getString("nom"));
-                hebergement.setAdresse(resultSet.getString("adresse"));
-                hebergement.setPrixParNuit(resultSet.getDouble("prixParNuit"));
-                hebergement.setDisponible(resultSet.getBoolean("disponible"));
-                hebergement.setImageUrl(resultSet.getString("imageUrl"));
-                hebergement.setLatitude(resultSet.getDouble("latitude"));
-                hebergement.setLongitude(resultSet.getDouble("longitude"));
-
-                hebergements.add(hebergement);
+            // Ajouter les paramètres à la requête
+            for (int i = 0; i < parameters.size(); i++) {
+                stmt.setObject(i + 1, parameters.get(i));
             }
+
+            // Exécuter la requête et mapper les résultats
+            try (ResultSet rs = stmt.executeQuery()) {
+
+                while (rs.next()) {
+                    Hebergement hebergement = new Hebergement();
+                    hebergement.setIdheb(rs.getInt("idheb"));
+                    hebergement.setNom(rs.getString("nom"));
+                    hebergement.setAdresse(rs.getString("adresse"));
+                    hebergement.setPrixParNuit(rs.getDouble("prixParNuit"));
+                    hebergement.setDisponible(rs.getBoolean("disponible"));
+                    hebergement.setImageUrl(rs.getString("imageUrl"));
+                    hebergement.setLatitude(rs.getDouble("latitude"));
+                    hebergement.setLongitude(rs.getDouble("longitude"));
+
+                    hebergements.add(hebergement);
+                }
+            }
+            System.out.println("Requête SQL : " + query);
+            System.out.println("Paramètres : " + parameters);
+
+            return hebergements;
         }
 
-        return hebergements;
+      /*  public List<Hebergement> getHebergementsWithValidCoordinates () throws SQLException {
+            List<Hebergement> hebergements = new ArrayList<>();
+            String query = "SELECT idheb, nom, adresse, prixParNuit, disponible, imageUrl, latitude, longitude " +
+                    "FROM hebergement WHERE latitude != 0 AND longitude != 0";
+
+            try (Connection connection = MyDatabase.getInstance().getConnection();
+                 Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(query)) {
+
+                while (resultSet.next()) {
+                    Hebergement hebergement = new Hebergement();
+                    hebergement.setIdheb(resultSet.getInt("idheb"));
+                    hebergement.setNom(resultSet.getString("nom"));
+                    hebergement.setAdresse(resultSet.getString("adresse"));
+                    hebergement.setPrixParNuit(resultSet.getDouble("prixParNuit"));
+                    hebergement.setDisponible(resultSet.getBoolean("disponible"));
+                    hebergement.setImageUrl(resultSet.getString("imageUrl"));
+                    hebergement.setLatitude(resultSet.getDouble("latitude"));
+                    hebergement.setLongitude(resultSet.getDouble("longitude"));
+
+                    hebergements.add(hebergement);
+                }
+            }
+
+            return hebergements;
+        }
+    }*/
     }
 }

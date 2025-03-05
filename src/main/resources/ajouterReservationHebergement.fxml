@@ -58,5 +58,14 @@
                         <Tooltip text="Cliquez pour réserver" />
                   </tooltip>
             </Button>
+            <Button fx:id="confirmerButton" text="Confirmer"/>
+
+
+            <!-- Bouton Retour -->
+            <Button fx:id="retourButton" layoutX="350.0" layoutY="260.0" mnemonicParsing="false" onAction="#retour" text="Retour" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;">
+                  <tooltip>
+                        <Tooltip text="Cliquez pour revenir en arrière" />
+                  </tooltip>
+            </Button>
       </children>
 </AnchorPane>

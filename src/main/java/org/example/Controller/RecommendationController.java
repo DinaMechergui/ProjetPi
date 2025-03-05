@@ -42,19 +42,25 @@ public class RecommendationController {
                 col = 0;
                 row++;
             }
+
         }
     }
 
     private VBox createHebergementCard(Hebergement hebergement) {
-        VBox card = new VBox(10);
-        card.getStyleClass().add("hebergement-card");
+        try {
+            VBox card = new VBox(10);
+            card.getStyleClass().add("hebergement-card");
 
-        Label nomLabel = new Label("Nom : " + hebergement.getNom());
-        Label adresseLabel = new Label("Adresse : " + hebergement.getAdresse());
-        Label prixLabel = new Label("Prix : " + hebergement.getPrixParNuit() + " TND");
+            Label nomLabel = new Label("Nom : " + hebergement.getNom());
+            Label adresseLabel = new Label("Adresse : " + hebergement.getAdresse());
+            Label prixLabel = new Label("Prix : " + hebergement.getPrixParNuit() + " TND");
 
-        card.getChildren().addAll(nomLabel, adresseLabel, prixLabel);
-        return card;
+            card.getChildren().addAll(nomLabel, adresseLabel, prixLabel);
+            return card;
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la création de la carte : " + e.getMessage());
+            return new VBox(new Label("Erreur lors du chargement des données."));
+        }
     }
 
     // Méthode pour retourner à la vue précédente

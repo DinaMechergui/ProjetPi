@@ -1,12 +1,12 @@
 package org.example.services;
 
-
 import org.example.entities.ReservationHebergement;
 import org.example.entities.ReservationHebergementDetail;
 import org.Wedding.utils.MyDatabase;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,109 +17,30 @@ public class ServiceResHebergement implements IResHebergement<ReservationHeberge
         this.connection = MyDatabase.getInstance().getConnection();
     }
 
-
-
     @Override
     public void ajouter(ReservationHebergement reservation) throws SQLException {
-        String req = "INSERT INTO reservation_hebergement (idheb, utilisateur, datedebut, datefin, prixtotal) VALUES ('"
-                + reservation.getIdheb() + "', '"
-                + reservation.getUtilisateur() + "', '"
-                + reservation.getDateDebut() + "', '"
-                + reservation.getDateFin() + "', "
-                + reservation.getPrixTotal() + ")";
+        String req = "INSERT INTO reservation_hebergement (idheb, utilisateur, datedebut, datefin, prixtotal) VALUES (?, ?, ?, ?, ?)";
 
-        Statement statement = this.connection.createStatement();
-        statement.executeUpdate(req);
-        System.out.println("✅ Réservation d'hébergement ajoutée avec succès !");
-    }
+        try (PreparedStatement statement = connection.prepareStatement(req)) {
+            // Convertir java.util.Date en java.sql.Date
+            java.sql.Date dateDebut = new java.sql.Date(reservation.getDateDebut().getTime());
+            java.sql.Date dateFin = new java.sql.Date(reservation.getDateFin().getTime());
 
-    /*public void modifier(ReservationHebergement reservation) throws SQLException {
-        String req = "UPDATE reservation_hebergement SET idheb = ?, client = ?, datedebut = ?, datefin = ?, prixtotal = ? WHERE id = ?";
+            // Définir les paramètres de la requête
+            statement.setInt(1, reservation.getIdheb());
+            statement.setString(2, reservation.getUtilisateur());
+            statement.setDate(3, dateDebut);
+            statement.setDate(4, dateFin);
+            statement.setFloat(5, reservation.getPrixTotal());
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(req)) {
-            // On définit les paramètres de la requête
-            preparedStatement.setInt(1, reservation.getIdheb());
-            preparedStatement.setString(2, reservation.getClient());
-            preparedStatement.setString(3, reservation.getDateDebut());
-            preparedStatement.setString(4, reservation.getDateFin());
-            preparedStatement.setFloat(5, reservation.getPrixTotal());
-            preparedStatement.setInt(6, reservation.getId());
-
-            // Exécution de la requête de mise à jour
-            preparedStatement.executeUpdate();
-            System.out.println("✅ Réservation d'hébergement modifiée avec succès !");
+            // Exécuter la requête
+            statement.executeUpdate();
+            System.out.println("✅ Réservation d'hébergement ajoutée avec succès !");
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de la modification de la réservation : " + e.getMessage());
+            System.err.println("❌ Erreur lors de l'ajout de la réservation : " + e.getMessage());
+            throw e; // Propager l'exception pour une gestion centralisée
         }
     }
-
-    public void supprimer(int id) throws SQLException {
-        String req = "DELETE FROM reservation_hebergement WHERE id = ?";
-
-        try (PreparedStatement preparedStatement = connection.prepareStatement(req)) {
-            // Définition du paramètre de l'ID
-            preparedStatement.setInt(1, id);
-
-            // Exécution de la requête
-            int rowsDeleted = preparedStatement.executeUpdate();
-            if (rowsDeleted > 0) {
-                System.out.println("✅ Réservation d'hébergement supprimée avec succès !");
-            } else {
-                System.out.println("⚠ Aucune réservation trouvée avec cet ID !");
-            }
-        } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de la suppression de la réservation : " + e.getMessage());
-        }
-    }
-
-    public void afficherReservationHebergement() {
-        List<ReservationHebergement> reservations = getAllReservation(); // Récupérer toutes les réservations
-
-        if (reservations.isEmpty()) {
-            System.out.println("⚠ Aucun hébergement trouvé !");
-        } else {
-            System.out.println("🏨 Liste des hébergements réservés :");
-            for (ReservationHebergement reservationHebergement : reservations) {
-                System.out.println("ID: " + reservationHebergement.getId() +
-                        " | Hebergement ID: " + reservationHebergement.getIdheb() +
-                        " | Client: " + reservationHebergement.getClient() +
-                        " | Date début: " + reservationHebergement.getDateDebut() +
-                        " | Date fin: " + reservationHebergement.getDateFin() +
-                        " | Prix total: " + reservationHebergement.getPrixTotal());
-            }
-        }
-    }
-
-    private List<ReservationHebergement> getAllReservation() {
-        List<ReservationHebergement> reservations = new ArrayList<>();
-        String query = "SELECT * FROM reservation_hebergement"; // Vérifie que "reservation_hebergement" est bien le nom de ta table
-
-        try (Connection conn = MyDatabase.getInstance().getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(query)) {
-
-            while (rs.next()) {
-                ReservationHebergement reservationHebergement = new ReservationHebergement(
-                        rs.getInt("hebergement_id"),
-                        rs.getString("client"),
-                        rs.getString("date_debut"),
-                        rs.getString("date_fin"),
-                        rs.getFloat("prix_total")
-                );
-                reservationHebergement.setId(rs.getInt("id"));
-                reservations.add(reservationHebergement);
-            }
-
-        } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de la récupération des réservations d'hébergement : " + e.getMessage());
-        }
-
-        return reservations;
-    }
-
-*/
-
-
 
     public List<ReservationHebergementDetail> getReservationsAvecHebergement() throws SQLException {
         List<ReservationHebergementDetail> reservations = new ArrayList<>();
@@ -133,11 +54,15 @@ public class ServiceResHebergement implements IResHebergement<ReservationHeberge
              ResultSet rs = statement.executeQuery(req)) {
 
             while (rs.next()) {
+                // Convertir java.sql.Date en java.util.Date
+                java.util.Date dateDebut = new java.util.Date(rs.getDate("datedebut").getTime());
+                java.util.Date dateFin = new java.util.Date(rs.getDate("datefin").getTime());
+
                 ReservationHebergementDetail reservation = new ReservationHebergementDetail(
                         rs.getInt("res_id"),
-                        rs.getString("utilisateur"),
-                        rs.getString("datedebut"),
-                        rs.getString("datefin"),
+                        rs.getString("utilisateur"), // Utilisateur au lieu de client
+                        dateDebut,
+                        dateFin,
                         rs.getDouble("prixtotal"),
                         rs.getInt("hebergement_id"),
                         rs.getString("nom"),
@@ -149,12 +74,13 @@ public class ServiceResHebergement implements IResHebergement<ReservationHeberge
             }
         } catch (SQLException e) {
             System.err.println("❌ Erreur lors de la récupération des réservations : " + e.getMessage());
+            throw e;
         }
 
         return reservations;
     }
 
-    public boolean estReserve(int idHebergement, LocalDate dateDebut, LocalDate dateFin) {
+    public boolean estReserve(int idHebergement, LocalDate dateDebut, LocalDate dateFin) throws SQLException {
         String requete = "SELECT COUNT(*) FROM reservation_hebergement WHERE idheb = ? " +
                 "AND ((datedebut BETWEEN ? AND ?) OR (datefin BETWEEN ? AND ?) " +
                 "OR (? BETWEEN datedebut AND datefin) OR (? BETWEEN datedebut AND datefin))";
@@ -168,14 +94,15 @@ public class ServiceResHebergement implements IResHebergement<ReservationHeberge
             pst.setDate(6, java.sql.Date.valueOf(dateDebut));
             pst.setDate(7, java.sql.Date.valueOf(dateFin));
 
-            ResultSet rs = pst.executeQuery();
-            if (rs.next() && rs.getInt(1) > 0) {
-                return true; // L'hébergement est déjà réservé
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    return true; // L'hébergement est déjà réservé
+                }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("❌ Erreur lors de la vérification de la disponibilité : " + e.getMessage());
+            throw e;
         }
         return false; // L'hébergement est disponible
     }
-
 }

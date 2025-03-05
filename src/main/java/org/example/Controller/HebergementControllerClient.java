@@ -346,33 +346,31 @@ public class HebergementControllerClient {
     @FXML
     private TextField localisationField; // Champ de texte pour la localisation
     @FXML
-    private Slider prixSlider; // Slider pour le budget
+    private TextField prixMinField;
 
-    // Méthode pour naviguer vers la page des recommandations
     @FXML
-    private void goToRecommendation() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Recommendation.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setScene(new Scene(root));
-            stage.setTitle("Recommandations");
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page de recommandation.");
-        }
-    }
+    private TextField prixMaxField;
+
 
     // Méthode pour appliquer les préférences de recherche
     @FXML
     private void appliquerPreferences() {
         String localisation = localisationField.getText();
-        double prixMin = prixSlider.getMin(); // Valeur minimale du slider
-        double prixMax = prixSlider.getValue(); // Valeur actuelle du slider
+        double prixMin;
+        double prixMax;
 
         try {
-            // Récupérer les recommandations basées sur les préférences
+            // Récupérer et convertir les valeurs des champs de texte
+            prixMin = Double.parseDouble(prixMinField.getText());
+            prixMax = Double.parseDouble(prixMaxField.getText());
+
+            // Vérifier que le prix minimum est inférieur ou égal au prix maximum
+            if (prixMin > prixMax) {
+                afficherAlerte("Erreur", "Le prix minimum doit être inférieur ou égal au prix maximum.");
+                return;
+            }
+
+            // Appeler le service de recommandation
             List<Hebergement> recommandations = serviceHebergement.recommanderHebergements(localisation, prixMin, prixMax, true);
 
             if (recommandations.isEmpty()) {
@@ -380,25 +378,25 @@ public class HebergementControllerClient {
                 return;
             }
 
-            // Charger la vue des recommandations
+            // Charger et afficher la vue des recommandations
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Recommendation.fxml"));
             Parent root = loader.load();
 
-            // Passer les recommandations au contrôleur des recommandations
             RecommendationController recommendationController = loader.getController();
+            System.out.println("Recommandations passées au contrôleur : " + recommandations.size());
             recommendationController.afficherRecommandations(recommandations);
 
-            // Afficher la vue des recommandations
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.setTitle("Recommandations");
             stage.show();
+        } catch (NumberFormatException e) {
+            afficherAlerte("Erreur", "Veuillez saisir des valeurs numériques valides pour les prix.");
         } catch (IOException | SQLException e) {
             e.printStackTrace();
             afficherAlerte("Erreur", "Une erreur s'est produite lors de la recherche des recommandations.");
         }
     }
-
     // Méthode pour naviguer vers la page des événements
     @FXML
     private void goToEvent() {

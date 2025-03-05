@@ -6,73 +6,75 @@
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.VoitureControllerClient"
-            stylesheets="@style.css" prefHeight="600.0" prefWidth="800.0">
+<ScrollPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.VoitureControllerClient"
+            fitToWidth="true" fitToHeight="true" stylesheets="@style.css" prefHeight="600.0" prefWidth="800.0">
 
-    <!-- ==================== NAVBAR ==================== -->
-    <HBox styleClass="navbar" layoutX="0" layoutY="0" prefWidth="800" prefHeight="40">
-        <!-- Logo -->
-        <ImageView fx:id="logo" fitHeight="30" fitWidth="30" pickOnBounds="true" preserveRatio="true">
-            <Image url="@/images/logo.jpg"/> <!-- Remplacez par le chemin de votre logo -->
-        </ImageView>
+    <VBox spacing="10" prefWidth="780" alignment="CENTER" style="-fx-padding: 10;">
 
-        <!-- Liens de la navbar -->
-        <HBox spacing="10" alignment="CENTER_LEFT" styleClass="nav-links">
-            <Button text="Event" styleClass="nav-button" onAction="#goToEvent" />
-            <Button text="Drive and Stay" styleClass="nav-button" onAction="#goToDriveAndStay" />
-            <Button text="Invité" styleClass="nav-button" onAction="#goToInvite"/>
+        <!-- ==================== NAVBAR ==================== -->
+        <HBox styleClass="navbar" prefWidth="800" prefHeight="40">
+            <!-- Logo -->
+            <ImageView fx:id="logo" fitHeight="30" fitWidth="30" pickOnBounds="true" preserveRatio="true">
+                <Image url="@/images/logo.jpg"/> <!-- Remplacez par le chemin de votre logo -->
+            </ImageView>
+
+            <!-- Liens de la navbar -->
+            <HBox spacing="10" alignment="CENTER_LEFT" styleClass="nav-links">
+                <Button text="Event" styleClass="nav-button" onAction="#goToEvent" />
+                <Button text="Drive and Stay" styleClass="nav-button" onAction="#goToDriveAndStay" />
+                <Button text="Invité" styleClass="nav-button" onAction="#goToInvite"/>
+            </HBox>
+
+            <!-- Boutons de login/logout -->
+            <HBox spacing="5" alignment="CENTER_RIGHT" styleClass="auth-buttons">
+                <Button fx:id="loginButton" text="Login" styleClass="auth-button" />
+                <Button fx:id="logoutButton" text="Logout" styleClass="auth-button" visible="false" />
+            </HBox>
         </HBox>
 
-        <!-- Boutons de login/logout -->
-        <HBox spacing="5" alignment="CENTER_RIGHT" styleClass="auth-buttons">
-            <Button fx:id="loginButton" text="Login" styleClass="auth-button" />
-            <Button fx:id="logoutButton" text="Logout" styleClass="auth-button" visible="false" />
-        </HBox>
-    </HBox>
+        <!-- ==================== SECTION PRINCIPALE ==================== -->
+        <VBox spacing="10" prefWidth="740">
 
-    <!-- ==================== SECTION PRINCIPALE ==================== -->
-    <VBox layoutX="30" layoutY="50" spacing="10" prefWidth="740">
+            <!-- ===== Section des préférences de recherche ===== -->
+            <VBox spacing="5" style="-fx-padding: 5;">
+                <Label text="Préférences de recherche" styleClass="section-title" />
+                <HBox spacing="5" alignment="CENTER_LEFT">
+                    <!-- Champ de texte pour la marque -->
+                    <TextField fx:id="marqueField" prefWidth="150" promptText="Marque" styleClass="search-bar" />
+                    <!-- Slider pour le budget -->
+                    <Slider fx:id="prixSlider" min="0" max="1000" value="500" showTickLabels="true" showTickMarks="true" prefWidth="200" />
+                    <!-- Bouton pour appliquer les préférences -->
+                    <Button text="Appliquer" onAction="#appliquerPreferences" styleClass="search-button" />
+                </HBox>
+            </VBox>
 
-        <!-- ===== Section des préférences de recherche ===== -->
-        <VBox spacing="5" style="-fx-padding: 5;">
-            <Label text="Préférences de recherche" styleClass="section-title" />
-            <HBox spacing="5" alignment="CENTER_LEFT">
-                <!-- Champ de texte pour la marque -->
-                <TextField fx:id="marqueField" prefWidth="150" promptText="Marque" styleClass="search-bar" />
-                <!-- Slider pour le budget -->
-                <Slider fx:id="prixSlider" min="0" max="1000" value="500" showTickLabels="true" showTickMarks="true" prefWidth="200" />
-                <!-- Bouton pour appliquer les préférences -->
-                <Button text="Appliquer" onAction="#appliquerPreferences" styleClass="search-button" />
-            </HBox>
-        </VBox>
+            <!-- ===== Icône du panier ===== -->
+            <ImageView fx:id="cartIcon" fitHeight="30" fitWidth="30" onMouseClicked="#goToCart">
+                <Image url="@/images/cart-icon.png"/>
+            </ImageView>
 
-        <!-- ===== Icône du panier ===== -->
-        <ImageView fx:id="cartIcon" layoutX="750" layoutY="10" fitHeight="30" fitWidth="30" onMouseClicked="#goToCart">
-            <Image url="@/images/cart-icon.png"/>
-        </ImageView>
+            <!-- ===== Section des voitures ===== -->
+            <VBox spacing="5" style="-fx-padding: 5;">
+                <Label text="Voitures Disponibles" styleClass="section-title" />
+                <!-- Grille des voitures -->
+                    <GridPane fx:id="gridPaneVoitures" hgap="10" vgap="10" styleClass="grid-pane">
+                        <!-- Les cartes des voitures seront ajoutées dynamiquement ici -->
+                    </GridPane>
 
-        <!-- ===== Section des voitures ===== -->
-        <VBox spacing="5" style="-fx-padding: 5;">
-            <Label text="Voitures Disponibles" styleClass="section-title" />
-            <!-- Grille des voitures -->
-            <ScrollPane prefWidth="740" prefHeight="300">
-                <GridPane fx:id="gridPaneVoitures" hgap="10" vgap="10" styleClass="grid-pane">
-                    <!-- Les cartes des voitures seront ajoutées dynamiquement ici -->
-                </GridPane>
-            </ScrollPane>
-        </VBox>
+            </VBox>
 
-        <!-- ===== Section des avis ===== -->
-        <VBox fx:id="avisSection" spacing="5" style="-fx-padding: 5;">
-            <Label text="Donner votre avis" styleClass="section-title" />
-            <!-- Conteneur pour les étoiles -->
-            <HBox fx:id="starRatingContainer" spacing="5" alignment="CENTER_LEFT">
-                <!-- Les étoiles seront ajoutées dynamiquement ici -->
-            </HBox>
-            <!-- Champ de commentaire -->
-            <TextArea fx:id="commentaireField" prefWidth="200" prefHeight="80" promptText="Votre commentaire..." styleClass="commentaire-field" />
-            <!-- Bouton pour poster l'avis -->
-            <Button fx:id="submitAvisButton" text="Poster Avis" onAction="#submitAvis" styleClass="submit-button" />
+            <!-- ===== Section des avis ===== -->
+            <VBox fx:id="avisSection" spacing="5" style="-fx-padding: 5;">
+                <Label text="Donner votre avis" styleClass="section-title" />
+                <!-- Conteneur pour les étoiles -->
+                <HBox fx:id="starRatingContainer" spacing="5" alignment="CENTER_LEFT">
+                    <!-- Les étoiles seront ajoutées dynamiquement ici -->
+                </HBox>
+                <!-- Champ de commentaire -->
+                <TextArea fx:id="commentaireField" prefWidth="200" prefHeight="80" promptText="Votre commentaire..." styleClass="commentaire-field" />
+                <!-- Bouton pour poster l'avis -->
+                <Button fx:id="submitAvisButton" text="Poster Avis" onAction="#submitAvis" styleClass="submit-button" />
+            </VBox>
         </VBox>
     </VBox>
-</AnchorPane>
+</ScrollPane>

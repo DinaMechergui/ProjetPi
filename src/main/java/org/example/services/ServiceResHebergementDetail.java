@@ -32,8 +32,8 @@ public class ServiceResHebergementDetail {
                 ReservationHebergementDetail reservation = new ReservationHebergementDetail(
                         rs.getInt("res_id"),
                         rs.getString("client"),
-                        rs.getString("datedebut"),
-                        rs.getString("datefin"),
+                        rs.getDate("datedebut"),
+                        rs.getDate("datefin"),
                         rs.getDouble("prixtotal"),
                         rs.getInt("hebergement_id"),
                         rs.getString("nom"),

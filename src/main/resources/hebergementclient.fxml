@@ -41,8 +41,8 @@
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <!-- Champ de texte pour la localisation -->
                     <TextField fx:id="localisationField" prefWidth="200" promptText="Localisation" styleClass="search-bar" />
-                    <!-- Slider pour le budget -->
-                    <Slider fx:id="prixSlider" min="0" max="1000" value="500" showTickLabels="true" showTickMarks="true" />
+                    <TextField fx:id="prixMinField" promptText="Prix minimum"/>
+                    <TextField fx:id="prixMaxField" promptText="Prix maximum"/>
                     <!-- Bouton pour appliquer les préférences -->
                     <Button text="Appliquer" onAction="#appliquerPreferences" styleClass="search-button" />
                 </HBox>

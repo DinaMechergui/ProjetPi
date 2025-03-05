@@ -1,11 +1,13 @@
 package org.example.entities;
 
 
+import java.util.Date;
+
 public class ReservationHebergementDetail {
     private int id;
     private String client;
-    private String dateDebut;
-    private String dateFin;
+    private Date dateDebut;
+    private Date dateFin;
     private double prixTotal;
 
     private int idheb;
@@ -15,7 +17,7 @@ public class ReservationHebergementDetail {
     private boolean disponible;
 
     // Constructeur
-    public ReservationHebergementDetail(int id, String client, String dateDebut, String dateFin, double prixTotal,
+    public ReservationHebergementDetail(int id, String client, Date dateDebut, Date dateFin, double prixTotal,
                                         int idheb, String nomHebergement, String adresse, double prixParNuit, boolean disponible) {
         this.id = id;
         this.client = client;
@@ -36,11 +38,21 @@ public class ReservationHebergementDetail {
     public String getClient() { return client; }
     public void setClient(String client) { this.client = client; }
 
-    public String getDateDebut() { return dateDebut; }
-    public void setDateDebut(String dateDebut) { this.dateDebut = dateDebut; }
+    public Date getDateDebut() {
+        return dateDebut;
+    }
 
-    public String getDateFin() { return dateFin; }
-    public void setDateFin(String dateFin) { this.dateFin = dateFin; }
+    public void setDateDebut(Date dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+
+    public Date getDateFin() {
+        return dateFin;
+    }
+
+    public void setDateFin(Date dateFin) {
+        this.dateFin = dateFin;
+    }
 
     public double getPrixTotal() { return prixTotal; }
     public void setPrixTotal(double prixTotal) { this.prixTotal = prixTotal; }
