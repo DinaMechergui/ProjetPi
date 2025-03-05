@@ -2,6 +2,7 @@ package Wedding.controllers;
 
 import Wedding.entities.*;
 import Wedding.service.*;
+import Wedding.utils.MyDatabase;
 import entities.ServiceItem;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -195,31 +196,42 @@ public class CommandeController {
     }
 
     @FXML
+
     private void confirmOrder() {
         if (currentCommande != null && currentUser != null) {
             try {
-                // Confirmer la commande
+                // ✅ Vérifier et rouvrir une connexion active
+                MyDatabase.getInstance().getConnection();
+
+                // ✅ Confirmer la commande
                 serviceCommande.confirmerCommande(currentCommande.getId(), currentUser.getPrenom());
 
-                // Calculer le total
-                double total = calculateTotal(serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId()));
+                // ✅ Récupérer les produits réservés
+                List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
 
-                // Vérifier si un code promo doit être appliqué
+                // ✅ Récupérer les services réservés
+                //   List<Pair<ServiceItem, Double>> servicesReserves = serviceCommande.getServicesReservesDansPanier(currentCommande.getId());
+
+                // ✅ Calculer le total (Produits + Services)
+                //    double total = calculateTotal(produitsEtQuantites, servicesReserves);
+
+                // ✅ Vérifier si un code promo doit être appliqué
                 String codePromo = (total > 10000) ? generatePromoCode() : null;
 
-                // Créer la facture avec ou sans code promo
-                Facture facture = new Facture(0, currentCommande, java.time.LocalDateTime.now(), currentUser.getPrenom(), total, codePromo);
+                // ✅ Créer et enregistrer la facture
+                Facture facture = new Facture(0, currentCommande, LocalDateTime.now(), currentUser.getPrenom(), total, codePromo);
                 serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
 
-                // Message de succès
-                String message = "Commande confirmée avec services et produits.";
+                // ✅ Afficher un message de succès
+                String message = "Commande confirmée avec succès !\nTotal : " + total + " TND";
                 if (codePromo != null) {
-                    message += "\nFélicitations ! Vous avez reçu un code promo : " + codePromo;
+                    message += "\n🎉 Félicitations ! Code promo obtenu : " + codePromo;
                 }
                 showAlert("Succès", message, Alert.AlertType.INFORMATION);
 
             } catch (SQLException e) {
-                showAlert("Erreur", "Une erreur s'est produite : " + e.getMessage(), Alert.AlertType.ERROR);
+                e.printStackTrace();
+                showAlert("Erreur", "Une erreur est survenue lors de la confirmation : " + e.getMessage(), Alert.AlertType.ERROR);
             }
         } else {
             showAlert("Erreur", "Aucune commande à confirmer.", Alert.AlertType.WARNING);
@@ -234,13 +246,23 @@ public class CommandeController {
         }
         return code.toString();
     }
-    private double calculateTotal(List<Pair<Produit, Integer>> cartProductsWithQuantity) {
+    private double calculateTotal(List<Pair<Produit, Integer>> produitsEtQuantites, List<Pair<ServiceItem, Double>> servicesReserves) {
         double total = 0.0;
-        for (Pair<Produit, Integer> pair : cartProductsWithQuantity) {
-            Produit produit = pair.getKey();
-            int quantite = pair.getValue();
-            total += produit.getPrix() * quantite;
+
+        // ✅ Ajouter les produits
+        if (produitsEtQuantites != null) {
+            for (Pair<Produit, Integer> pair : produitsEtQuantites) {
+                total += pair.getKey().getPrix() * pair.getValue();
+            }
         }
+
+        // ✅ Ajouter les services
+        if (servicesReserves != null) {
+            for (Pair<ServiceItem, Double> pair : servicesReserves) {
+                total += pair.getValue();  // pair.getValue() contient déjà le prix total du service
+            }
+        }
+
         return total;
     }
 
@@ -255,3 +277,5 @@ public class CommandeController {
         });
     }
 }
+
+
