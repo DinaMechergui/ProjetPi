@@ -2,22 +2,49 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
 
 <?import java.net.URL?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.AjouterHebergementController"
             prefHeight="400.0" prefWidth="600.0">
-   <stylesheets>
-      <URL value="@style.css"/>
-   </stylesheets>
-   <children>
-      <TextField fx:id="nomtf" layoutX="150" layoutY="50" promptText="Nom"/>
-      <TextField fx:id="adressetf" layoutX="150" layoutY="100" promptText="Adresse"/>
-      <TextField fx:id="prixtf" layoutX="150" layoutY="150" promptText="Prix"/>
-<<<<<<< HEAD
-      <TextField fx:id="dispotf" layoutX="150" layoutY="200" promptText="Disponibilité (1 ou 0)"/>
-=======
->>>>>>> d627a82e60f134c97eb373f12b67f85eff692716
+    <stylesheets>
+        <URL value="@style.css"/>
+    </stylesheets>
+    <children>
+        <GridPane alignment="CENTER" hgap="10" vgap="10" AnchorPane.topAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            <children>
+                <!-- Nom de l'hébergement -->
+                <Label text="Nom de l'hébergement:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <TextField fx:id="nomtf" promptText="Entrez le nom" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-      <Button text="Ajouter" layoutX="250" layoutY="250" onAction="#AjouterHebergement"/>
-   </children>
+                <!-- Adresse -->
+                <Label text="Adresse:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <TextField fx:id="adressetf" promptText="Entrez l'adresse" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+                <!-- Prix par nuit -->
+                <Label text="Prix par nuit:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <TextField fx:id="prixtf" promptText="Entrez le prix" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+
+                <!-- URL de l'image -->
+                <Label text="URL de l'image:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+                <TextField fx:id="imageUrltf" promptText="Entrez l'URL de l'image" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+                <!-- Latitude -->
+                <Label text="Latitude:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+                <TextField fx:id="latitudetf" promptText="Entrez la latitude" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+                <!-- Longitude -->
+                <Label text="Longitude:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+                <TextField fx:id="longitudetf" promptText="Entrez la longitude" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+            </children>
+        </GridPane>
+
+        <!-- Bouton Ajouter -->
+        <Button text="Ajouter" onAction="#AjouterHebergement" AnchorPane.bottomAnchor="20" AnchorPane.rightAnchor="20"/>
+    </children>
 </AnchorPane>

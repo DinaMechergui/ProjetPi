@@ -120,9 +120,7 @@ public class VoitureController {
             if (!dispoText.equals("0") && !dispoText.equals("1")) throw new IllegalArgumentException("⚠ La disponibilité doit être 1 (Oui) ou 0 (Non) !");
             boolean disponible = dispoText.equals("1");
 
-            // Ajouter la voiture à la base de données
-            Voiture voiture = new Voiture(0, prix, marque, disponible);
-            serviceVoiture.ajouter(voiture);
+
 
             // Rafraîchir l'affichage après l'ajout
             loadVoitures();

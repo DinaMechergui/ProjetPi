@@ -11,10 +11,11 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import javafx.concurrent.Worker;
 import org.example.components.StarRatingInput;
 import org.example.entities.Avis;
 import org.example.entities.Hebergement;
@@ -22,9 +23,11 @@ import org.example.services.AvisService;
 import org.example.services.ServiceHebergement;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.ResourceBundle;
 
 public class HebergementControllerClient {
     private final ServiceHebergement serviceHebergement = new ServiceHebergement();
@@ -40,6 +43,10 @@ public class HebergementControllerClient {
     private TextArea commentaireField; // Champ de commentaire
     @FXML
     private Button submitAvisButton; // Bouton pour poster l'avis
+    @FXML
+    private HBox topBar;
+    @FXML
+    private WebView mapView; // WebView pour afficher la carte OpenStreetMap
 
     private StarRatingInput starRatingInput; // Composant pour la notation
     private Hebergement currentHebergement; // Hébergement actuellement sélectionné
@@ -72,12 +79,41 @@ public class HebergementControllerClient {
 
             // Charger les hébergements
             loadHebergements();
+
+            // Charger la carte OpenStreetMap
+            if (mapView != null) {
+                //loadOpenStreetMap();
+            } else {
+                System.err.println("Erreur : mapView n'est pas initialisé.");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+        // Ajouter un écouteur pour les erreurs de la WebView
 
-    // Méthode pour charger les hébergements et afficher des cartes dans le GridPane
+    @FXML
+    private void goToMap() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/MapView.fxml"));
+            Parent root = loader.load();
+
+            // Récupérer le contrôleur de la carte
+            MapViewController mapViewController = loader.getController();
+
+            // Passer la liste des hébergements au contrôleur de la carte
+            List<Hebergement> hebergements = serviceHebergement.afficher(); // Récupérer les hébergements
+            mapViewController.setHebergements(hebergements);
+
+            // Afficher la page de carte
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Méthode pour charger les hébergements
     private void loadHebergements() throws SQLException {
         gridPaneHebergements.getChildren().clear(); // Réinitialiser l'affichage
         List<Hebergement> hebergements = serviceHebergement.afficher(); // Récupérer la liste des hébergements
@@ -92,8 +128,11 @@ public class HebergementControllerClient {
                 col = 0;
                 row++;
             }
+
         }
     }
+
+
 
     private VBox createHebergementCard(Hebergement hebergement) {
         VBox card = new VBox(10);
@@ -135,6 +174,32 @@ public class HebergementControllerClient {
         hebergementDispo.getStyleClass().add("hebergement-availability");
         hebergementDispo.setStyle(hebergement.isDisponible() ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
 
+        // Moyenne des avis sous forme d'étoiles
+        HBox ratingStars = new HBox(5); // Conteneur pour les étoiles
+        try {
+            double moyenne = avisService.getAverageRating(hebergement.getIdheb());
+            int moyenneArrondie = (int) Math.round(moyenne); // Arrondir la moyenne à l'entier le plus proche
+
+            // Ajouter des étoiles en fonction de la moyenne
+            for (int i = 0; i < 5; i++) {
+                ImageView star = new ImageView();
+                if (i < moyenneArrondie) {
+                    star.setImage(new Image("file:star_full.png")); // Étoile pleine
+                } else {
+                    star.setImage(new Image("file:star_empty.png")); // Étoile vide
+                }
+                star.setFitWidth(15);
+                star.setFitHeight(15);
+                ratingStars.getChildren().add(star);
+            }
+
+            // Ajouter un label pour afficher la moyenne en texte
+            Label moyenneLabel = new Label(String.format("(%.1f/5)", moyenne));
+            ratingStars.getChildren().add(moyenneLabel);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         // Bouton de réservation
         Button reserverButton = new Button("Réserver");
         reserverButton.getStyleClass().add("button");
@@ -158,7 +223,31 @@ public class HebergementControllerClient {
         HBox buttonContainer = new HBox(10); // Conteneur pour les boutons
         buttonContainer.getChildren().addAll(reserverButton, avisButton); // Ajouter les boutons
 
-        card.getChildren().addAll(hebergementImage, hebergementNom, hebergementAdresse, hebergementPrix, hebergementDispo, buttonContainer);
+        // Section des avis pour cet hébergement
+        VBox avisContainer = new VBox(5);
+        avisContainer.getStyleClass().add("avis-container");
+
+        try {
+            List<Avis> avisList = avisService.getAvisByHebergement(hebergement.getIdheb());
+            for (Avis avis : avisList) {
+                VBox avisCard = new VBox(5);
+                avisCard.getStyleClass().add("avis-card");
+
+                Label noteLabel = new Label("Note : " + avis.getNote() + "/5");
+                Label commentaireLabel = new Label(avis.getCommentaire());
+
+                avisCard.getChildren().addAll(noteLabel, commentaireLabel);
+                avisContainer.getChildren().add(avisCard);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        // Ajouter tous les éléments à la carte
+        card.getChildren().addAll(
+                hebergementImage, hebergementNom, hebergementAdresse, hebergementPrix,
+                hebergementDispo, ratingStars, buttonContainer, avisContainer
+        );
 
         return card;
     }
@@ -225,12 +314,15 @@ public class HebergementControllerClient {
         alert.show();
     }
 
-    // Méthode pour charger les avis d'un hébergement
-    private void loadAvis(int hebergementId) {
-        try {
-            List<Avis> avisList = avisService.getAvisByHebergement(hebergementId);
+    @FXML
+    private VBox avisSection; // Section des avis
 
-            // Afficher les avis dans un VBox ou un GridPane
+    // Méthode pour charger les avis d'un hébergement
+    private void loadAvis(int idheb) {
+        try {
+            List<Avis> avisList = avisService.getAvisByHebergement(idheb);
+
+            // Afficher les avis dans un VBox
             VBox avisContainer = new VBox(10);
             for (Avis avis : avisList) {
                 VBox avisCard = new VBox(5);
@@ -243,13 +335,68 @@ public class HebergementControllerClient {
                 avisContainer.getChildren().add(avisCard);
             }
 
-            // Ajouter le conteneur d'avis à votre interface
-            gridPaneHebergements.add(avisContainer, 0, 1); // Exemple d'ajout dans un GridPane
+            // Ajouter le conteneur d'avis à la section des avis
+            avisSection.getChildren().clear(); // Réinitialiser l'affichage
+            avisSection.getChildren().add(avisContainer); // Ajouter les avis
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
+    @FXML
+    private TextField localisationField; // Champ de texte pour la localisation
+    @FXML
+    private TextField prixMinField;
+
+    @FXML
+    private TextField prixMaxField;
+
+
+    // Méthode pour appliquer les préférences de recherche
+    @FXML
+    private void appliquerPreferences() {
+        String localisation = localisationField.getText();
+        double prixMin;
+        double prixMax;
+
+        try {
+            // Récupérer et convertir les valeurs des champs de texte
+            prixMin = Double.parseDouble(prixMinField.getText());
+            prixMax = Double.parseDouble(prixMaxField.getText());
+
+            // Vérifier que le prix minimum est inférieur ou égal au prix maximum
+            if (prixMin > prixMax) {
+                afficherAlerte("Erreur", "Le prix minimum doit être inférieur ou égal au prix maximum.");
+                return;
+            }
+
+            // Appeler le service de recommandation
+            List<Hebergement> recommandations = serviceHebergement.recommanderHebergements(localisation, prixMin, prixMax, true);
+
+            if (recommandations.isEmpty()) {
+                afficherAlerte("Information", "Aucun hébergement ne correspond à vos critères.");
+                return;
+            }
+
+            // Charger et afficher la vue des recommandations
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Recommendation.fxml"));
+            Parent root = loader.load();
+
+            RecommendationController recommendationController = loader.getController();
+            System.out.println("Recommandations passées au contrôleur : " + recommandations.size());
+            recommendationController.afficherRecommandations(recommandations);
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Recommandations");
+            stage.show();
+        } catch (NumberFormatException e) {
+            afficherAlerte("Erreur", "Veuillez saisir des valeurs numériques valides pour les prix.");
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+            afficherAlerte("Erreur", "Une erreur s'est produite lors de la recherche des recommandations.");
+        }
+    }
     // Méthode pour naviguer vers la page des événements
     @FXML
     private void goToEvent() {

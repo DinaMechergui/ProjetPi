@@ -61,7 +61,7 @@ public class AjouterHebergementController {
             boolean disponible = dispoText.equals("1");
             String imageUrl = "defaultImage.jpg"; // Valeur par défaut si aucune image n'est fournie
 
-            Hebergement hebergement = new Hebergement(0, nom, adresse, prix, disponible ,imageUrl );
+            Hebergement hebergement = new Hebergement(0, nom, adresse, prix, disponible ,imageUrl,10,11 );
 
             // La disponibilité est toujours vraie (1)
 

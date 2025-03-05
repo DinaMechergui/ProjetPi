@@ -75,15 +75,16 @@ public class ServiceVoiture implements IService<Voiture> {
         while (rs.next()) {
             voitures.add(new Voiture(0,(float) rs.getDouble("prix"),
                     rs.getString("marque"),  // 🔹 Conversion double → float
-                    rs.getBoolean("disponible")
-            ));
+                                rs.getBoolean("disponible"),
+                    rs.getString("imageUrl")
+                        ));
 
         }
         return voitures;
     }
     public List<Voiture> afficher() throws SQLException {
         List<Voiture> voitures = new ArrayList<>();
-        String req = "SELECT idvoiture, marque, prix, disponible FROM voiture";
+        String req = "SELECT idvoiture, marque, prix, disponible , imageUrl FROM voiture";
         Statement statement = this.connection.createStatement();
         ResultSet rs = statement.executeQuery(req);
 
@@ -93,12 +94,48 @@ public class ServiceVoiture implements IService<Voiture> {
                     rs.getFloat("prix"),
                     rs.getString("marque"),
 
-                    rs.getBoolean("disponible")
+                    rs.getBoolean("disponible"),
+                    rs.getString("imageUrl")
             );
             voitures.add(voiture);
         }
         System.out.println("🚗 Voitures affichées : " + voitures);
         return voitures;
     }
+    // Méthode pour recommander des voitures en fonction de la marque, du prix et de la disponibilité
+    public List<Voiture> recommanderVoitures(String marque, double prixMin, double prixMax, boolean disponible) throws SQLException {
+        List<Voiture> recommandations = new ArrayList<>();
+        String req = "SELECT * FROM voiture WHERE marque LIKE ? AND prix BETWEEN ? AND ? AND disponible = ?";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(req)) {
+            preparedStatement.setString(1, "%" + marque + "%"); // Recherche par marque (partielle)
+            preparedStatement.setDouble(2, prixMin); // Prix minimum
+            preparedStatement.setDouble(3, prixMax); // Prix maximum
+            preparedStatement.setBoolean(4, disponible); // Disponibilité
+
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                Voiture voiture = new Voiture(
+                        rs.getInt("idvoiture"),
+
+                        rs.getFloat("prix"),
+                        rs.getString("marque"),
+                        rs.getBoolean("disponible"),
+                        rs.getString("imageUrl") // Ajoutez d'autres champs si nécessaire
+                );
+                recommandations.add(voiture);
+            }
+        }
+
+        return recommandations;
+    }
+
 
 }
+
+
+
+
+
+

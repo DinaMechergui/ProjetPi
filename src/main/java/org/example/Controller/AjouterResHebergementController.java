@@ -2,11 +2,16 @@ package org.example.Controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import org.example.entities.Hebergement;
 import org.example.entities.ReservationHebergement;
 import org.example.services.ServiceResHebergement;
-import java.sql.Date;
+
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
@@ -25,75 +30,95 @@ public class AjouterResHebergementController {
     private TextField prixttf;
 
     @FXML
-    private Button reserverButton;
+    private Button confirmerButton;
 
     @FXML
-    private Label errorLabel; // Label pour afficher les erreurs
+    private Button retourButton;
+
+    @FXML
+    private Label errorLabel;
+
+    @FXML
+    private Label personnalisationLabel;
 
     private Hebergement hebergement;
 
     private final ServiceResHebergement serviceReservationHebergement = new ServiceResHebergement();
+    private static final float PRIX_MAX_PERSONNALISATION = 400;
 
     public void setHebergementData(Hebergement hebergement) {
         this.hebergement = hebergement;
-        prixttf.setText(String.valueOf(hebergement.getPrixParNuit())); // Pré-remplir le prix
+        mettreAJourPrixTotal(); // Calculer le prix dès l'affichage
     }
-/*
+
+    @FXML
+    private void retour(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/hebergementclient.fxml"));
+            Parent root = loader.load();
+            Scene scene = retourButton.getScene();
+            scene.setRoot(root);
+        } catch (IOException e) {
+            afficherErreur("❌ Erreur lors du chargement de la page de retour : " + e.getMessage());
+        }
+    }
+
     @FXML
     public void ajouterResHebergement() {
         try {
-            // Récupérer les valeurs du formulaire
             String client = nompretf.getText();
             LocalDate dateDebut = ddtf.getValue();
             LocalDate dateFin = dftf.getValue();
             float prixTotal = Float.parseFloat(prixttf.getText());
 
-            // Vérification des champs
+            // Vérifications des champs
             if (client.isEmpty() || dateDebut == null || dateFin == null) {
                 afficherErreur("⚠️ Veuillez remplir tous les champs !");
                 return;
             }
-
             if (dateDebut.isBefore(LocalDate.now())) {
                 afficherErreur("❌ La date de début ne peut pas être dans le passé !");
                 return;
             }
-
             if (dateFin.isBefore(dateDebut)) {
                 afficherErreur("❌ La date de fin doit être après la date de début !");
                 return;
             }
-
             if (prixTotal <= 0) {
                 afficherErreur("❌ Prix total invalide !");
                 return;
             }
-
-            // Vérifier si l'hébergement est déjà réservé
             if (serviceReservationHebergement.estReserve(hebergement.getIdheb(), dateDebut, dateFin)) {
                 afficherErreur("❌ Cet hébergement est déjà réservé à ces dates !");
                 return;
             }
 
-            // Créer et enregistrer la réservation
+            // Création et enregistrement de la réservation
             ReservationHebergement reservation = new ReservationHebergement(
                     hebergement.getIdheb(), client,
                     java.sql.Date.valueOf(dateDebut),
                     java.sql.Date.valueOf(dateFin),
                     prixTotal
             );
-
             serviceReservationHebergement.ajouter(reservation);
 
             afficherMessage("✅ Réservation effectuée avec succès !");
+            clearFields();
         } catch (NumberFormatException e) {
             afficherErreur("❌ Erreur : Prix total invalide !");
         } catch (SQLException e) {
             afficherErreur("❌ Erreur avec la base de données : " + e.getMessage());
-            e.printStackTrace();
         }
     }
-*/
+
+    private void clearFields() {
+        nompretf.clear();
+        ddtf.setValue(null);
+        dftf.setValue(null);
+        prixttf.setText("0");
+        personnalisationLabel.setText("");
+    }
+
     private void afficherErreur(String message) {
         errorLabel.setText(message);
         errorLabel.setStyle("-fx-text-fill: red;");
@@ -106,45 +131,108 @@ public class AjouterResHebergementController {
 
     @FXML
     public void initialize() {
-        // Désactiver les dates passées pour ddtf (Date Début)
-        ddtf.setDayCellFactory(picker -> new DateCell() {
-            @Override
-            public void updateItem(LocalDate date, boolean empty) {
-                super.updateItem(date, empty);
-                if (date.isBefore(LocalDate.now())) { // Si la date est passée, on la désactive
-                    setDisable(true);
-                    setStyle("-fx-background-color: #ffc0cb;"); // Rouge clair pour indiquer désactivation
-                }
-            }
+        configureDatePickers();
+        confirmerButton.setDisable(true);
+
+        // Activation du bouton Confirmer uniquement si le formulaire est valide
+        nompretf.textProperty().addListener((obs, oldValue, newValue) -> validateForm());
+        ddtf.valueProperty().addListener((obs, oldValue, newValue) -> validateForm());
+        dftf.valueProperty().addListener((obs, oldValue, newValue) -> validateForm());
+    }
+
+    private void configureDatePickers() {
+        ddtf.setDayCellFactory(picker -> createDateCell(LocalDate.now(), null));
+        dftf.setDayCellFactory(picker -> createDateCell(LocalDate.now(), ddtf.getValue()));
+
+        ddtf.valueProperty().addListener((obs, oldValue, newValue) -> {
+            dftf.setValue(null);
+            dftf.setDayCellFactory(picker -> createDateCell(LocalDate.now(), newValue));
+            mettreAJourPrixTotal();
         });
 
-        // Désactiver les dates passées et s'assurer que la fin est après le début
-        dftf.setDayCellFactory(picker -> new DateCell() {
+        dftf.valueProperty().addListener((obs, oldValue, newValue) -> mettreAJourPrixTotal());
+    }
+
+    private DateCell createDateCell(LocalDate minDate, LocalDate maxDate) {
+        return new DateCell() {
             @Override
             public void updateItem(LocalDate date, boolean empty) {
                 super.updateItem(date, empty);
-                if (date.isBefore(LocalDate.now()) || (ddtf.getValue() != null && date.isBefore(ddtf.getValue()))) {
+                if (date.isBefore(minDate) || (maxDate != null && date.isBefore(maxDate))) {
                     setDisable(true);
                     setStyle("-fx-background-color: #ffc0cb;");
                 }
             }
-        });
+        };
+    }
 
-        // Ajouter un écouteur pour mettre à jour la date de fin dynamiquement
-        ddtf.valueProperty().addListener((obs, oldValue, newValue) -> {
-            dftf.setValue(null); // Réinitialiser la date de fin
-            dftf.setDayCellFactory(picker -> new DateCell() {
-                @Override
-                public void updateItem(LocalDate date, boolean empty) {
-                    super.updateItem(date, empty);
-                    if (date.isBefore(LocalDate.now()) || date.isBefore(newValue)) {
-                        setDisable(true);
-                        setStyle("-fx-background-color: #ffc0cb;");
-                    }
-                }
-            });
+    private void mettreAJourPrixTotal() {
+        LocalDate dateDebut = ddtf.getValue();
+        LocalDate dateFin = dftf.getValue();
+
+        if (dateDebut != null && dateFin != null && !dateFin.isBefore(dateDebut)) {
+            float prixTotal = calculerPrixTotal(dateDebut, dateFin);
+            prixttf.setText(String.valueOf(prixTotal));
+
+            if (prixTotal > PRIX_MAX_PERSONNALISATION) {
+                afficherPopupPersonalisation();
+            }
+        } else {
+            prixttf.setText("0");
+        }
+    }
+
+    private float calculerPrixTotal(LocalDate dateDebut, LocalDate dateFin) {
+        long nombreDeNuits = java.time.temporal.ChronoUnit.DAYS.between(dateDebut, dateFin);
+        return (float) (hebergement.getPrixParNuit() * nombreDeNuits);
+    }
+
+    private void afficherPopupPersonalisation() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Personnalisation disponible !");
+        alert.setHeaderText("Votre réservation dépasse " + PRIX_MAX_PERSONNALISATION + "€. Voulez-vous ajouter des options ?");
+        alert.setContentText("Choisissez une option :");
+
+        ButtonType buttonOui = new ButtonType("Oui");
+        ButtonType buttonNon = new ButtonType("Non", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(buttonOui, buttonNon);
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == buttonOui) {
+                ouvrirFenetrePersonalisation();
+            }
         });
     }
 
+    private void ouvrirFenetrePersonalisation() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/personalisation.fxml"));
+            Parent root = loader.load();
 
+            PersonalisationController controller = loader.getController();
+            controller.setReservationController(this);
+
+            Stage stage = new Stage();
+            stage.setTitle("Personnalisation");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            afficherErreur("Erreur lors de l'ouverture de la personnalisation : " + e.getMessage());
+        }
+    }
+
+    @FXML
+    public void afficherPersonnalisation(String personnalisation) {
+        personnalisationLabel.setText("Personnalisation : " + personnalisation);
+        personnalisationLabel.setStyle("-fx-text-fill: blue; -fx-font-weight: bold;");
+    }
+
+    private void validateForm() {
+        boolean isValid = !nompretf.getText().isEmpty() &&
+                ddtf.getValue() != null &&
+                dftf.getValue() != null &&
+                !dftf.getValue().isBefore(ddtf.getValue());
+        confirmerButton.setDisable(!isValid);
+    }
 }
