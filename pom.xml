@@ -147,6 +147,7 @@
             <artifactId>javafx-web</artifactId>
             <version>21.0.2</version> <!-- Ajoutez cette ligne pour WebView -->
         </dependency>
+
     </dependencies>
 
     <build>
