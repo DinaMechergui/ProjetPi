@@ -63,6 +63,9 @@
         <p><strong>Client:</strong> {{destinataireNom}} {{destinatairePrenom}}</p>
         <p><strong>Téléphone Client:</strong> {{destinataireTelephone}}</p>
     </div>
+
+    <!-- 🛒 Produits achetés -->
+    <h2>Produits</h2>
     <table class="facture-table">
         <thead>
         <tr>
@@ -76,6 +79,22 @@
         {{produits}}
         </tbody>
     </table>
+
+    <!-- 🛎️ Services réservés -->
+    <h2>Services</h2>
+    <table class="facture-table">
+        <thead>
+        <tr>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Prix</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{services}}
+        </tbody>
+    </table>
+
     <div class="facture-total">
         <p><strong>Total avant taxes:</strong> {{total}} €</p>
         <p><strong>Total après taxes (20%):</strong> {{sommeTotaleAvecTaxe}} €</p>
