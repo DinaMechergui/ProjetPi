@@ -23,8 +23,6 @@ public class AdminServiceController {
     @FXML
     private GridPane gridPane;
     @FXML
-    private Button loginButton;
-    @FXML
     private Button btnAdd, btnEdit, btnDelete;
 
     private ServiceService serviceService = new ServiceService();
@@ -35,50 +33,72 @@ public class AdminServiceController {
 
     @FXML
     private void initialize() {
-        loadServices();  // Charge la liste des services lors de l'initialisation de la vue
-        btnAdd.setOnAction(event -> addService());  // Action du bouton "Ajouter" qui appelle la méthode addService
-        btnEdit.setOnAction(event -> editService());  // Action du bouton "Modifier" qui appelle la méthode editService
-        btnDelete.setOnAction(event -> deleteService());  // Action du bouton "Supprimer" qui appelle la méthode deleteService
+        loadServices();
+        btnEdit.setDisable(true);
+        btnDelete.setDisable(true);
+        btnAdd.setOnAction(event -> addService());
+        btnEdit.setOnAction(event -> editService());
+        btnDelete.setOnAction(event -> deleteService());
     }
 
     private void loadServices() {
         try {
-            List<ServiceItem> services = serviceService.afficher();  // Récupère la liste des services depuis la base de données
-            gridPane.getChildren().clear();  // Efface les éléments précédents dans la grille
-            gridPane.setVgap(20);  // Définit l'espacement vertical entre les éléments de la grille
-            gridPane.setHgap(20);  // Définit l'espacement horizontal entre les éléments de la grille
-            gridPane.setAlignment(Pos.CENTER);  // Centre les éléments dans la grille
+            List<ServiceItem> services = serviceService.afficher();
+            gridPane.getChildren().clear();
+            gridPane.setAlignment(Pos.CENTER);
 
             int row = 0;
             for (ServiceItem service : services) {
-                addServiceToGrid(service, row++);  // Ajoute chaque service à la grille
+                addServiceToGrid(service, row++);
             }
         } catch (SQLException e) {
-            showAlert("Erreur", "Impossible de charger les services", e.getMessage());  // Affiche une alerte en cas d'erreur
+            showAlert("Erreur", "Impossible de charger les services", e.getMessage());
         }
     }
 
     private void addServiceToGrid(ServiceItem service, int row) {
-        HBox serviceBox = new HBox(10);  // Crée une boîte horizontale pour contenir les informations d'un service
-        serviceBox.setAlignment(Pos.CENTER_LEFT);  // Aligne les éléments à gauche dans la boîte
-        serviceBox.setStyle("-fx-border-color: black; -fx-padding: 10; -fx-background-color: lightgray;");  // Style CSS pour la boîte
+        HBox serviceBox = new HBox(50);
+        serviceBox.setAlignment(Pos.BASELINE_RIGHT);
+        serviceBox.setStyle("-fx-border-color: black;" +
+                "-fx-border-radius: 10;" +
+                "-fx-background-color: #ffffff;" +
+                "-fx-padding: 9;" +
+                "-fx-border-width: 1;");
 
-        Image image = new Image(service.getImageUrl());  // Crée une image à partir de l'URL fournie par le service
-        ImageView imageView = new ImageView(image);  // Crée une vue d'image
-        imageView.setFitWidth(50);  // Définit la largeur de l'image
-        imageView.setFitHeight(50);  // Définit la hauteur de l'image
+        Image image;
+        try {
+            image = new Image(service.getImageUrl(), 200, 100, true, false);
+        } catch (Exception e) {
+            image = new Image("/images/placeholder.png", 200, 100, true, false);
+        }
 
-        Label nameLabel = new Label(service.getNom());  // Crée un label pour le nom du service
-        Label descriptionLabel = new Label(service.getDescription());  // Crée un label pour la description du service
-        Label priceLabel = new Label(String.valueOf(service.getPrix()));  // Crée un label pour le prix du service
+        ImageView imageView = new ImageView(image);
+        imageView.setSmooth(false);
+        imageView.setFitWidth(200);
+        imageView.setFitHeight(100);
+        imageView.setStyle("-fx-border-color: black; -fx-border-width: 0;");
 
-        serviceBox.getChildren().addAll(imageView, nameLabel, descriptionLabel, priceLabel);  // Ajoute les éléments à la boîte
-        gridPane.add(serviceBox, 0, row);  // Ajoute la boîte à la grille à la ligne correspondante
+        VBox textContainer = new VBox(30);
+        textContainer.setAlignment(Pos.BASELINE_CENTER);
+
+        Label nameLabel = new Label("Nom: " + service.getNom());
+        nameLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
+
+        Label descriptionLabel = new Label("Description: " + service.getDescription());
+        descriptionLabel.setStyle("-fx-text-fill: gray;");
+
+        Label priceLabel = new Label("Prix: " + service.getPrix() + " dt");
+        priceLabel.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
+
+        textContainer.getChildren().addAll(nameLabel, descriptionLabel, priceLabel);
+        serviceBox.getChildren().addAll(imageView, textContainer);
+
+        gridPane.add(serviceBox,0, row);
 
         serviceBox.setOnMouseClicked(e -> {
-            selectedService = service;  // Définit le service sélectionné
-            btnEdit.setDisable(false);  // Active le bouton "Modifier"
-            btnDelete.setDisable(false);  // Active le bouton "Supprimer"
+            selectedService = service;
+            btnEdit.setDisable(false);
+            btnDelete.setDisable(false);
         });
     }
 
@@ -227,69 +247,37 @@ public class AdminServiceController {
     }
 
     private void showAlert(String title, String header, String content) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);  // Crée une alerte d'information
-        alert.setTitle(title);  // Définit le titre de l'alerte
-        alert.setHeaderText(header);  // Définit le texte d'en-tête
-        alert.setContentText(content);  // Définit le contenu de l'alerte
-        alert.showAndWait();  // Affiche l'alerte et attend que l'utilisateur la ferme
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
+
     public void goToReservation(ActionEvent event) {
-        try {
-            // Charger le fichier FXML de la page des produits
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ServiceAdmin.fxml"));
-            Parent root = loader.load();
-
-            // Récupérer la scène actuelle
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            // Changer la scène pour afficher la page des produits
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des produits.");
-        }
+        navigateToPage(event, "/ServiceAdmin.fxml");
     }
 
     public void goToHotel(ActionEvent event) {
-        try {
-            // Charger le fichier FXML de la page des produits
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AfficherHebergement.fxml"));
-            Parent root = loader.load();
-
-            // Récupérer la scène actuelle
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            // Changer la scène pour afficher la page des produits
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des produits.");
-        }
-    }
-
-    public void goTStore(ActionEvent actionEvent) {
+        navigateToPage(event, "/AfficherHebergement.fxml");
     }
 
     public void goToProduit(ActionEvent event) {
+        navigateToPage(event, "/AdminDashboardProduit.fxml");
+    }
+
+    private void navigateToPage(ActionEvent event, String resourcePath) {
         try {
-            // Charger le fichier FXML de la page des produits
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/AdminDashboardProduit.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(resourcePath));
             Parent root = loader.load();
 
-            // Récupérer la scène actuelle
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            // Changer la scène pour afficher la page des produits
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des produits.");
+            System.out.println("Erreur lors du chargement de la page: " + resourcePath);
         }
     }
 }

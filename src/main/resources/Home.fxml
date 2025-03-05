@@ -41,6 +41,10 @@
                 <Button text="Search" styleClass="search-button" />
             </HBox>
 
+
+
+
+
             <!-- Icône du panier -->
             <ImageView fx:id="cartIcon" layoutX="1100" layoutY="20" fitHeight="50" fitWidth="50" onMouseClicked="#goToCart">
                 <image>
@@ -62,6 +66,7 @@
                            styleClass="about-us-description" wrapText="true" />
                 </HBox>
             </VBox>
+
 
             <!-- Section "Nos services" -->
             <VBox layoutX="50" layoutY="400" spacing="20" styleClass="services">
