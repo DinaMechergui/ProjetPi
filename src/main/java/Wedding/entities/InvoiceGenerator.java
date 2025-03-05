@@ -1,11 +1,13 @@
 package Wedding.entities;
 
+import entities.ServiceItem;
 import javafx.util.Pair;
 import tn.esprit.tacheuser.models.User;
 import Wedding.service.ServiceCommande;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -14,8 +16,10 @@ import java.util.Map;
 
 public class InvoiceGenerator {
 
-    public static void generateInvoice(User user, Facture facture, List<Produit> produits, String outputPath) throws IOException, SQLException {
-        // Charger le template depuis les ressources
+    public static void generateInvoice(User user, Facture facture, List<Produit> produits, String outputPath)
+            throws IOException, SQLException {
+
+        // Charger le template HTML depuis les ressources
         InputStream inputStream = InvoiceGenerator.class.getClassLoader().getResourceAsStream("invoice_template.html");
         if (inputStream == null) {
             throw new FileNotFoundException("Le fichier invoice_template.html n'a pas été trouvé dans les ressources.");
@@ -33,54 +37,67 @@ public class InvoiceGenerator {
         data.put("{{destinatairePrenom}}", user.getPrenom());
         data.put("{{destinataireTelephone}}", user.getTel());
 
-        // Ajouter les détails des produits
-        StringBuilder produitsHtml = new StringBuilder();
-        double totalHT = 0;
+        // 🛒 Récupérer les produits et services réservés depuis `reservation`
         List<Pair<Produit, Integer>> produitsEtQuantites = ServiceCommande.getProduitsEtQuantitesDansPanier(facture.getCommande().getId());
+        List<Pair<ServiceItem, LocalDate>> servicesReserves = ServiceCommande.getServicesReserves(user.getPrenom());
+
+        // 🛍️ Construire le HTML des produits
+        StringBuilder produitsHtml = new StringBuilder();
         if (produitsEtQuantites.isEmpty()) {
-            System.out.println("❌ Aucun produit trouvé avec une réservation !");
+            produitsHtml.append("<tr><td colspan='4' style='text-align:center;'>Aucun produit réservé</td></tr>");
         } else {
             for (Pair<Produit, Integer> pair : produitsEtQuantites) {
-                System.out.println("Produit : " + pair.getKey().getNom() + " | Quantité réservée : " + pair.getValue());
+                Produit produit = pair.getKey();
+                int quantiteReservee = pair.getValue();
+
+                produitsHtml.append("<tr>")
+                        .append("<td>").append(produit.getNom()).append("</td>")
+                        .append("<td>").append(quantiteReservee).append("</td>")
+                        .append("<td>").append(String.format("%.2f", produit.getPrix())).append(" €</td>")
+                        .append("<td>").append(String.format("%.2f", produit.getPrix() * quantiteReservee)).append(" €</td>")
+                        .append("</tr>");
             }
         }
 
-        for (Pair<Produit, Integer> pair : produitsEtQuantites) {
-            Produit produit = pair.getKey();
-            int quantiteReservee = pair.getValue();
+        // 🛎️ Construire le HTML des services
+        StringBuilder servicesHtml = new StringBuilder();
+        if (servicesReserves.isEmpty()) {
+            servicesHtml.append("<tr><td colspan='3' style='text-align:center;'>Aucun service réservé</td></tr>");
+        } else {
+            for (Pair<ServiceItem, LocalDate> pair : servicesReserves) {
+                ServiceItem service = pair.getKey();
+                LocalDate dateReservation = pair.getValue();
 
-            produitsHtml.append("<tr>")
-                    .append("<td>").append(produit.getNom()).append("</td>")
-                    .append("<td>").append(quantiteReservee).append("</td>") // Utilisation de la quantité réservée
-                    .append("<td>").append(String.format("%.2f", produit.getPrix())).append(" €</td>")
-                    .append("<td>").append(String.format("%.2f", produit.getPrix() * quantiteReservee)).append(" €</td>")
-                    .append("</tr>");
-
-        totalHT += produit.getPrix() * produit.getStock();
+                servicesHtml.append("<tr>")
+                        .append("<td>").append(service.getNom()).append("</td>")
+                        .append("<td>").append(dateReservation.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append("</td>")
+                        .append("<td>").append(String.format("%.2f", service.getPrix())).append(" €</td>")
+                        .append("</tr>");
+            }
         }
-        System.out.println("✅ Vérification après remplissage : " + data.get("{{produits}}"));
 
+        // 💰 Calcul du total avant taxes (HT)
+        double totalProduits = produitsEtQuantites.stream().mapToDouble(pair -> pair.getKey().getPrix() * pair.getValue()).sum();
+        double totalServices = servicesReserves.stream().mapToDouble(pair -> pair.getKey().getPrix()).sum();
+        double totalHT = totalProduits + totalServices;
+
+        // 📌 Ajouter les valeurs calculées à la map
         data.put("{{produits}}", produitsHtml.toString());
+        data.put("{{services}}", servicesHtml.toString());
         data.put("{{total}}", String.format("%.2f", totalHT));
-        data.put("{{sommeTotaleAvecTaxe}}", String.format("%.2f", totalHT * 1.2)); // Exemple de taxe de 20%
-        data.put("{{taxe}}", String.format("%.2f", totalHT * 0.2));
+        data.put("{{sommeTotaleAvecTaxe}}", String.format("%.2f", totalHT * 1.2)); // TVA 20%
+        data.put("{{taxe}}", String.format("%.2f", totalHT * 0.2)); // TVA 20%
 
-        // Remplacer les placeholders dans le template
-        // Remplacement des placeholders
+        // 🔄 Remplacement des placeholders dans le template
         for (Map.Entry<String, String> entry : data.entrySet()) {
-            System.out.println("Clé : " + entry.getKey() + " | Valeur : " + entry.getValue());
-
             template = template.replace(entry.getKey(), entry.getValue());
         }
 
-// Vérification du contenu HTML avant l'écriture
-        System.out.println("HTML généré : \n" + template);
-
-// Écrire le fichier HTML final
+        // 📝 Écrire le fichier HTML final
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputPath), StandardCharsets.UTF_8))) {
             writer.write(template);
         }
 
+        System.out.println("✅ Facture générée avec succès : " + outputPath);
     }
-
 }
