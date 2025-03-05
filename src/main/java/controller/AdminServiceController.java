@@ -30,6 +30,9 @@ public class AdminServiceController {
     private ServiceService serviceService = new ServiceService();
     private ServiceItem selectedService;
 
+    public AdminServiceController() throws SQLException {
+    }
+
     @FXML
     private void initialize() {
         loadServices();  // Charge la liste des services lors de l'initialisation de la vue

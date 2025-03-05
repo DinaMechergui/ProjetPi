@@ -52,6 +52,9 @@ public class CommandeController {
     private ObservableList<ServiceItem> serviceList;
     private Commande currentCommande;
 
+    public CommandeController() throws SQLException {
+    }
+
     public void initialize() {
         try {
             loadProducts();

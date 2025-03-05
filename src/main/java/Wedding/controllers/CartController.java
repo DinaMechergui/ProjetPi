@@ -5,6 +5,8 @@ import Wedding.service.ServiceCommande;
 import Wedding.service.ServiceFacture;
 import Wedding.utils.MyDatabase;
 import com.itextpdf.text.DocumentException;
+import entities.ServiceItem;
+import entities.reserve;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -25,6 +27,7 @@ import javafx.event.ActionEvent;
 
 import javafx.scene.input.MouseEvent;
 import javafx.util.Pair;
+import services.ServiceReservation;
 import tn.esprit.tacheuser.models.User;
 import tn.esprit.tacheuser.utils.SessionManager;
 
@@ -32,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -80,12 +84,14 @@ public class CartController {
         // Vérifier si un utilisateur est connecté
         if (!SessionManager.isUserLoggedIn()) {
             System.err.println("❌ Erreur : Aucun utilisateur connecté.");
-            return; // Arrêter l'exécution pour éviter les erreurs
+            return;
         }
 
-        // Récupérer l'utilisateur connecté
-        User currentUser = SessionManager.getUser();
-        System.out.println("✅ Utilisateur connecté : " + currentUser.getNom());
+        currentUser = SessionManager.getUser();
+        if (currentUser == null) {
+            System.err.println("❌ Erreur : L'utilisateur actuel est null.");
+            return;
+        }
 
         // Créer une instance du service commande
         ServiceCommande serviceCommande = new ServiceCommande();
@@ -118,97 +124,55 @@ public class CartController {
 
     private void loadCart() throws SQLException {
         if (currentCommande == null || currentCommande.getId() == -1) {
-            System.out.println("Aucune commande en attente trouvée.");
-            totalPriceLabel.setText("Total: 0.00 TND"); // Mettre à jour le total à 0 si le panier est vide
+            System.out.println("❌ Aucune commande en attente trouvée.");
+            totalPriceLabel.setText("Total: 0.00 TND");
             return;
         }
 
-        // Récupérer les produits et leurs quantités réservées
-        List<Pair<Produit, Integer>> cartProductsWithQuantity = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
+        int commandeId = currentCommande.getId();
+        gridPaneCart.getChildren().clear(); // Nettoyer l'affichage avant de charger les données
+        total = 0.0; // Réinitialiser le total
 
-        if (cartProductsWithQuantity == null || cartProductsWithQuantity.isEmpty()) {
-            System.out.println("Le panier est vide.");
-            totalPriceLabel.setText("Total: 0.00 TND"); // Mettre à jour le total à 0 si le panier est vide
-            return;
-        }
+        // 🔹 Récupération des produits dans le panier
+        List<Pair<Produit, Integer>> cartProductsWithQuantity = serviceCommande.getProduitsEtQuantitesDansPanier(commandeId);
 
-        gridPaneCart.getChildren().clear(); // Nettoyer l'affichage
+        // 🔹 Récupération des services réservés
+        ServiceReservation serviceReservation = new ServiceReservation();
+        List<reserve> cartServices = serviceReservation.getReservedServicesByUser(currentUser.getPrenom());
+
+        System.out.println("🔍 Produits récupérés : " + cartProductsWithQuantity.size());
+        System.out.println("🔍 Services récupérés : " + cartServices.size());
+
         int row = 0;
-        double total = 0.0;
 
-        for (Pair<Produit, Integer> pair : cartProductsWithQuantity) {
-            Produit produit = pair.getKey();
-            int quantiteReservee = pair.getValue();
-
-            // Créer un ImageView pour l'image du produit
-            ImageView productImageView = new ImageView();
-            try {
-                // Charger l'image depuis l'URL stockée dans la base de données
-                String imageUrl = produit.getImageUrl();
-                if (imageUrl != null && !imageUrl.isEmpty()) {
-                    Image productImage = new Image(imageUrl);
-                    productImageView.setImage(productImage); // Définir l'image dans l'ImageView
-                    productImageView.setFitWidth(90); // Ajuster la largeur de l'image
-                    productImageView.setFitHeight(90); // Ajuster la hauteur de l'image
-                    productImageView.setPreserveRatio(true); // Maintenir le ratio
-                } else {
-                    System.out.println("Aucune URL d'image trouvée pour le produit : " + produit.getNom());
-                }
-            } catch (Exception e) {
-                productImageView.setImage(null); // En cas d'erreur, ne pas afficher d'image
-                System.out.println("Erreur lors du chargement de l'image : " + e.getMessage());
+        // 🔹 Affichage des services dans le panier
+        for (reserve reservation : cartServices) {
+            if (reservation.getService() != null) {
+                total += displayServiceInCart(reservation.getService(), reservation.getPrixTotal(), row++);
             }
-
-            // Créer les labels pour le nom, le prix et la quantité du produit
-            Label productName = new Label(produit.getNom());
-            productName.setFont(Font.font("Georgia", 18));
-            productName.setTextFill(Color.web("#6d8c7a"));
-
-            Label productPrice = new Label("Prix unitaire: " + String.format("%.2f", produit.getPrix()) + " TND");
-            productPrice.setFont(Font.font("Georgia", 16));
-            productPrice.setTextFill(Color.web("#6d8c7a"));
-
-            Label productQuantity = new Label("Quantité: " + quantiteReservee);
-            productQuantity.setFont(Font.font("Georgia", 16));
-            productQuantity.setTextFill(Color.web("#6d8c7a"));
-
-            // Calculer le prix total pour ce produit (prix unitaire * quantité)
-            double prixTotalProduit = produit.getPrix() * quantiteReservee;
-            Label productTotalPrice = new Label("Total: " + String.format("%.2f", prixTotalProduit) + " TND");
-            productTotalPrice.setFont(Font.font("Georgia", 16));
-            productTotalPrice.setTextFill(Color.web("#6d8c7a"));
-
-            // Ajouter le prix total de ce produit au total général
-            total += prixTotalProduit;
-
-            // Créer le bouton "Supprimer"
-            Button removeButton = new Button("Supprimer");
-            removeButton.setStyle("-fx-background-color: #e14d3c; -fx-text-fill: white; -fx-font-size: 14px;");
-            removeButton.setOnAction(event -> {
-                try {
-                    serviceCommande.removeProductFromCart(currentCommande.getId(), produit.getId());
-                    loadCart(); // Rafraîchir le panier après suppression
-                    showAlert("Suppression réussie", "Le produit '" + produit.getNom() + "' a été supprimé du panier.", Alert.AlertType.INFORMATION);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    showAlert("Erreur", "Une erreur est survenue lors de la suppression.", Alert.AlertType.ERROR);
-                }
-            });
-
-            // Ajouter les éléments à la GridPane
-            gridPaneCart.add(productImageView, 0, row); // Image du produit
-            gridPaneCart.add(productName, 1, row); // Nom du produit
-            gridPaneCart.add(productPrice, 2, row); // Prix unitaire du produit
-            gridPaneCart.add(productQuantity, 3, row); // Quantité réservée
-            gridPaneCart.add(productTotalPrice, 4, row); // Prix total pour ce produit
-            gridPaneCart.add(removeButton, 5, row); // Bouton "Supprimer"
-
-            row++; // Passer à la ligne suivante
         }
 
-        // Afficher le total général
+        // 🔹 Affichage des produits dans le panier
+        for (Pair<Produit, Integer> pair : cartProductsWithQuantity) {
+            total += displayProductInCart(pair.getKey(), pair.getValue(), row++);
+        }
+
+        // 🔹 Mettre à jour l'affichage du total
         totalPriceLabel.setText("Total: " + String.format("%.2f", total) + " TND");
     }
+
+    private double displayProductInCart(Produit produit, int quantity, int row) {
+        return addCartRow(produit.getNom(), produit.getPrix(), quantity, produit.getImageUrl(), () -> {
+            try {
+                serviceCommande.removeProductFromCart(currentCommande.getId(), produit.getId());
+                loadCart();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showAlert("Erreur", "Une erreur est survenue lors de la suppression du produit.", Alert.AlertType.ERROR);
+            }
+        }, row);
+    }
+
 
     private void showAlert(String title, String message, Alert.AlertType type) {
         Alert alert = new Alert(type);
@@ -246,7 +210,33 @@ public class CartController {
     }
 
 
+    private double displayServiceInCart(ServiceItem service, double prixTotal, int row) {
+        Label serviceName = new Label(service.getNom());
+        serviceName.setFont(Font.font("Georgia", 18));
+        serviceName.setTextFill(Color.web("#6d8c7a"));
 
+        Label servicePrice = new Label("Prix: " + String.format("%.2f", prixTotal) + " TND");
+
+        Button removeButton = new Button("Supprimer");
+        removeButton.setStyle("-fx-background-color: #e14d3c; -fx-text-fill: white; -fx-font-size: 14px;");
+
+        removeButton.setOnAction(event -> {
+            try {
+                ServiceReservation.removeServiceFromCart(currentUser.getPrenom(), service.getId());
+                loadCart();
+                showAlert("Suppression réussie", "Le service '" + service.getNom() + "' a été supprimé du panier.", Alert.AlertType.INFORMATION);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                showAlert("Erreur", "Une erreur est survenue lors de la suppression.", Alert.AlertType.ERROR);
+            }
+        });
+
+        gridPaneCart.add(serviceName, 0, row);
+        gridPaneCart.add(servicePrice, 1, row);
+        gridPaneCart.add(removeButton, 2, row);
+
+        return prixTotal;
+    }
 
     @FXML
     private void handleConfirmOrder(ActionEvent event) {
@@ -320,17 +310,66 @@ public class CartController {
             showAlert("Erreur", "Une erreur est survenue lors de l'annulation.", Alert.AlertType.ERROR);
         }
     }
-
-    private double calculateTotal(List<Pair<Produit, Integer>> cartProductsWithQuantity) {
-        double total = 0.0;
-        for (Pair<Produit, Integer> pair : cartProductsWithQuantity) {
-            Produit produit = pair.getKey();
-            int quantite = pair.getValue();
-            total += produit.getPrix() * quantite;
+    private double addCartRow(String name, double price, int quantity, String imageUrl, Runnable onRemove, int row) {
+        ImageView imageView = new ImageView();
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            imageView.setImage(new Image(imageUrl));
+            imageView.setFitWidth(90);
+            imageView.setFitHeight(90);
+            imageView.setPreserveRatio(true);
         }
+
+        Label nameLabel = new Label(name);
+        nameLabel.setFont(Font.font("Georgia", 18));
+        nameLabel.setTextFill(Color.web("#6d8c7a"));
+
+        Label priceLabel = new Label("Prix: " + String.format("%.2f", price) + " TND");
+        Label quantityLabel = new Label("Quantité: " + quantity);
+
+        Button removeButton = new Button("Supprimer");
+        removeButton.setOnAction(event -> onRemove.run());
+
+        gridPaneCart.add(imageView, 0, row);
+        gridPaneCart.add(nameLabel, 1, row);
+        gridPaneCart.add(priceLabel, 2, row);
+        gridPaneCart.add(quantityLabel, 3, row);
+        gridPaneCart.add(removeButton, 4, row);
+
+        return price * quantity;
+    }
+    private double calculateTotal(List<Pair<Produit, Integer>> produitsEtQuantites, int commandeId) throws SQLException {
+        double total = 0.0;
+
+        // Calculate total for products
+        if (produitsEtQuantites != null) {
+            for (Pair<Produit, Integer> pair : produitsEtQuantites) {
+                Produit produit = pair.getKey();
+                int quantite = pair.getValue();
+
+                if (produit != null) {
+                    total += produit.getPrix() * quantite;
+                }
+            }
+        }
+
+        // Calculate total for services
+        String query = "SELECT COALESCE(SUM(prix_total), 0) FROM reservation WHERE event_id = ?";
+
+        try (Connection connection = MyDatabase.getInstance().getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+
+            stmt.setInt(1, commandeId);  // Assuming event_id corresponds to commande_id
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                double totalServices = rs.getDouble(1);
+                total += totalServices;
+                // ✅ Add service prices to total
+            }
+        }
+
         return total;
     }
-
 
     @FXML
     public void goToProductsPage(MouseEvent event) {
@@ -402,7 +441,7 @@ public class CartController {
                 List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
 
                 // Calculer le total en fonction de la quantité réservée
-                double total = calculateTotal(produitsEtQuantites);
+                double total = calculateTotal(produitsEtQuantites,currentCommande.getId());
 
                 // Ouvrir la fenêtre de paiement avec le montant total
                 openPaymentWindow(event, total);
