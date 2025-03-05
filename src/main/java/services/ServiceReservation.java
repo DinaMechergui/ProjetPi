@@ -65,6 +65,7 @@ public class ServiceReservation {
         }
     }
 
+
     public void removeServiceFromCart(String utilisateur, int serviceId) throws SQLException {
         System.out.println("🗑️ Tentative de suppression du service " + serviceId + " pour l'utilisateur " + utilisateur);
 
@@ -104,8 +105,7 @@ public class ServiceReservation {
                         rs.getString("service_nom"),
                         rs.getString("service_description"),
                         rs.getDouble("service_prix"),
-                        rs.getString("service_image"),
-                        utilisateur
+                        rs.getString("service_image")
                 ));
                 res.setDateReservation(rs.getDate("date_reservation"));
                 res.setPrixTotal(rs.getDouble("prix_total"));

@@ -85,8 +85,7 @@ public class Event {
                         rs.getString("nom"),
                         rs.getString("description"),
                         rs.getDouble("prix"),
-                        rs.getString("image_url"),
-                        rs.getString("utilisateur")
+                        rs.getString("image_url")
                 ));
             }
         }

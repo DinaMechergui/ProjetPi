@@ -58,6 +58,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ReservationController {
 
+    public ListView serviceListView;
     @FXML private ComboBox<Event> eventCombo;
     @FXML private ComboBox<ServiceItem> serviceCombo;
     @FXML private DatePicker datePicker;

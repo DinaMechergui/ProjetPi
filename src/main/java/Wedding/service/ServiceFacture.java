@@ -2,7 +2,7 @@ package Wedding.service;
 
 import Wedding.entities.Commande;
 import Wedding.entities.Facture;
-import Wedding.utils.MyDatabase;
+import org.Wedding.utils.MyDatabase;
 
 
 import java.sql.*;
