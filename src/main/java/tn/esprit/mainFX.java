@@ -69,7 +69,7 @@ public class mainFX extends Application {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }*/
-FXMLLoader loader = new FXMLLoader(getClass().getResource("/menuOrganizer.fxml"));
+FXMLLoader loader = new FXMLLoader(getClass().getResource("/MenuOrganizer.fxml"));
         try {
             Parent parent = loader.load();
             Scene scene = new Scene(parent);

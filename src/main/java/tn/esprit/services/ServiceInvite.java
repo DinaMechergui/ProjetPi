@@ -16,19 +16,30 @@ public class ServiceInvite {
     }
 
     public void ajouter(Invite invite) throws SQLException {
-        String req = "INSERT INTO invite (nom, prenom, email, telephone, confirmation,evenement_id) VALUES ('"
-                + invite.getNom() + "', '"
-                + invite.getPrenom() + "', '"
-                + invite.getEmail() + "', '"
-                + invite.getTelephone() + "', "
-                + (invite.isConfirmation() ? "1" : "0") +", "
-                + invite.getEvenementId()  +  ")";
+        String req = "INSERT INTO invite (nom, prenom, email, telephone, confirmation, evenement_id) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection connection = MyDatabase.getInstance().getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
+            preparedStatement.setString(1, invite.getNom());
+            preparedStatement.setString(2, invite.getPrenom());
+            preparedStatement.setString(3, invite.getEmail());
+            preparedStatement.setString(4, invite.getTelephone());
+            preparedStatement.setBoolean(5, invite.isConfirmation());
+            preparedStatement.setInt(6, invite.getEvenementId());
 
-
-
-        Statement statement = this.connection.createStatement();
-        statement.executeUpdate(req);
-        System.out.println("🚗 Voiture ajoutée avec succès !");
+            int rowsInserted = preparedStatement.executeUpdate();
+            if (rowsInserted > 0) {
+                // Récupérer l'ID généré
+                ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    int generatedId = generatedKeys.getInt(1); // Récupérer l'ID généré
+                    invite.setId(generatedId); // Définir l'ID de l'invité
+                    System.out.println("ID généré : " + generatedId);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur lors de l'ajout de l'invité : " + e.getMessage());
+            throw e; // Propager l'exception pour la gestion dans le contrôleur
+        }
     }
     public void modifier(Invite invite) throws SQLException {
         String query = "UPDATE invite SET nom = ?, prenom = ?, email = ?, telephone = ?, confirmation = ? WHERE id = ?";

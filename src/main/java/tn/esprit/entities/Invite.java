@@ -1,7 +1,7 @@
 package tn.esprit.entities;
 
 public class Invite {
-    private int id;
+   private int id ;
     private String nom;
     private String prenom;
     private String email;

@@ -100,7 +100,7 @@ AjouterCadeau {
                 afficherErreur("L'événement sélectionné est introuvable.");
                 return;
             }
-            boolean disponibilite = false;
+            boolean disponibilite = true;
             // Création d'un nouvel objet Cadeau
             Cadeau cadeau = new Cadeau(0, nom, description, disponibilite, evenementId);
 

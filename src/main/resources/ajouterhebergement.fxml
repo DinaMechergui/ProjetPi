@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import java.net.URL?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.AjouterHebergementController"
+            prefHeight="400.0" prefWidth="600.0">
+   <stylesheets>
+      <URL value="@style.css"/>
+   </stylesheets>
+   <children>
+      <TextField fx:id="nomtf" layoutX="150" layoutY="50" promptText="Nom"/>
+      <TextField fx:id="adressetf" layoutX="150" layoutY="100" promptText="Adresse"/>
+      <TextField fx:id="prixtf" layoutX="150" layoutY="150" promptText="Prix"/>
+      <TextField fx:id="dispotf" layoutX="150" layoutY="200" promptText="Disponibilité (1 ou 0)"/>
+
+      <Button text="Ajouter" layoutX="250" layoutY="250" onAction="#AjouterHebergement"/>
+   </children>
+</AnchorPane>

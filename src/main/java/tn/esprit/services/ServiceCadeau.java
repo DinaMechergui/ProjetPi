@@ -265,6 +265,51 @@ public class ServiceCadeau implements ICadeau {
             stmt.executeUpdate();
         }
     }*/
+    public List<Cadeau> getCadeauxByEvenementCode(String codeUnique) throws SQLException {
+        List<Cadeau> cadeaux = new ArrayList<>();
+        String query = "SELECT c.* FROM cadeau c JOIN evenement e ON c.invite_id = e.id WHERE e.code_unique = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, codeUnique); // Utiliser code_unique comme paramètre
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Cadeau cadeau = new Cadeau(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("description"),
+                        rs.getBoolean("disponibilite"),
+                        rs.getInt("invite_id") // Utilise invite_id ici
+                );
+                cadeaux.add(cadeau);
+            }
+        }
+
+        return cadeaux;
+    }
+    public String getNomInviteById(String inviteIdStr) {
+        try {
+            // Conversion de la chaîne en entier
+            int inviteId = Integer.parseInt(inviteIdStr);
+
+            // Requête SQL pour récupérer le nom de l'invité
+            String req = "SELECT nom FROM invite WHERE id = ?";
+            try (PreparedStatement stmt = connection.prepareStatement(req)) {
+                stmt.setInt(1, inviteId);
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    return rs.getString("nom");
+                }
+            } catch (SQLException e) {
+                System.err.println("Erreur lors de la récupération du nom de l'invité : " + e.getMessage());
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("Format d'identifiant invalide : " + inviteIdStr);
+        }
+        return null; // Retourner null si l'invité n'est pas trouvé ou en cas d'erreur
+    }
+
 }
 
 

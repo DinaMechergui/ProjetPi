@@ -1,5 +1,9 @@
 package tn.esprit.entities;
 
+import com.google.zxing.WriterException;
+
+import java.awt.image.BufferedImage;
+
 public class Cadeau {
     private int id;
     private String nom;
@@ -54,4 +58,11 @@ public class Cadeau {
     public void setInviteId(int inviteId) {
         this.inviteId = inviteId;
     }
+
+    @Override
+    public String toString() {
+        return nom + " - " + description + " (" + (disponibilite ? "Disponible" : "Non disponible") + ")";
+    }
+
+
 }

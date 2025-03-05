@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Pos?>
+
+<?import java.net.URL?>
+<AnchorPane prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.VoitureController">
+   <!-- Lien vers le fichier CSS -->
+   <stylesheets>
+      <URL value="@style.css"/>
+   </stylesheets>
+
+   <children>
+      <!-- Titre -->
+      <Label layoutX="317.0" layoutY="20.0" text="Gestion des Voitures" textFill="#d2b5c6">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+
+      <!-- Liste des voitures au centre -->
+      <Label layoutX="320.0" layoutY="80.0" text="Liste des Voitures :" />
+      <GridPane fx:id="gridPaneVoitures" layoutX="150.0" layoutY="110.0" hgap="10" vgap="10" alignment="CENTER">
+         <!-- Les voitures seront ajoutées dynamiquement ici -->
+      </GridPane>
+
+      <!-- Bouton Ajouter Voiture en haut à droite -->
+      <Button fx:id="ajouterVoitureBtn" text="Ajouter Voiture" onAction="#goToAjouterVoiture" layoutX="650.0" layoutY="20.0" prefWidth="120"/>
+
+      <!-- Bouton Retour en bas à gauche -->
+      <Button text="Retour" onAction="#goToStore" layoutX="20.0" layoutY="550.0" prefWidth="120"/>
+   </children>
+</AnchorPane>

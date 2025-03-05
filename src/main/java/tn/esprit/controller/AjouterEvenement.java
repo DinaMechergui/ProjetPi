@@ -35,6 +35,8 @@ public class AjouterEvenement {
         String nom = nomtf.getText().trim();
         String lieu = lieutf.getText().trim();
         LocalDate date = datetf.getValue();
+        String codeQR = QRCodeGenerator.generateUniqueCode();
+        String codeUnique = RandomCodeGenerator.generateRandomCode(); // Générer un code unique
 
         // Vérifier les champs vides
         if (nom.isEmpty() || lieu.isEmpty() || date == null) {
@@ -67,7 +69,7 @@ public class AjouterEvenement {
             }
 
             // Si l'événement n'existe pas, l'ajouter
-            Evenement evenement = new Evenement(0, nom, lieu, date.toString());
+            Evenement evenement = new Evenement(0, nom, lieu, date.toString(), codeQR, codeUnique);
             serviceEvenement.ajouter(evenement);
             afficherAlerte("Succès", "Événement ajouté avec succès !");
             naviguerVersListeEvenements();

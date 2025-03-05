@@ -38,6 +38,10 @@ public class MenuOrganizerController {
     private void showAfficherevenement() {
         loadPage("AffichageEvenement.fxml");
     }
+    @FXML
+    private void showAfficherclient() {
+        loadPage("CodeInput.fxml");
+    }
 
 
     private void loadPage(String fxmlFile) {

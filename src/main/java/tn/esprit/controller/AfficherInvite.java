@@ -72,9 +72,14 @@ public class AfficherInvite {
             supprimerButton.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-border-radius: 5;");
             supprimerButton.setOnAction(event -> {
                 try {
+                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Confirmation de suppression");
+                    alert.setHeaderText("Êtes-vous sûr de vouloir supprimer cet événement ?");
+                    alert.setContentText("Cette action est irréversible.");
+                    if (alert.showAndWait().get() == ButtonType.OK) {
                     serviceInvite.supprimer(invite.getId());
                     loadInvites(); // Rafraîchir la liste après suppression
-                    System.out.println("Invité supprimé : " + invite.getNom());
+                    System.out.println("Invité supprimé : " + invite.getNom());}
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

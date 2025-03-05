@@ -1,8 +1,11 @@
 package tn.esprit.services;
 
+import com.google.zxing.WriterException;
+import tn.esprit.controller.QRCodeGenerator;
 import tn.esprit.entities.Evenement;
 import tn.esprit.utils.MyDatabase;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,16 +19,15 @@ public class ServiceEvenement {
 
     // Ajouter un événement
     public void ajouter(Evenement evenement) throws SQLException {
-        String req = "INSERT INTO evenement (nom, lieu, date) VALUES ('"
-                + evenement.getNom() + "', '"
-                + evenement.getLieu() + "', '"
-                + evenement.getDate() + "')";
-
-
-        Statement statement = this.connection.createStatement();
-        statement.executeUpdate(req);
-        System.out.println("🚗 Voiture ajoutée avec succès !");
-
+        String query = "INSERT INTO Evenement (nom, lieu, date, codeQR, code_unique) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setString(1, evenement.getNom());
+            pstmt.setString(2, evenement.getLieu());
+            pstmt.setString(3, evenement.getDate());
+            pstmt.setString(4, evenement.getCodeQR());
+            pstmt.setString(5, evenement.getCodeUnique()); // Ajouter le code unique
+            pstmt.executeUpdate();
+        }
     }
 
     // Modifier un événement
@@ -73,7 +75,7 @@ public class ServiceEvenement {
                         rs.getInt("id"),
                         rs.getString("nom"),
                         rs.getString("lieu"),
-                        rs.getString("date") // Correction : Date est une String
+                        rs.getString("date"), rs.getString("codeQR") ,rs.getString("code_unique")// Correction : Date est une String
                 );
                 evenements.add(evenement);
             }
@@ -113,7 +115,7 @@ public class ServiceEvenement {
                         rs.getInt("id"),
                         rs.getString("nom"),
                         rs.getString("lieu"),
-                        rs.getString("date")
+                        rs.getString("date"),rs.getString("codeQR"),rs.getString("code_unique")
                 );
                 evenements.add(evenement);
             }
@@ -162,7 +164,19 @@ public class ServiceEvenement {
         }
         return false;
     }
-
+    public String getCodeUniqueByEventId(int eventId) throws SQLException {
+        String query = "SELECT code_unique FROM Evenement WHERE id = ?";
+        try (Connection connection = MyDatabase.getInstance().getConnection();
+             PreparedStatement pstmt = connection.prepareStatement(query)) {
+            pstmt.setInt(1, eventId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("code_unique");
+                }
+            }
+        }
+        return null; // Retourne null si l'événement n'est pas trouvé
+    }
 }
 
 
