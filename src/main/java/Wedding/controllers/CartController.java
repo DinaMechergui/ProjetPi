@@ -34,16 +34,13 @@ import tn.esprit.tacheuser.utils.SessionManager;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CartController {
@@ -211,41 +208,26 @@ public class CartController {
 
 
     private double displayServiceInCart(ServiceItem service, double prixTotal, int row) {
-        Label serviceName = new Label(service.getNom());
-        serviceName.setFont(Font.font("Georgia", 18));
-        serviceName.setTextFill(Color.web("#6d8c7a"));
-
-        Label servicePrice = new Label("Prix: " + String.format("%.2f", prixTotal) + " TND");
-
-        Button removeButton = new Button("Supprimer");
-        removeButton.setStyle("-fx-background-color: #e14d3c; -fx-text-fill: white; -fx-font-size: 14px;");
-
-        removeButton.setOnAction(event -> {
+        return addCartRow(service.getNom(), service.getPrix(), 1, service.getImageUrl(), () -> {
             try {
+                System.out.println("🗑️ Suppression du service ID " + service.getId() + " pour l'utilisateur " + currentUser.getPrenom());
                 ServiceReservation.removeServiceFromCart(currentUser.getPrenom(), service.getId());
-                loadCart();
-                showAlert("Suppression réussie", "Le service '" + service.getNom() + "' a été supprimé du panier.", Alert.AlertType.INFORMATION);
+                loadCart();  // Recharger le panier après suppression
             } catch (SQLException e) {
                 e.printStackTrace();
-                showAlert("Erreur", "Une erreur est survenue lors de la suppression.", Alert.AlertType.ERROR);
+                showAlert("Erreur", "Une erreur est survenue lors de la suppression du service.", Alert.AlertType.ERROR);
             }
-        });
-
-        gridPaneCart.add(serviceName, 0, row);
-        gridPaneCart.add(servicePrice, 1, row);
-        gridPaneCart.add(removeButton, 2, row);
-
-        return prixTotal;
+        }, row);
     }
-
     @FXML
+
     private void handleConfirmOrder(ActionEvent event) {
         try {
             if (currentCommande != null && currentCommande.getId() != -1 && currentUser != null) {
                 // Confirmer la commande
                 serviceCommande.confirmerCommande(currentCommande.getId(), currentUser.getPrenom());
 
-                // Utiliser le total de la commande (qui inclut la réduction si appliquée)
+                // Utiliser le total de la commande
                 double total = currentCommande.getTotal();
 
                 // Générer un code promo si le total dépasse 10 000 TND
@@ -255,12 +237,15 @@ public class CartController {
                     showAlert("Félicitations !", "Vous avez dépensé plus de 10 000 TND. Voici un code promo : " + codePromo, Alert.AlertType.INFORMATION);
                 }
 
+                // ✅ Vérifier la connexion avant de générer la facture
+                MyDatabase.getInstance().getConnection();
+
                 // Créer la facture avec le total de la commande et le code promo
                 ServiceFacture serviceFacture = new ServiceFacture();
                 Facture facture = new Facture(0, currentCommande, LocalDateTime.now(), currentUser.getPrenom(), total, codePromo);
                 serviceFacture.ajouterFacture(facture, currentUser.getPrenom());
 
-                System.out.println("Facture créée pour la commande ID : " + currentCommande.getId());
+                System.out.println("✅ Facture créée pour la commande ID : " + currentCommande.getId());
 
                 // Générer la facture HTML
                 List<Pair<Produit, Integer>> produitsEtQuantites = serviceCommande.getProduitsEtQuantitesDansPanier(currentCommande.getId());
@@ -395,43 +380,53 @@ public class CartController {
 
     @FXML
     private void showInvoice() {
-        if (currentCommande != null && currentUser != null) { // Vérifiez que l'utilisateur est disponible
-            try {
-                ServiceFacture serviceFacture = new ServiceFacture();
-
-                // Récupérer la facture en passant l'ID de la commande et l'utilisateur
-                Facture facture = serviceFacture.getFactureByCommandeId(currentCommande.getId(), currentUser.getPrenom());
-
-                if (facture != null) {
-                    // Ouvrir un FileChooser pour choisir l'emplacement du fichier
-                    FileChooser fileChooser = new FileChooser();
-                    fileChooser.setTitle("Enregistrer la facture");
-                    fileChooser.setInitialFileName("Facture_Commande_" + currentCommande.getId() + ".pdf");
-                    File file = fileChooser.showSaveDialog(null);
-
-                    if (file != null) {
-                        // Générer le PDF à l'emplacement choisi, en passant l'utilisateur (currentUser)
-                        PdfGenerator.generateInvoicePdf(facture, currentUser, file.getAbsolutePath());
-
-                        // Afficher un message dans la console (optionnel)
-                        System.out.println("Facture générée avec succès : " + file.getAbsolutePath());
-
-                        // Afficher un message à l'utilisateur
-                        showAlert("Succès", "La facture a été générée avec succès.", Alert.AlertType.INFORMATION);
-                    }
-                } else {
-                    System.out.println("Aucune facture trouvée pour cette commande.");
-                    showAlert("Aucune facture", "Aucune facture trouvée pour cette commande.", Alert.AlertType.WARNING);
-                }
-            } catch (SQLException | IOException | DocumentException | com.lowagie.text.DocumentException e) {
-                System.err.println("Erreur lors de la génération de la facture : " + e.getMessage());
-                showAlert("Erreur", "Une erreur est survenue lors de la génération de la facture : " + e.getMessage(), Alert.AlertType.ERROR);
-            }
-        } else {
-            System.out.println("Aucune commande sélectionnée ou utilisateur non connecté.");
+        if (currentCommande == null || currentUser == null) {
+            System.out.println("❌ Aucune commande sélectionnée ou utilisateur non connecté.");
             showAlert("Erreur", "Aucune commande sélectionnée ou utilisateur non connecté.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        try {
+            System.out.println("🔄 Vérification de la connexion à la base de données...");
+            Connection connection = MyDatabase.getInstance().getConnection();
+            if (connection == null || connection.isClosed()) {
+                showAlert("Erreur de connexion", "Impossible de se connecter à la base de données.", Alert.AlertType.ERROR);
+                return;
+            }
+
+            ServiceFacture serviceFacture = new ServiceFacture();
+            Facture facture = serviceFacture.getFactureByCommandeId(currentCommande.getId(), currentUser.getPrenom());
+
+            if (facture == null) {
+                System.out.println("❌ Aucune facture trouvée pour cette commande.");
+                showAlert("Aucune facture", "Aucune facture trouvée pour cette commande.", Alert.AlertType.WARNING);
+                return;
+            }
+
+            // 📂 Ouvrir un FileChooser pour choisir l'emplacement du fichier PDF
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Enregistrer la facture");
+            fileChooser.setInitialFileName("Facture_Commande_" + currentCommande.getId() + ".pdf");
+            File file = fileChooser.showSaveDialog(null);
+
+            if (file != null) {
+                // ✅ Générer le PDF à l'emplacement choisi
+                PdfGenerator.generateInvoicePdf(facture, currentUser, file.getAbsolutePath());
+
+                // ✅ Afficher un message de succès
+                System.out.println("✅ Facture générée avec succès : " + file.getAbsolutePath());
+                showAlert("Succès", "La facture a été générée avec succès.", Alert.AlertType.INFORMATION);
+            }
+
+        } catch (SQLException ex) {
+            System.err.println("❌ Erreur SQL lors de la récupération de la facture : " + ex.getMessage());
+            showAlert("Erreur SQL", "Une erreur est survenue lors de la récupération de la facture : " + ex.getMessage(), Alert.AlertType.ERROR);
+        } catch (IOException | DocumentException | com.lowagie.text.DocumentException ex) {
+            System.err.println("❌ Erreur lors de la génération du PDF : " + ex.getMessage());
+            showAlert("Erreur PDF", "Une erreur est survenue lors de la génération de la facture : " + ex.getMessage(), Alert.AlertType.ERROR);
         }
     }
+
 
     @FXML
     private void handlePayment(ActionEvent event) {
@@ -487,14 +482,19 @@ public class CartController {
 
     private boolean isValidPromoCode(String promoCode) {
         try {
-            String query = "SELECT COUNT(*) FROM facture WHERE code_promo = ? ";
-            PreparedStatement stmt = MyDatabase.getConnection().prepareStatement(query);
-            stmt.setString(1, promoCode);
-            ResultSet rs = stmt.executeQuery();
+            String query = "SELECT COUNT(*) FROM facture WHERE code_promo = ?";
 
-            if (rs.next()) {
-                int count = rs.getInt(1);
-                return count > 0;
+            // ✅ Obtenir une connexion active depuis l'instance Singleton de MyDatabase
+            Connection connection = MyDatabase.getInstance().getConnection();
+
+            try (PreparedStatement stmt = connection.prepareStatement(query)) {
+                stmt.setString(1, promoCode);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        int count = rs.getInt(1);
+                        return count > 0;
+                    }
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -536,3 +536,4 @@ public class CartController {
 
 
 }
+
