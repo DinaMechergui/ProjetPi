@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.shape.Circle?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="tn.esprit.controller.LoadingController">
+    <!-- Création d'un cercle pour simuler la roue -->
+    <Circle fx:id="wheelCircle" radius="100" style="-fx-fill: lightgray;" />
+    <Label fx:id="resultLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #333;" />
+</VBox>

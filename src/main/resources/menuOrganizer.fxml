@@ -34,7 +34,7 @@
             <Button text="listes des invites" styleClass="nav-button" onAction="#showAfficherInvite"/>
             <Button text="listes des cadeaux" styleClass="nav-button" onAction="#showAfficherCadeau"/>
             <Button text="listes des Evenement" styleClass="nav-button" onAction="#showAfficherevenement"/>
-            <Button text="client" styleClass="nav-button" onAction="#showAfficherclient"/>
+            <Button text="QR_Code" styleClass="nav-button" onAction="#showAfficherclient"/>
 
 
         </VBox>

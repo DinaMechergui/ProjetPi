@@ -84,3 +84,71 @@
     -fx-text-fill: #333333; /* Texte gris foncé */
     -fx-wrap-text: true;
 }
+
+/* Styles pour le titre */
+.title-label {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+}
+
+/* Style du VBox contenant le formulaire */
+.container-box {
+    -fx-background-color: #ffffff;
+    -fx-padding: 20px;
+    -fx-spacing: 10px;
+    -fx-alignment: center;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0, 0, 5);
+}
+
+/* Style des champs de texte */
+.input-field, .date-picker {
+    -fx-pref-width: 250px;
+    -fx-pref-height: 40px;
+    -fx-background-color: #f5f5f5;
+    -fx-border-color: #ddd;
+    -fx-border-radius: 5px;
+    -fx-padding: 5px;
+}
+
+/* Style du bouton */
+.submit-button {
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-padding: 10px 20px;
+    -fx-background-radius: 5px;
+    -fx-cursor: hand;
+}
+
+.submit-button:hover {
+    -fx-background-color: #45a049;
+}
+/* Styles pour le titre */
+.title-label {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333;
+    -fx-alignment: center;
+}
+
+/* Style de la grille */
+.grid-pane {
+    -fx-padding: 20px;
+    -fx-alignment: center;
+}
+
+/* Style des cartes cadeaux */
+.card {
+    -fx-background-color: #ffffff;
+    -fx-padding: 15px;
+    -fx-spacing: 10px;
+    -fx-background-radius: 10px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 8, 0, 0, 5);
+}
+
+/* Effet au survol */
+.card:hover {
+    -fx-background-color: #f0f0f0;
+}

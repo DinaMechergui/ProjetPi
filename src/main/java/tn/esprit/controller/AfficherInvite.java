@@ -57,9 +57,9 @@ public class AfficherInvite {
             Label inviteTelephone = new Label("📞 " + invite.getTelephone());
             inviteTelephone.setStyle("-fx-text-fill: #666;");
 
-            Label inviteConfirmation = new Label(invite.isConfirmation() ? "✅ Confirmé" : "❌ Non confirmé");
+          /*  Label inviteConfirmation = new Label(invite.isConfirmation() ? "✅ Confirmé" : "❌ Non confirmé");
             inviteConfirmation.setStyle("-fx-font-weight: bold; -fx-text-fill: "
-                    + (invite.isConfirmation() ? "#2ecc71" : "#e74c3c") + ";");
+                    + (invite.isConfirmation() ? "#2ecc71" : "#e74c3c") + ";");*/
 
             HBox buttonBox = new HBox(10);
             buttonBox.setAlignment(Pos.CENTER_RIGHT);
@@ -86,7 +86,7 @@ public class AfficherInvite {
             });
 
             buttonBox.getChildren().addAll(modifierButton, supprimerButton);
-            inviteCard.getChildren().addAll(inviteNom, inviteEmail, inviteTelephone, inviteConfirmation, buttonBox);
+            inviteCard.getChildren().addAll(inviteNom, inviteEmail, inviteTelephone, buttonBox);
             inviteCard.setPadding(new Insets(10));
 
             gridPaneInvites.add(inviteCard, col, row);

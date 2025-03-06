@@ -6,21 +6,34 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import tn.esprit.entities.Cadeau;
 import tn.esprit.services.ServiceCadeau;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import javafx.scene.layout.AnchorPane;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 public class CadeauListController {
     private ServiceCadeau serviceCadeau = new ServiceCadeau();
+
     @FXML
     private GridPane cadeauGrid;
     private String nomInvite;
     @FXML
     private Label bienvenueLabel;
+    @FXML
+    private Button randomButton;
+    @FXML
+    private ProgressIndicator progressIndicator;  // Déclaration du ProgressIndicator
 
     public void setNomInvite(String nomInvite) {
         this.nomInvite = nomInvite;
@@ -75,7 +88,7 @@ public class CadeauListController {
                         serviceCadeau.modifier(cadeau);
 
                         // Mettre à jour l'interface utilisateur
-                        disponibiliteLabel.setText("Non disponible");
+                        disponibiliteLabel.setText("Reserver");
                         disponibiliteLabel.setStyle("-fx-text-fill: red;");
                         buttonBox.getChildren().clear(); // Supprimer le bouton après réservation
                     } catch (SQLException e) {
@@ -102,6 +115,91 @@ public class CadeauListController {
         alert.setTitle("Réservation");
         alert.setHeaderText(null);
         alert.setContentText("Vous avez réservé le cadeau : " + cadeau.getNom());
+        alert.showAndWait();
+    }
+
+    public void handleRandomSelection() {
+        try {
+            // Afficher le ProgressIndicator lors de la sélection du cadeau
+            //progressIndicator.setVisible(true);
+
+            // Charger l'interface de la roue (chargement)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/loading.fxml"));
+            VBox loadingPane = loader.load();  // Charger le VBox du FXML
+
+            // Récupérer le contrôleur de la fenêtre de la roue
+            LoadingController loadingController = loader.getController();
+
+            // Obtenir la liste des noms de cadeaux disponibles
+            List<String> cadeauNames = getAvailableCadeauNames();
+
+            // Passer la liste des noms au contrôleur de la roue
+            loadingController.setCadeauNames(cadeauNames);
+
+            // Créer une nouvelle scène pour la fenêtre de chargement
+            Stage loadingStage = new Stage();
+            loadingStage.setTitle("Chargement...");
+            loadingStage.setScene(new Scene(loadingPane));  // Ajouter le VBox au lieu de AnchorPane
+            loadingStage.show();  // Afficher la fenêtre de chargement
+
+            // Simuler un délai de 2 secondes pour la sélection (remplacer par logique réelle)
+            Thread.sleep(2000);
+
+            // Sélection aléatoire d’un cadeau
+            Cadeau cadeauChoisi = selectRandomGift();
+
+            // Après la sélection, fermer la fenêtre de chargement
+            loadingStage.close();
+
+            // Afficher le cadeau sélectionné
+            if (cadeauChoisi != null) {
+                afficherAlerte("🎁 Cadeau sélectionné", "Félicitations ! Vous avez gagné : " + cadeauChoisi.getNom());
+            } else {
+                afficherAlerte("Aucun cadeau disponible", "Tous les cadeaux ont été réservés.");
+            }
+
+            // Cacher le ProgressIndicator après la sélection
+            progressIndicator.setVisible(false);
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    private List<String> getAvailableCadeauNames() {
+        // Obtenir tous les cadeaux et filtrer ceux disponibles
+        List<Cadeau> cadeaux = serviceCadeau.getAllCadeaux();
+        List<Cadeau> cadeauxDisponibles = cadeaux.stream()
+                .filter(Cadeau::isDisponibilite)
+                .collect(Collectors.toList());
+
+        // Retourner les noms des cadeaux disponibles
+        return cadeauxDisponibles.stream()
+                .map(Cadeau::getNom)
+                .collect(Collectors.toList());
+    }
+    private Cadeau selectRandomGift() {
+        // Obtenir tous les cadeaux et filtrer ceux disponibles
+        List<Cadeau> cadeaux = serviceCadeau.getAllCadeaux();
+        List<Cadeau> cadeauxDisponibles = cadeaux.stream()
+                .filter(Cadeau::isDisponibilite)
+                .collect(Collectors.toList());
+
+        if (cadeauxDisponibles.isEmpty()) {
+            return null;
+        }
+
+        // Sélectionner un cadeau aléatoire
+        Random random = new Random();
+        return cadeauxDisponibles.get(random.nextInt(cadeauxDisponibles.size()));
+    }
+
+    private void afficherAlerte(String titre, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(titre);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 }

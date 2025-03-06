@@ -309,6 +309,31 @@ public class ServiceCadeau implements ICadeau {
         }
         return null; // Retourner null si l'invité n'est pas trouvé ou en cas d'erreur
     }
+    public List<Cadeau> getAllCadeaux() {
+        List<Cadeau> cadeaux = new ArrayList<>();
+        String query = "SELECT * FROM cadeau";
+
+        try (Connection conn = MyDatabase.getInstance().getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(query)) {
+
+            while (rs.next()) {
+                Cadeau cadeau = new Cadeau(
+                        rs.getInt("id"),
+                        rs.getString("nom"),
+                        rs.getString("description"),
+                        rs.getBoolean("disponibilite"),
+                        rs.getInt("invite_id") // Vérifie si invite_id est correct
+                );
+                cadeaux.add(cadeau);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur lors de la récupération des cadeaux : " + e.getMessage());
+        }
+
+        return cadeaux;
+    }
 
 }
 

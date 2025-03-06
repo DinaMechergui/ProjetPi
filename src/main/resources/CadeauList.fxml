@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.GridPane?>
@@ -31,7 +32,12 @@
             <!-- Les éléments de la grille seront ajoutés dynamiquement depuis le contrôleur -->
         </GridPane>
 
-        <!-- Bouton Retour -->
+        <!-- Bouton Random -->
+        <Button fx:id="randomButton" text="Choisir un Cadeau Aléatoire" onAction="#handleRandomSelection"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 10; -fx-background-radius: 5;"/>
+
+        <!-- ProgressIndicator (Roue de chargement) -->
+        <ProgressIndicator fx:id="progressIndicator" visible="false" style="-fx-padding: 20;"/>
 
     </VBox>
 
