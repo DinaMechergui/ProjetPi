@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="controller.RatingsController"
+            prefHeight="800.0" prefWidth="1000.0"
+            style="-fx-background-color: linear-gradient(to bottom right, #f8f9fa, #e9ecef);">
+
+    <!-- Header avec un design moderne -->
+    <top>
+        <VBox alignment="CENTER" spacing="15" style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+            <padding>
+                <Insets top="30" right="30" bottom="30" left="30"/>
+            </padding>
+            <HBox alignment="CENTER" spacing="10">
+                <Label text="⭐" style="-fx-font-size: 32px;"/>
+                <Label text="Évaluez vos services réservés" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+            </HBox>
+            <Label text="Votre avis nous aide à améliorer nos services"
+                   style="-fx-font-size: 16px; -fx-text-fill: #6c757d; -fx-font-style: italic;"/>
+        </VBox>
+    </top>
+
+    <!-- Contenu principal avec effet de profondeur -->
+    <center>
+        <VBox spacing="20">
+            <padding>
+                <Insets top="30" right="30" bottom="30" left="30"/>
+            </padding>
+            <ListView fx:id="servicesList"
+                      VBox.vgrow="ALWAYS"
+                      style="-fx-background-color: transparent;
+                             -fx-background-insets: 0;
+                             -fx-padding: 15;
+                             -fx-fixed-cell-size: 160;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 5, 0, 0, 1);"/>
+        </VBox>
+    </center>
+
+    <!-- Footer avec bouton stylisé -->
+    <bottom>
+        <HBox alignment="CENTER" spacing="20" style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, -2);">
+            <padding>
+                <Insets top="25" right="25" bottom="25" left="25"/>
+            </padding>
+            <Button text="← Retour aux réservations"
+                    onAction="#goToReservation"
+                    style="-fx-background-color: #3498db;
+                           -fx-text-fill: white;
+                           -fx-font-size: 14px;
+                           -fx-padding: 12 25;
+                           -fx-background-radius: 25;
+                           -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 5, 0, 0, 1);
+                           -fx-cursor: hand;">
+                <HBox.margin>
+                    <Insets right="10"/>
+                </HBox.margin>
+            </Button>
+        </HBox>
+    </bottom>
+
+</BorderPane>
