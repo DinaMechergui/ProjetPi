@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Facture</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .facture-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .facture-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .facture-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .facture-info {
+            margin-bottom: 20px;
+        }
+        .facture-info p {
+            margin: 5px 0;
+        }
+        .facture-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .facture-table th, .facture-table td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        .facture-table th {
+            background-color: #f4f4f4;
+        }
+        .facture-total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="facture-container">
+    <div class="facture-header">
+        <h1>Facture</h1>
+    </div>
+    <div class="facture-info">
+        <p><strong>ID Facture:</strong> {{factureId}}</p>
+        <p><strong>Émetteur:</strong> {{emetteurNom}}</p>
+        <p><strong>Téléphone:</strong> {{emetteurTelephone}}</p>
+        <p><strong>Adresse:</strong> 123 Rue des Mariages, Paris, France</p>
+        <p><strong>Client:</strong> {{destinataireNom}} {{destinatairePrenom}}</p>
+        <p><strong>Téléphone Client:</strong> {{destinataireTelephone}}</p>
+    </div>
+    <table class="facture-table">
+        <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Prix Unitaire</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{produits}}
+        </tbody>
+    </table>
+    <div class="facture-total">
+        <p><strong>Total avant taxes:</strong> {{total}} €</p>
+        <p><strong>Total après taxes (20%):</strong> {{sommeTotaleAvecTaxe}} €</p>
+    </div>
+</div>
+</body>
+</html>
