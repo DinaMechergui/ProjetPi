@@ -18,16 +18,17 @@ public class ServiceHebergement implements IHebergement {
 
     @Override
     public void ajouter(Hebergement hebergement) throws SQLException {
-        String req = "INSERT INTO hebergement (nom, adresse, prixParNuit, disponible, imageUrl) VALUES ('"
-                + hebergement.getNom() + "', '"
-                + hebergement.getAdresse() + "', "
-                + hebergement.getPrixParNuit() + ", "
-                + hebergement.isDisponible() + ", '"
-                + hebergement.getImageUrl() + "')";
-
-        Statement statement = this.connection.createStatement();
-        statement.executeUpdate(req);
-        System.out.println("✅ Hébergement ajouté avec succès !");
+        String query = "INSERT INTO Hebergement (nom, adresse, prixParNuit, disponible, imageUrl, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, hebergement.getNom());
+            preparedStatement.setString(2, hebergement.getAdresse());
+            preparedStatement.setDouble(3, hebergement.getPrixParNuit());
+            preparedStatement.setBoolean(4, hebergement.isDisponible());
+            preparedStatement.setString(5, hebergement.getImageUrl());
+            preparedStatement.setDouble(6, hebergement.getLatitude());
+            preparedStatement.setDouble(7, hebergement.getLongitude());
+            preparedStatement.executeUpdate();
+        }
     }
 
     @Override

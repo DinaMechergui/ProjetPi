@@ -7,6 +7,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -60,6 +62,19 @@ public class AfficherVoitureController {
             VBox voitureCard = new VBox(10);
             voitureCard.getStyleClass().add("voiture-card");
 
+            // 🖼️ Image de la voiture
+            ImageView voitureImage = new ImageView();
+            voitureImage.setFitWidth(150); // Largeur fixe
+            voitureImage.setFitHeight(100); // Hauteur fixe
+            voitureImage.setPreserveRatio(true); // Garde les proportions
+
+            try {
+                Image image = new Image(voiture.getImageUrl(), true);
+                voitureImage.setImage(image);
+            } catch (Exception e) {
+                System.err.println("⚠ Erreur lors du chargement de l'image : " + voiture.getImageUrl());
+            }
+
             // Marque de la voiture
             Label voitureMarque = new Label("Marque : " + voiture.getMarque());
             voitureMarque.getStyleClass().add("voiture-marque");
@@ -79,18 +94,18 @@ public class AfficherVoitureController {
             reserverButton.setDisable(!voiture.isDisponible());
             reserverButton.setOnAction(event -> System.out.println("Voiture réservée : " + voiture.getMarque()));
 
-            // 🟢 Bouton "Modifier"
+            // Bouton "Modifier"
             Button modifierButton = new Button("Modifier");
             modifierButton.getStyleClass().addAll("button", "modifier-button");
             modifierButton.setOnAction(event -> modifierVoiture(voiture));
 
-            // 🛑 Bouton "Supprimer"
+            // Bouton "Supprimer"
             Button supprimerButton = new Button("Supprimer");
             supprimerButton.getStyleClass().addAll("button", "supprimer-button");
             supprimerButton.setOnAction(event -> supprimerVoiture(voiture));
 
             // Ajouter les éléments à la carte
-            voitureCard.getChildren().addAll(voitureMarque, voiturePrix, voitureDispo, reserverButton, modifierButton, supprimerButton);
+            voitureCard.getChildren().addAll(voitureImage, voitureMarque, voiturePrix, voitureDispo, reserverButton, modifierButton, supprimerButton);
 
             // Ajouter la carte au GridPane
             gridPaneVoitures.add(voitureCard, col, row);
@@ -103,7 +118,6 @@ public class AfficherVoitureController {
         }
     }
 
-    // ✅ Méthode pour modifier une voiture
     private void modifierVoiture(Voiture voiture) {
         TextInputDialog dialog = new TextInputDialog(voiture.getMarque());
         dialog.setTitle("Modifier Voiture");
@@ -119,31 +133,21 @@ public class AfficherVoitureController {
 
             Optional<String> prixResult = prixDialog.showAndWait();
             prixResult.ifPresent(nouveauPrix -> {
-                TextInputDialog dispoDialog = new TextInputDialog(voiture.isDisponible() ? "true" : "false");
-                dispoDialog.setTitle("Modifier Disponibilité");
-                dispoDialog.setHeaderText("Modifier la disponibilité");
-                dispoDialog.setContentText("Disponible ? (true/false) :");
+                try {
+                    voiture.setMarque(nouvelleMarque);
+                    voiture.setPrix(Float.parseFloat(nouveauPrix));
 
-                Optional<String> dispoResult = dispoDialog.showAndWait();
-                dispoResult.ifPresent(nouvelleDispo -> {
-                    try {
-                        voiture.setMarque(nouvelleMarque);
-                        voiture.setPrix(Float.parseFloat(nouveauPrix));
-                        voiture.setDisponible(Boolean.parseBoolean(nouvelleDispo));
-
-                        serviceVoiture.modifier(voiture);
-                        loadVoitures(); // Rafraîchir l'affichage
-                        System.out.println("✅ Voiture modifiée avec succès !");
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                        System.err.println("❌ Erreur lors de la modification !");
-                    }
-                });
+                    serviceVoiture.modifier(voiture);
+                    loadVoitures();
+                    System.out.println("✅ Voiture modifiée avec succès !");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                    System.err.println("❌ Erreur lors de la modification !");
+                }
             });
         });
     }
 
-    // ❌ Méthode pour supprimer une voiture
     private void supprimerVoiture(Voiture voiture) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Suppression de Voiture");
@@ -154,7 +158,7 @@ public class AfficherVoitureController {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 serviceVoiture.supprimer(voiture.getIdvoiture());
-                loadVoitures(); // Rafraîchir l'affichage
+                loadVoitures();
                 System.out.println("🛑 Voiture supprimée avec succès !");
             } catch (SQLException e) {
                 e.printStackTrace();

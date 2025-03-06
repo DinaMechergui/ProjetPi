@@ -14,6 +14,8 @@ public class AjouterVoitureController {
     private TextField marqueField;
     @FXML
     private TextField prixField;
+    @FXML
+    private TextField imageUrlField; // Nouveau champ pour l'URL de l'image
 
     private final ServiceVoiture serviceVoiture = new ServiceVoiture();
 
@@ -38,11 +40,13 @@ public class AjouterVoitureController {
                 throw new IllegalArgumentException("⚠ Le prix doit être un nombre positif !");
             }
 
+            String imageUrl = imageUrlField.getText().trim();
+            if (imageUrl.isEmpty()) {
+                throw new IllegalArgumentException("⚠ Le champ 'Image URL' ne peut pas être vide !");
+            }
+
             // Créer un nouvel objet Voiture
-            Voiture voiture = new Voiture(0,12,"x",true,"cc");
-            voiture.setMarque(marque);
-            voiture.setPrix(prix);
-            voiture.setDisponible(true); // La disponibilité est toujours vraie (true)
+            Voiture voiture = new Voiture(0, prix, marque, true, imageUrl);
 
             // Ajouter la voiture à la base de données
             serviceVoiture.ajouter(voiture);
@@ -53,7 +57,7 @@ public class AjouterVoitureController {
             alert.setContentText("🚗 Voiture ajoutée avec succès !");
             alert.show();
 
-            // Fermer la fenêtre d'ajout de voiture après l'ajout
+            // Fermer la fenêtre après l'ajout
             marqueField.getScene().getWindow().hide();
         } catch (IllegalArgumentException e) {
             afficherAlerte("Erreur de saisie", e.getMessage());

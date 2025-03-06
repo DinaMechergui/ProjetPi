@@ -162,6 +162,7 @@
 .contact-button:hover {
     -fx-background-color: #5a7364; /* Couleur plus foncée au survol */
 }
+
 /* Cartes d'hébergement */
 .hebergement-card {
     -fx-background-color: white; /* Fond blanc */
@@ -189,6 +190,7 @@
     -fx-text-fill: #333333; /* Texte gris foncé */
     -fx-font-weight: bold;
 }
+
 .hebergement-available {
     -fx-text-fill: green; /* Disponible en vert */
 }
@@ -196,10 +198,82 @@
 .hebergement-unavailable {
     -fx-text-fill: red; /* Indisponible en rouge */
 }
+
 .hebergement-image {
     -fx-fit-width: 150px;
     -fx-fit-height: 150px;
     -fx-preserve-ratio: true;
 }
-.imageView {
-    -fx-smooth: false;}
+
+/* Nouveaux ajouts */
+
+/* Appliquer un fond de couleur à la grille */
+#gridPaneRecommandations {
+    -fx-background-color: #f9f9f9; /* Gris très clair */
+    -fx-padding: 20px; /* Espace autour de la grille */
+    -fx-border-color: #ddd; /* Bordure légère */
+    -fx-border-width: 1px;
+}
+
+/* Style des labels */
+.label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #333333; /* Texte foncé */
+    -fx-padding: 5px;
+}
+
+/* Style pour les champs de texte (Input fields) */
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 5px;
+    -fx-padding: 5px;
+    -fx-font-size: 14px;
+}
+
+/* Effet au focus sur les champs de texte */
+.text-field:focused {
+    -fx-border-color: #4CAF50; /* Bordure verte */
+}
+
+/* Style pour les labels d'erreur ou d'information */
+.label.erreur {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #FF5733; /* Rouge orangé pour les erreurs */
+}
+
+.label.information {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2196F3; /* Bleu pour les informations */
+}
+
+/* Style des titres */
+.title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2C3E50; /* Gris foncé pour les titres */
+}
+/* Cartes de personnalisation */
+.personalisation-card {
+    -fx-background-color: white;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.1), 10, 0, 0, 0); /* Ombre légère */
+    -fx-padding: 15;
+    -fx-spacing: 10;
+    -fx-alignment: center;
+}
+
+.personalisation-name {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #6d8c7a; /* Couleur principale */
+}
+
+.personalisation-description {
+    -fx-font-size: 16px;
+    -fx-text-fill: #333333;
+}

@@ -6,7 +6,7 @@ public class Voiture {
     private String marque ;
 
     private boolean  disponible ;
-    private static String imageUrl;
+    private String imageUrl;
 
     public Voiture(int idvoiture, float prix, String marque, boolean disponible, String imageUrl) {
         this.idvoiture = idvoiture;
@@ -53,11 +53,11 @@ public class Voiture {
         this.disponible = disponible;
     }
 
-    public static String getImageUrl() {
+    public  String getImageUrl() {
         return imageUrl;
     }
 
-    public static void setImageUrl(String imageUrl) {
-        Voiture.imageUrl = imageUrl;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
