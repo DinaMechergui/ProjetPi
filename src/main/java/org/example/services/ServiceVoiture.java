@@ -13,16 +13,23 @@ public class ServiceVoiture implements IService<Voiture> {
         this.connection = MyDatabase.getInstance().getConnection();
     }
     @Override
-    public  void ajouter(Voiture voiture) throws SQLException {
-        String req = "INSERT INTO voiture (marque, prix, disponible) VALUES ('"
-                + voiture.getMarque() + "', "
-                + voiture.getPrix() + ", "
-                + voiture.isDisponible() + ")";
 
-        Statement statement = this.connection.createStatement();
-        statement.executeUpdate(req);
-        System.out.println("🚗 Voiture ajoutée avec succès !");
+    public void ajouter(Voiture voiture) throws SQLException {
+        String req = "INSERT INTO voiture (marque, prix, disponible, imageUrl) VALUES (?, ?, ?, ?)";
+
+        try (PreparedStatement preparedStatement = connection.prepareStatement(req)) {
+            preparedStatement.setString(1, voiture.getMarque());
+            preparedStatement.setFloat(2, voiture.getPrix());
+            preparedStatement.setBoolean(3, voiture.isDisponible());
+            preparedStatement.setString(4, voiture.getImageUrl());
+
+            preparedStatement.executeUpdate();
+            System.out.println("🚗 Voiture ajoutée avec succès !");
+        } catch (SQLException e) {
+            System.err.println("❌ Erreur lors de l'ajout de la voiture : " + e.getMessage());
+        }
     }
+
 
 
 

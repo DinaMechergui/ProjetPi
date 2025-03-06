@@ -6,9 +6,12 @@ import org.example.utils.MyDatabase;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AvisVoitureService {
     private final Connection connection;
+    private static final Logger logger = Logger.getLogger(AvisVoitureService.class.getName());
 
     public AvisVoitureService() {
         this.connection = MyDatabase.getInstance().getConnection();
@@ -16,6 +19,7 @@ public class AvisVoitureService {
 
     // Ajouter un avis pour une voiture
     public AvisVoiture ajouterAvis(AvisVoiture avisVoiture) throws SQLException {
+
         String req = "INSERT INTO avis (idvoiture, note, commentaire, date_creation) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(req, Statement.RETURN_GENERATED_KEYS)) {
@@ -31,10 +35,12 @@ public class AvisVoitureService {
                         avisVoiture.setId(generatedKeys.getInt(1)); // Récupérer l'ID généré
                     }
                 }
+                logger.log(Level.INFO, "✅ Avis pour voiture ajouté avec succès !");
+            } else {
+                logger.log(Level.WARNING, "⚠️ Aucune ligne affectée lors de l'ajout de l'avis.");
             }
-            System.out.println("✅ Avis pour voiture ajouté avec succès !");
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de l'ajout de l'avis : " + e.getMessage());
+            logger.log(Level.SEVERE, "❌ Erreur lors de l'ajout de l'avis : " + e.getMessage(), e);
             throw e;
         }
         return avisVoiture;
@@ -50,7 +56,6 @@ public class AvisVoitureService {
             try (ResultSet rs = preparedStatement.executeQuery()) {
                 while (rs.next()) {
                     AvisVoiture avisVoiture = new AvisVoiture(
-
                             rs.getInt("idvoiture"),
                             rs.getInt("note"),
                             rs.getString("commentaire"),
@@ -60,26 +65,28 @@ public class AvisVoitureService {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de la récupération des avis : " + e.getMessage());
+            logger.log(Level.SEVERE, "❌ Erreur lors de la récupération des avis : " + e.getMessage(), e);
             throw e;
         }
         return avisList;
     }
 
     // Supprimer un avis
-    public void supprimerAvis(int id) throws SQLException {
+    public boolean supprimerAvis(int id) throws SQLException {
         String req = "DELETE FROM avis WHERE id = ?";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(req)) {
             preparedStatement.setInt(1, id);
             int rowsAffected = preparedStatement.executeUpdate();
             if (rowsAffected > 0) {
-                System.out.println("✅ Avis supprimé avec succès !");
+                logger.log(Level.INFO, "✅ Avis supprimé avec succès !");
+                return true;
             } else {
-                System.out.println("⚠️ Aucun avis trouvé avec l'ID : " + id);
+                logger.log(Level.WARNING, "⚠️ Aucun avis trouvé avec l'ID : " + id);
+                return false;
             }
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors de la suppression de l'avis : " + e.getMessage());
+            logger.log(Level.SEVERE, "❌ Erreur lors de la suppression de l'avis : " + e.getMessage(), e);
             throw e;
         }
     }
@@ -95,7 +102,7 @@ public class AvisVoitureService {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("❌ Erreur lors du calcul de la note moyenne : " + e.getMessage());
+            logger.log(Level.SEVERE, "❌ Erreur lors du calcul de la note moyenne : " + e.getMessage(), e);
             throw e;
         }
         return 0.0; // Retourner 0 si aucun avis n'est trouvé

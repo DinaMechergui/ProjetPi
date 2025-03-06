@@ -6,6 +6,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -61,30 +63,61 @@ public class VoitureController {
     private void loadVoitures() throws SQLException {
         gridPaneVoitures.getChildren().clear(); // Réinitialiser l'affichage
         List<Voiture> voitures = serviceVoiture.afficher();
-        int row = 0, col = 0;
+        int row = 0;
+        int col = 0;
 
         for (Voiture voiture : voitures) {
             VBox voitureCard = new VBox(10);
             voitureCard.getStyleClass().add("voiture-card");
 
+            // 🖼️ Image de la voiture
+            ImageView voitureImage = new ImageView();
+            voitureImage.setFitWidth(150); // Largeur fixe
+            voitureImage.setFitHeight(100); // Hauteur fixe
+            voitureImage.setPreserveRatio(true); // Garde les proportions
+
+            try {
+                Image image = new Image(voiture.getImageUrl(), true);
+                voitureImage.setImage(image);
+            } catch (Exception e) {
+                System.err.println("⚠ Erreur lors du chargement de l'image : " + voiture.getImageUrl());
+            }
+
+            // Marque de la voiture
             Label voitureMarque = new Label("Marque : " + voiture.getMarque());
+            voitureMarque.getStyleClass().add("voiture-marque");
+
+            // Prix de la voiture
             Label voiturePrix = new Label("Prix : " + String.format("%.2f", voiture.getPrix()) + " TND / jour");
+            voiturePrix.getStyleClass().add("voiture-prix");
+
+            // Disponibilité
             Label voitureDispo = new Label(voiture.isDisponible() ? "Disponible" : "Non disponible");
+            voitureDispo.getStyleClass().add("voiture-dispo");
             voitureDispo.setStyle(voiture.isDisponible() ? "-fx-text-fill: green;" : "-fx-text-fill: red;");
 
 
-
+            // Bouton "Modifier"
             Button modifierButton = new Button("Modifier");
+            modifierButton.getStyleClass().addAll("button", "modifier-button");
             modifierButton.setOnAction(event -> modifierVoiture(voiture));
 
+            // Bouton "Supprimer"
             Button supprimerButton = new Button("Supprimer");
+            supprimerButton.getStyleClass().addAll("button", "supprimer-button");
             supprimerButton.setOnAction(event -> supprimerVoiture(voiture));
 
-            voitureCard.getChildren().addAll(voitureMarque, voiturePrix, voitureDispo, modifierButton, supprimerButton);
+            // Ajouter les éléments à la carte
+            voitureCard.getChildren().addAll(voitureImage, voitureMarque, voiturePrix, voitureDispo, modifierButton, supprimerButton);
+
+            // Ajouter la carte au GridPane
             gridPaneVoitures.add(voitureCard, col, row);
 
             col++;
-            if (col > 2) { col = 0; row++; }
+            if (col > 2) { // 3 colonnes par ligne
+                col = 0;
+                row++;
+            }
         }
     }
 

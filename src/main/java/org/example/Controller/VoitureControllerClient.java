@@ -29,6 +29,14 @@ public class VoitureControllerClient {
     private final ServiceVoiture serviceVoiture = new ServiceVoiture();
     private final AvisVoitureService avisVoitureService = new AvisVoitureService();
 
+    // Chemins des fichiers FXML
+    private static final String RESERVATION_VOITURE_FXML = "/ajouterReservationVoiture.fxml";
+    private static final String RECOMMENDATION_VOITURE_FXML = "/RecommendationVoiture.fxml";
+    private static final String EVENT_FXML = "/reservation.fxml";
+    private static final String MENU_ORGANIZER_FXML = "/menuOrganizer.fxml";
+    private static final String HEBERGEMENT_CLIENT_FXML = "/hebergementclient.fxml";
+    private static final String CART_FXML = "/Cart.fxml";
+
     @FXML
     private GridPane gridPaneVoitures; // GridPane pour afficher les voitures
     @FXML
@@ -62,7 +70,7 @@ public class VoitureControllerClient {
             // Charger les voitures
             loadVoitures();
         } catch (SQLException e) {
-            e.printStackTrace();
+            afficherAlerte("Erreur", "Erreur lors du chargement des voitures : " + e.getMessage());
         }
     }
 
@@ -70,6 +78,12 @@ public class VoitureControllerClient {
     private void loadVoitures() throws SQLException {
         gridPaneVoitures.getChildren().clear(); // Réinitialiser l'affichage
         List<Voiture> voitures = serviceVoiture.afficher(); // Récupérer la liste des voitures
+
+        if (voitures.isEmpty()) {
+            afficherAlerte("Information", "Aucune voiture disponible.");
+            return;
+        }
+
         int row = 0;
         int col = 0;
 
@@ -99,7 +113,7 @@ public class VoitureControllerClient {
                 voitureImage.setImage(image);
             } catch (Exception e) {
                 voitureImage.setImage(new Image("file:defaultCarImage.jpg")); // Image par défaut en cas d'erreur
-                e.printStackTrace();
+                afficherAlerte("Erreur", "Erreur lors du chargement de l'image de la voiture : " + e.getMessage());
             }
         } else {
             voitureImage.setImage(new Image("file:defaultCarImage.jpg")); // Image par défaut si l'URL est vide
@@ -153,7 +167,7 @@ public class VoitureControllerClient {
     // Méthode pour ouvrir la page de réservation
     private void ouvrirPageReservation(Voiture voiture) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ajouterReservationVoiture.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(RESERVATION_VOITURE_FXML));
             Parent root = loader.load();
 
             // Récupérer le contrôleur de la nouvelle page et passer les données de la voiture
@@ -165,7 +179,7 @@ public class VoitureControllerClient {
             stage.setTitle("Réservation Voiture");
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
+            afficherAlerte("Erreur", "Erreur lors de l'ouverture de la page de réservation : " + e.getMessage());
         }
     }
 
@@ -219,12 +233,12 @@ public class VoitureControllerClient {
             avisSection.getChildren().clear(); // Réinitialiser l'affichage
             avisSection.getChildren().add(avisContainer); // Ajouter les avis
         } catch (SQLException e) {
-            e.printStackTrace();
+            afficherAlerte("Erreur", "Erreur lors du chargement des avis : " + e.getMessage());
         }
     }
 
     // Méthode pour appliquer les préférences de recherche
-   @FXML
+    @FXML
     private void appliquerPreferences() {
         String marque = marqueField.getText();
         double prixMin = prixSlider.getMin(); // Valeur minimale du slider
@@ -240,7 +254,7 @@ public class VoitureControllerClient {
             }
 
             // Charger la vue des recommandations
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/RecommendationVoiture.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(RECOMMENDATION_VOITURE_FXML));
             Parent root = loader.load();
 
             // Passer les recommandations au contrôleur des recommandations
@@ -253,8 +267,7 @@ public class VoitureControllerClient {
             stage.setTitle("Recommandations Voitures");
             stage.show();
         } catch (IOException | SQLException e) {
-            e.printStackTrace();
-            afficherAlerte("Erreur", "Une erreur s'est produite lors de la recherche des recommandations.");
+            afficherAlerte("Erreur", "Erreur lors de la recherche des recommandations : " + e.getMessage());
         }
     }
 
@@ -269,58 +282,42 @@ public class VoitureControllerClient {
     // Méthodes de navigation
     @FXML
     private void goToEvent() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/reservation.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) loginButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des événements.");
-        }
+        naviguerVersPage(EVENT_FXML, "Page des événements");
     }
 
     @FXML
     private void goToInvite() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/menuOrganizer.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) loginButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des invités.");
-        }
+        naviguerVersPage(MENU_ORGANIZER_FXML, "Page des invités");
     }
 
     @FXML
     private void goToDriveAndStay() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/hebergementclient.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) loginButton.getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("Erreur lors du chargement de la page des hébergements.");
-        }
+        naviguerVersPage(HEBERGEMENT_CLIENT_FXML, "Page des hébergements");
     }
 
     @FXML
     public void goToCart(MouseEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Cart.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(CART_FXML));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
         } catch (IOException e) {
-            e.printStackTrace();
+            afficherAlerte("Erreur", "Erreur lors de l'ouverture du panier : " + e.getMessage());
+        }
+    }
+
+    // Méthode utilitaire pour la navigation
+    private void naviguerVersPage(String fxmlPath, String titre) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            Stage stage = (Stage) loginButton.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            stage.setTitle(titre);
+            stage.show();
+        } catch (IOException e) {
+            afficherAlerte("Erreur", "Erreur lors du chargement de la page : " + e.getMessage());
         }
     }
 }

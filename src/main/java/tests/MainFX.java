@@ -16,7 +16,7 @@ public class MainFX extends Application {
     public void start(Stage primaryStage) throws Exception {
         // Charger le fichier FXML
        //FXMLLoader loader = new FXMLLoader(getClass().getResource("/tn/esprit/tacheuser/User/login.fxml"));
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Home.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/hebergementclient.fxml"));
 
         Parent root = loader.load();
 

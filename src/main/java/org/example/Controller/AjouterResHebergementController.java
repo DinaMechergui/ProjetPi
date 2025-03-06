@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import org.example.entities.Hebergement;
 import org.example.entities.ReservationHebergement;
 import org.example.services.ServiceResHebergement;
+import org.example.services.SmsService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -34,6 +35,10 @@ public class AjouterResHebergementController {
 
     @FXML
     private Button retourButton;
+
+    @FXML
+    private Button sendConfirmationButton;
+
 
     @FXML
     private Label errorLabel;
@@ -116,7 +121,7 @@ public class AjouterResHebergementController {
         ddtf.setValue(null);
         dftf.setValue(null);
         prixttf.setText("0");
-        personnalisationLabel.setText("");
+
     }
 
     private void afficherErreur(String message) {
@@ -132,12 +137,13 @@ public class AjouterResHebergementController {
     @FXML
     public void initialize() {
         configureDatePickers();
-        confirmerButton.setDisable(true);
 
         // Activation du bouton Confirmer uniquement si le formulaire est valide
         nompretf.textProperty().addListener((obs, oldValue, newValue) -> validateForm());
         ddtf.valueProperty().addListener((obs, oldValue, newValue) -> validateForm());
         dftf.valueProperty().addListener((obs, oldValue, newValue) -> validateForm());
+
+
     }
 
     private void configureDatePickers() {
@@ -221,6 +227,35 @@ public class AjouterResHebergementController {
             afficherErreur("Erreur lors de l'ouverture de la personnalisation : " + e.getMessage());
         }
     }
+
+    @FXML
+    public void sendReminder(ActionEvent event) {
+        try {
+            String client = nompretf.getText();
+            LocalDate dateDebut = ddtf.getValue();
+            LocalDate dateFin = dftf.getValue();
+
+            // Vérifications avant l'envoi
+            if (client.isEmpty() || dateDebut == null || dateFin == null) {
+                afficherErreur("⚠️ Veuillez remplir tous les champs pour envoyer un rappel !");
+                return;
+            }
+
+            // Préparer le message de confirmation
+            String message = "Confirmation de réservation : Bonjour " + client + ", votre réservation pour l'hotel" + hebergement.getNom() +  "est confirmée. " +
+                    "Votre séjour commence le " + dateDebut + " et se termine le " + dateFin + ". Merci pour votre réservation !";
+
+            // Utiliser la classe SmsService pour envoyer le rappel
+            SmsService smsService = new SmsService();
+            smsService.envoyerSmsRappel("+21620584986", message);  // Remplace "+1234567890" par le numéro du client
+
+            // Afficher un message de confirmation à l'utilisateur
+            afficherMessage("✅ Rappel de réservation envoyé avec succès !");
+        } catch (Exception e) {
+            afficherErreur("❌ Erreur lors de l'envoi du rappel : " + e.getMessage());
+        }
+    }
+
 
     @FXML
     public void afficherPersonnalisation(String personnalisation) {

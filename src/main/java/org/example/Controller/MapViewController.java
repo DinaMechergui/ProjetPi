@@ -36,21 +36,22 @@ public class MapViewController {
 
         // HTML et JavaScript pour afficher la carte avec Leaflet
         String html = """
-            <html>
-                <head>
-                    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
-                    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-                </head>
-                <body>
-                    <div id="map" style="width: 100%; height: 100%;"></div>
-                    <script>
-                        var map = L.map('map').setView([36.8065, 10.1815], 13); // Coordonnées de Tunis
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '© OpenStreetMap contributors'
-                        }).addTo(map);
+        <html>
+            <head>
+                <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+                <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+            </head>
+            <body>
+                <div id="map" style="width: 100%; height: 100%;"></div>
+                <script>
+                    var map = L.map('map').setView([36.8065, 10.1815], 13); // Coordonnées de Tunis
 
-                        // Ajouter des marqueurs pour chaque hébergement
-            """;
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    // Ajouter des marqueurs pour chaque hébergement
+                    """;
 
         // Ajouter les marqueurs pour chaque hébergement
         if (hebergements != null && !hebergements.isEmpty()) {
@@ -67,15 +68,24 @@ public class MapViewController {
                 );
                 html += markerScript; // Ajouter le script du marqueur au HTML
             }
-
         }
 
-        // Fermer la balise script et le HTML
+        // Ajouter un écouteur d'événements pour le clic sur la carte
         html += """
-                    </script>
-                </body>
-            </html>
-            """;
+                    // Écouter le clic sur la carte pour ajouter une épingle
+                    map.on('click', function(e) {
+                        var lat = e.latlng.lat;
+                        var lng = e.latlng.lng;
+                        
+                        // Ajouter une nouvelle épingle à la position cliquée
+                        L.marker([lat, lng]).addTo(map)
+                            .bindPopup('Nouvelle épingle: ' + lat.toFixed(6) + ', ' + lng.toFixed(6))
+                            .openPopup();
+                    });
+                </script>
+            </body>
+        </html>
+        """;
 
         // Afficher le code généré dans la console
         System.out.println(html);

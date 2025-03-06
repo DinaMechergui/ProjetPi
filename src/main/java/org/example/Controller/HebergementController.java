@@ -139,19 +139,29 @@ public class HebergementController {
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
+        // Champ pour le nom
         TextField nomField = new TextField(hebergement.getNom());
+        grid.add(new Label("Nom :"), 0, 0);
+        grid.add(nomField, 1, 0);
+
+        // Champ pour l'adresse
+        TextField adresseField = new TextField(hebergement.getAdresse());
+        grid.add(new Label("Adresse :"), 0, 1);
+        grid.add(adresseField, 1, 1);
+
+        // Champ pour le prix par nuit
         TextField prixField = new TextField(String.valueOf(hebergement.getPrixParNuit()));
+        grid.add(new Label("Prix par nuit :"), 0, 2);
+        grid.add(prixField, 1, 2);
+
+        // ComboBox pour la disponibilité
         ComboBox<String> dispoBox = new ComboBox<>();
         dispoBox.getItems().addAll("true", "false");
         dispoBox.setValue(hebergement.isDisponible() ? "true" : "false");
+        grid.add(new Label("Disponible :"), 0, 3);
+        grid.add(dispoBox, 1, 3);
 
-        grid.add(new Label("Nom :"), 0, 0);
-        grid.add(nomField, 1, 0);
-        grid.add(new Label("Prix par nuit :"), 0, 1);
-        grid.add(prixField, 1, 1);
-        grid.add(new Label("Disponible :"), 0, 2);
-        grid.add(dispoBox, 1, 2);
-
+        // Ajouter le contenu à la boîte de dialogue
         dialog.getDialogPane().setContent(grid);
 
         // Ajout des boutons
@@ -163,14 +173,23 @@ public class HebergementController {
         if (result.isPresent() && result.get() == ButtonType.OK) {
             // Vérifications de saisie
             String nouveauNom = nomField.getText().trim();
+            String nouvelleAdresse = adresseField.getText().trim();
             String prixTexte = prixField.getText().trim();
             String nouvelleDispo = dispoBox.getValue();
 
+            // Validation du nom
             if (nouveauNom.isEmpty()) {
                 afficherAlerte("Erreur", "Le nom ne peut pas être vide !");
                 return;
             }
 
+            // Validation de l'adresse
+            if (nouvelleAdresse.isEmpty()) {
+                afficherAlerte("Erreur", "L'adresse ne peut pas être vide !");
+                return;
+            }
+
+            // Validation du prix
             double prix;
             try {
                 prix = Double.parseDouble(prixTexte);
@@ -186,11 +205,17 @@ public class HebergementController {
             try {
                 // Mise à jour des informations
                 hebergement.setNom(nouveauNom);
+                hebergement.setAdresse(nouvelleAdresse); // Mise à jour de l'adresse
                 hebergement.setPrixParNuit(prix);
                 hebergement.setDisponible(Boolean.parseBoolean(nouvelleDispo));
 
+                // Appel du service pour modifier l'hébergement
                 serviceHebergement.modifier(hebergement);
+
+                // Recharger la liste des hébergements
                 loadHebergements();
+
+                // Afficher un message de succès
                 afficherAlerte("Succès", "Hébergement modifié avec succès !");
             } catch (SQLException e) {
                 e.printStackTrace();

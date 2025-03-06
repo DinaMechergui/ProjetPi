@@ -8,15 +8,16 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.PersonalisationController">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.Controller.PersonalisationController"
+      stylesheets="@style.css"> <!-- Appel au fichier CSS ici -->
     <padding>
         <Insets top="10" right="10" bottom="10" left="10"/>
     </padding>
 
     <!-- Formulaire pour ajouter/modifier une personnalisation -->
-    <HBox spacing="10">
-
+    <HBox spacing="10" alignment="center">
         <VBox spacing="5">
             <Label text="Décoration"/>
             <CheckBox fx:id="decorationCheckBox"/>
@@ -31,7 +32,6 @@
         </VBox>
         <VBox spacing="5">
             <Button text="Ajouter" onAction="#handleAddPersonalisation"/>
-
         </VBox>
     </HBox>
 
@@ -40,5 +40,7 @@
         <padding>
             <Insets top="10" left="10" right="10" bottom="10"/>
         </padding>
+        <!-- Cette section est remplie dynamiquement par le contrôleur -->
     </GridPane>
+
 </VBox>

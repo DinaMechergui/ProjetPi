@@ -355,12 +355,23 @@ public class HebergementControllerClient {
     // Méthode pour appliquer les préférences de recherche
     @FXML
     private void appliquerPreferences() {
-        String localisation = localisationField.getText();
+        String localisation = localisationField.getText().trim(); // Assurer qu'il n'y a pas d'espaces avant ou après
         double prixMin;
         double prixMax;
 
+        // Vérification si la localisation est vide
+        if (localisation.isEmpty()) {
+            afficherAlerte("Erreur", "La localisation ne peut pas être vide.");
+            return;
+        }
+
         try {
-            // Récupérer et convertir les valeurs des champs de texte
+            // Vérifier que les champs de prix sont non vides et convertir les valeurs
+            if (prixMinField.getText().trim().isEmpty() || prixMaxField.getText().trim().isEmpty()) {
+                afficherAlerte("Erreur", "Les prix doivent être renseignés.");
+                return;
+            }
+
             prixMin = Double.parseDouble(prixMinField.getText());
             prixMax = Double.parseDouble(prixMaxField.getText());
 
@@ -386,6 +397,7 @@ public class HebergementControllerClient {
             System.out.println("Recommandations passées au contrôleur : " + recommandations.size());
             recommendationController.afficherRecommandations(recommandations);
 
+            // Créer et afficher la nouvelle fenêtre avec les recommandations
             Stage stage = new Stage();
             stage.setScene(new Scene(root));
             stage.setTitle("Recommandations");
@@ -397,6 +409,7 @@ public class HebergementControllerClient {
             afficherAlerte("Erreur", "Une erreur s'est produite lors de la recherche des recommandations.");
         }
     }
+
     // Méthode pour naviguer vers la page des événements
     @FXML
     private void goToEvent() {
