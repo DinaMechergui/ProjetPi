@@ -157,7 +157,7 @@ Ce projet est sous licence [MIT](LICENSE).
 ## 🙏 Remerciements
 
 - *Mme Hichri Chaima * - Superviseur - Esprit School of Engineering
-- *Mmr Hechmi Moataz* - Superviseur - Esprit School of Engineering
+- *Mr Hechmi Moataz* - Superviseur - Esprit School of Engineering
 
 
 ## 📞 Support
